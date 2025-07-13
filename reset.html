@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>รีเซ็ตรหัสผ่าน</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-box">
+    <h2>รีเซ็ตรหัสผ่าน</h2>
+
+    <!-- ฟอร์มสำหรับขอลิงก์รีเซ็ต (กรอกอีเมล) -->
+    <form id="request-reset-form" onsubmit="verifyUsername(event)">
+      <label for="reset-email">อีเมล:</label>
+      <input type="email" id="reset-email" placeholder="กรอกอีเมลของคุณ" required><br>
+      <button type="submit">ส่งลิงก์รีเซ็ต</button>
+    </form>
+
+    <!-- ฟอร์มสำหรับตั้งรหัสผ่านใหม่ (จะแสดงเมื่อมี Token ใน URL) -->
+    <form id="set-new-password-form" style="display:none;" onsubmit="resetPassword(event)">
+      <label for="new-password">รหัสผ่านใหม่:</label>
+      <input type="password" id="new-password" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)" required><br>
+      <label for="confirm-password">ยืนยันรหัสผ่านใหม่:</label>
+      <input type="password" id="confirm-password" placeholder="ยืนยันรหัสผ่านใหม่" required><br>
+      <button type="submit">ตั้งรหัสผ่านใหม่</button>
+    </form>
+
+    <p id="reset-message" style="margin-top:15px;"></p> <!-- สำหรับแสดงข้อความสถานะ -->
+    <button onclick="window.location.href='index.html'">กลับไปหน้าเข้าสู่ระบบ</button>
+  </div>
+
+  <script src="script.js"></script> <!-- นำเข้า JavaScript หลัก -->
+  <script>
+    // Logic สำหรับการจัดการหน้าเมื่อโหลด reset.html
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token'); // ดึงค่า 'token' จาก URL
+      const requestResetForm = document.getElementById('request-reset-form');
+      const setNewPasswordForm = document.getElementById('set-new-password-form');
+      const resetMessage = document.getElementById('reset-message');
+
+      if (token) {
+        // ถ้ามี token ใน URL แสดงว่าผู้ใช้คลิกลิงก์รีเซ็ตจากอีเมลมา
+        requestResetForm.style.display = 'none'; // ซ่อนฟอร์มขอลิงก์
+        setNewPasswordForm.style.display = 'block'; // แสดงฟอร์มตั้งรหัสผ่านใหม่
+        resetMessage.innerText = 'กรุณาตั้งรหัสผ่านใหม่ของคุณ';
+        // (ในแอปจริง คุณอาจต้องการส่ง token ไป Backend เพื่อตรวจสอบความถูกต้องทันทีที่หน้านี้โหลด เพื่อความปลอดภัยเพิ่มเติม)
+      } else {
+        // ถ้าไม่มี token แสดงฟอร์มขอลิงก์รีเซ็ต
+        requestResetForm.style.display = 'block';
+        setNewPasswordForm.style.display = 'none';
+      }
+    });
+    // ฟังก์ชัน resetPassword ถูกย้ายไปอยู่ใน script.js แล้ว
+  </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif; /* ใช้ Font 'Segoe UI' หรือ Sans-serif ทั่วไป */
+  background-image: url("bg.jpg"); /* รูปภาพพื้นหลัง */
+  background-size: cover; /* ครอบคลุมพื้นที่ทั้งหมด */
+  background-position: center; /* จัดตำแหน่งรูปภาพให้อยู่ตรงกลาง */
+  background-attachment: fixed; /* ทำให้รูปภาพพื้นหลังไม่เลื่อนตามเมื่อ Scroll */
+  color: #ffffff; /* สีตัวอักษรเริ่มต้นเป็นสีขาว */
+  display: flex; /* ใช้ Flexbox เพื่อจัดวางเนื้อหา */
+  justify-content: center; /* จัดให้อยู่ตรงกลางแนวนอน */
+  align-items: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
+  height: 100vh; /* กำหนดความสูงเต็ม Viewport */
+}
+
+.login-box {
+  background-color: rgba(30, 30, 47, 0.8); /* สีพื้นหลังกล่อง Login (สีเข้ม + ความโปร่งใส) */
+  backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอพื้นหลัง */
+  padding: 30px 40px; /* ระยะห่างภายในกล่อง */
+  border-radius: 12px; /* มุมโค้งมน */
+  box-shadow: 0 0 20px rgba(0,0,0,0.5); /* เงาของกล่อง */
+  text-align: center; /* จัดข้อความให้อยู่ตรงกลาง */
+  max-width: 400px; /* กำหนดความกว้างสูงสุด */
+  width: 100%; /* กำหนดความกว้างเป็น 100% ของ Parent */
+}
+
+h2 {
+  margin-bottom: 20px; /* ระยะห่างด้านล่างของหัวข้อ */
+  color: #ffffff; /* สีหัวข้อเป็นสีขาว */
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] { /* เพิ่ม input type="email" */
+  width: 100%; /* ความกว้างเต็ม Parent */
+  padding: 12px; /* ระยะห่างภายใน Input */
+  margin: 10px 0; /* ระยะห่างด้านบนและล่าง */
+  border: none; /* ไม่มีเส้นขอบ */
+  border-radius: 6px; /* มุมโค้งมน */
+  background-color: #2c2c3d; /* สีพื้นหลัง Input */
+  color: white; /* สีตัวอักษรใน Input */
+}
+
+button {
+  background-color: #4c6ef5; /* สีพื้นหลังปุ่ม (น้ำเงิน) */
+  color: white; /* สีตัวอักษรปุ่ม */
+  padding: 12px 18px; /* ระยะห่างภายในปุ่ม */
+  border: none; /* ไม่มีเส้นขอบ */
+  border-radius: 6px; /* มุมโค้งมน */
+  margin-top: 10px; /* ระยะห่างด้านบน */
+  cursor: pointer; /* เปลี่ยน Cursor เมื่อชี้ */
+  transition: 0.3s; /* เพิ่ม Transition เมื่อ Hover */
+}
+
+button:hover {
+  background-color: #3b5bdb; /* สีพื้นหลังปุ่มเมื่อ Hover */
+}
+
+button.logout {
+  background-color: #ff6b6b; /* สีพื้นหลังปุ่ม Logout (แดง) */
+}
+
+button.logout:hover {
+  background-color: #fa5252; /* สีพื้นหลังปุ่ม Logout เมื่อ Hover */
+}
+
+#message,
+#reg-message,
+#reset-message { /* เพิ่ม #reset-message */
+  margin-top: 10px;
+  font-weight: bold; /* ตัวอักษรหนา */
+}
+
+/* สำหรับลิงก์ */
+a {
+  color: #87ceeb; /* สีลิงก์ */
+  text-decoration: none; /* ไม่มีขีดเส้นใต้ */
+  transition: 0.3s;
+}
+
+a:hover {
+  color: #5bbad5; /* สีลิงก์เมื่อ Hover */
+  text-decoration: underline; /* เพิ่มขีดเส้นใต้เมื่อ Hover */
+}
+
+/* สำหรับ input group */
+.input-group {
+  margin-bottom: 15px;
+  text-align: left; /* จัดข้อความใน Input Group ให้อยู่ชิดซ้าย */
+}
+
+.input-group label {
+  display: block; /* ทำให้ Label ขึ้นบรรทัดใหม่ */
+  margin-bottom: 5px; /* ระยะห่างด้านล่างของ Label */
+  color: #cccccc; /* สีของ Label */
+}
+
+/* ปรับปรุงการแสดงผลสำหรับหน้า Admin */
+#user-list ul {
+    list-style-type: none; /* ไม่มี Bullet Point */
+    padding: 0;
+}
+
+#user-list li {
+    background-color: rgba(44, 44, 61, 0.9); /* สีพื้นหลังของแต่ละรายการผู้ใช้ */
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column; /* จัดเรียงในแนวตั้ง */
+    align-items: flex-start; /* จัดชิดซ้าย */
+    text-align: left;
+}
+
+#user-list li button {
+    margin-top: 10px;
+    align-self: flex-end; /* จัดปุ่มให้อยู่ด้านขวาของรายการ */
+    background-color: #ff6b6b; /* สีแดงสำหรับปุ่มลบ */
+}
+
+#user-list li button:hover {
+    background-color: #fa5252;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .login-container {
+    flex-direction: column; /* เปลี่ยนเป็นแนวตั้งบนหน้าจอขนาดเล็ก */
+    align-items: center; /* จัดให้อยู่ตรงกลาง */
+    padding-top: 20px;
+  }
+
+  .login-box, .google-signin-box {
+    margin-top: 20px; /* ลด margin-top */
+    width: 90%; /* ความกว้างมากขึ้นบนมือถือ */
+    max-width: 350px; /* จำกัดความกว้างสูงสุด */
+    padding: 20px 25px; /* ปรับ padding */
+  }
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สมัครสมาชิก</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body onload="checkLogin()"> <!-- เรียกใช้ checkLogin เมื่อโหลดหน้า -->
+  <div class="login-box">
+    <h2>สมัครสมาชิก</h2>
+    <form onsubmit="return register(event)">
+      <div class="input-group">
+        <label for="reg-username">ชื่อผู้ใช้</label>
+        <input type="text" id="reg-username" required>
+      </div>
+      <div class="input-group">
+        <label for="reg-email">อีเมล</label> <!-- เพิ่มช่องอีเมล -->
+        <input type="email" id="reg-email" required>
+      </div>
+      <div class="input-group">
+        <label for="reg-password">รหัสผ่าน</label>
+        <input type="password" id="reg-password" required>
+      </div>
+      <button type="submit">สมัครสมาชิก</button>
+      <p id="reg-message"></p> <!-- สำหรับแสดงข้อความสถานะการสมัครสมาชิก -->
+      <p style="text-align:center;margin-top:10px;">
+        <a href="index.html">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</a>
+      </p>
+    </form>
+  </div>
+  <script src="script.js"></script> <!-- นำเข้า JavaScript หลัก -->
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบหลังบ้าน</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body onload="checkLogin(); loadUsers();"> <!-- เรียก checkLogin และ loadUsers เมื่อโหลดหน้า -->
+  <div class="login-box">
+    <h2>ระบบหลังบ้าน (Admin)</h2>
+    <div id="user-list"></div> <!-- สำหรับแสดงรายการผู้ใช้ -->
+    <button onclick="backToHome()">กลับหน้า Home</button>
+  </div>
+  <script src="script.js"></script> <!-- นำเข้า JavaScript หลัก -->
+</body>
+</html>
