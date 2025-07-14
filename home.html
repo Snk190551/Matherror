@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>หน้าหลัก</title>
   <link rel="stylesheet" href="style.css">
+  <!-- เพิ่มบรรทัดนี้: นำเข้า Google Identity Services Library -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body onload="checkLogin()"> <!-- เรียกใช้ checkLogin เมื่อโหลดหน้า -->
   <div class="login-box">
@@ -23,11 +25,12 @@
 
   <script src="script.js"></script> <!-- นำเข้า JavaScript หลัก -->
   <script>
+    // โค้ด JavaScript ที่อยู่ใน home.html (ถ้ามี)
     // ตรวจสอบว่าเป็น admin หรือไม่ (ใน Frontend)
     // **หมายเหตุ:** นี่เป็นเพียงการแสดงผลใน Frontend เท่านั้น ไม่ใช่การยืนยันตัวตนที่ปลอดภัย
     // ในแอปจริง ควรมีการตรวจสอบ Role ของผู้ใช้จาก Backend
     const user = sessionStorage.getItem("loggedInUser");
-    if (user === "admin") { // หากชื่อผู้ใช้ที่ล็อกอินคือ "admin"
+    if (user === "admin@example.com") { // ตรวจสอบว่าเป็น admin หรือไม่
       document.getElementById("admin-section").style.display = "block"; // แสดงปุ่ม Admin
     }
   </script>
