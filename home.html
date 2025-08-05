@@ -3,193 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เครื่องคิดเลข</title>
+  <title>หน้าหลัก</title>
   <link rel="stylesheet" href="style.css">
-  <!-- เพิ่มบรรทัดนี้: นำเข้า Google Identity Services Library สำหรับ Logout -->
+  <!-- นำเข้า Google Identity Services Library สำหรับ Logout -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* CSS สำหรับเครื่องคิดเลข */
-    .calculator-container {
+    /* CSS สำหรับหน้าต้อนรับ */
+    .welcome-container {
       background-color: rgba(255, 255, 255, 0.9); /* สีขาวโปร่งใส */
       backdrop-filter: blur(5px); /* เอฟเฟกต์เบลอ */
-      padding: 20px;
+      padding: 40px;
       border-radius: 12px; /* มุมโค้งมน */
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* เงา */
       text-align: center;
-      max-width: 400px; /* กำหนดความกว้างสูงสุด */
+      max-width: 500px; /* กำหนดความกว้างสูงสุด */
       width: 100%;
       margin: 50px auto; /* จัดให้อยู่ตรงกลางหน้าจอและมีระยะห่างด้านบน */
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .calculator-container h2 {
       color: #333;
-      margin-bottom: 15px;
+      box-sizing: border-box;
     }
 
-    .calculator-display {
-      background-color: #222;
-      color: #0f0; /* สีเขียวสไตล์ Matrix */
+    .welcome-container h2 {
+      margin-bottom: 20px;
+      color: #333;
       font-size: 2.5em;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: right;
-      font-family: 'Courier New', Courier, monospace; /* Font สำหรับเครื่องคิดเลข */
-      overflow-x: auto; /* ให้เลื่อนได้ถ้าตัวเลขยาวเกิน */
-      white-space: nowrap; /* ไม่ให้ขึ้นบรรทัดใหม่ */
-      min-height: 60px; /* ความสูงขั้นต่ำ */
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
     }
 
-    .calculator-buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr); /* 4 คอลัมน์เท่าๆ กัน */
-      gap: 10px;
+    .welcome-container p {
+      font-size: 1.2em;
+      margin-bottom: 30px;
     }
 
-    .calculator-buttons button {
-      background-color: #4CAF50; /* สีเขียว */
-      color: white;
-      border: none;
-      padding: 20px;
-      font-size: 1.5em;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-      font-weight: bold;
-    }
-
-    .calculator-buttons button:hover {
-      background-color: #45a049;
-      transform: translateY(-2px);
-    }
-
-    .calculator-buttons button:active {
-      background-color: #3e8e41;
-      transform: translateY(0);
-    }
-
-    .calculator-buttons button.operator {
-      background-color: #f39c12; /* สีส้ม */
-    }
-
-    .calculator-buttons button.operator:hover {
-      background-color: #e67e22;
-    }
-
-    .calculator-buttons button.clear {
-      background-color: #e74c3c; /* สีแดง */
-    }
-
-    .calculator-buttons button.clear:hover {
-      background-color: #c0392b;
-    }
-
-    .calculator-buttons button.equals {
-      background-color: #3498db; /* สีน้ำเงิน */
-      grid-column: span 2; /* ทำให้ปุ่มเท่ากับกว้าง 2 คอลัมน์ */
-    }
-
-    .calculator-buttons button.equals:hover {
-      background-color: #2980b9;
-    }
-
-    .bottom-buttons {
-        margin-top: 20px;
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-    }
-    .bottom-buttons button {
-        background-color: #34495e; /* สีเทาเข้ม */
+    .welcome-container button {
+        background-color: #dc3545; /* สีแดงสำหรับปุ่ม Logout */
         color: white;
         border: none;
         padding: 12px 25px;
-        font-size: 1em;
         border-radius: 8px;
         cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-    .bottom-buttons button:hover {
-        background-color: #2c3e50;
+        font-size: 1.1em;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        width: auto; /* ให้ปุ่มมีขนาดตามเนื้อหา */
+        margin-top: 0; /* ลบ margin-top ที่อาจมาจาก style.css */
     }
 
-    /* ปรับปรุงสำหรับหน้าจอเล็ก */
+    .welcome-container button:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+    }
+
+    .welcome-container button:active {
+        background-color: #b02a37;
+        transform: translateY(0);
+    }
+
+    /* Responsive adjustments */
     @media (max-width: 600px) {
-        .calculator-container {
+        .welcome-container {
             margin: 20px auto;
-            padding: 15px;
+            padding: 25px;
         }
-        .calculator-display {
+        .welcome-container h2 {
             font-size: 2em;
-            padding: 12px;
         }
-        .calculator-buttons button {
-            padding: 15px;
-            font-size: 1.2em;
-        }
-        .bottom-buttons {
-            flex-direction: column;
-            gap: 10px;
+        .welcome-container p {
+            font-size: 1em;
         }
     }
   </style>
 </head>
 <body onload="checkLogin()"> <!-- เรียกใช้ checkLogin เมื่อโหลดหน้า -->
-  <div class="calculator-container">
-    <h2 id="welcome-msg">เครื่องคิดเลข</h2> <!-- แสดงข้อความต้อนรับพร้อมชื่อผู้ใช้ -->
-
-    <div class="calculator-display" id="display">0</div>
-
-    <div class="calculator-buttons">
-      <button class="clear" onclick="clearDisplay()">C</button>
-      <button class="operator" onclick="appendOperator('/')">/</button>
-      <button class="operator" onclick="appendOperator('*')">*</button>
-      <button class="operator" onclick="appendOperator('-')">-</button>
-
-      <button onclick="appendNumber('7')">7</button>
-      <button onclick="appendNumber('8')">8</button>
-      <button onclick="appendNumber('9')">9</button>
-      <button class="operator" onclick="appendOperator('+')">+</button>
-
-      <button onclick="appendNumber('4')">4</button>
-      <button onclick="appendNumber('5')">5</button>
-      <button onclick="appendNumber('6')">6</button>
-      <button onclick="appendNumber('.')">.</button>
-
-      <button onclick="appendNumber('1')">1</button>
-      <button onclick="appendNumber('2')">2</button>
-      <button onclick="appendNumber('3')">3</button>
-      <button class="equals" onclick="calculateResult()">=</button>
-
-      <button onclick="appendNumber('0')">0</button>
-      <!-- ปุ่มว่าง 2 ปุ่ม เพื่อจัด layout ให้สวยงาม -->
-      <button style="visibility: hidden;"></button>
-      <button style="visibility: hidden;"></button>
-    </div>
-
-    <div class="bottom-buttons">
-        <!-- ถ้าเป็น admin จะเห็นปุ่มนี้ (Logic อยู่ใน script.js) -->
-        <div id="admin-section" style="display: none;">
-            <button onclick="window.location.href='admin.html'">🔧 เข้าระบบหลังบ้าน (Admin)</button>
-        </div>
-        <button onclick="logout()">🚪 ออกจากระบบ</button>
-    </div>
-  </div>
-
-  <script src="script.js"></script> <!-- นำเข้า JavaScript หลัก -->
-  <script>
-    // ตรวจสอบว่าเป็น admin หรือไม่ (ใน Frontend)
-    // **หมายเหตุ:** นี่เป็นเพียงการแสดงผลใน Frontend เท่านั้น ไม่ใช่การยืนยันตัวตนที่ปลอดภัย
-    // ในแอปจริง ควรมีการตรวจสอบ Role ของผู้ใช้จาก Backend
-    const user = sessionStorage.getItem("loggedInUser");
-    if (user === "admin@example.com") { // ตรวจสอบว่าเป็น admin หรือไม่
-      document.getElementById("admin-section").style.display = "block"; // แสดงปุ่ม Admin
-    }
-  </script>
-</body>
-</html>
+  <div class="welcome-container">
+    <h2 id="welcome-msg">ยินดีต้อนรับ!</h2> <!-- แสดงข้อความต้อนรับ -->
+    <p>คุณเข้าสู่ระบบสำเร็จแล้ว</p>
+    <button onclick="logout(
