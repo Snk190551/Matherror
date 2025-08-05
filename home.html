@@ -7,21 +7,21 @@
   <link rel="stylesheet" href="style.css">
   <!-- นำเข้า Google Identity Services Library สำหรับ Logout -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- ย้าย script.js มาที่นี่เพื่อให้ checkLogin ถูกโหลดก่อน onload -->
-  <script src="script.js"></script> 
+  <!-- ย้าย script.js มาที่นี่เพื่อให้ฟังก์ชันพร้อมใช้งานก่อน onload -->
+  <script src="script.js"></script>
 </head>
 <body onload="checkLogin()">
   <div class="app-container">
     <!-- ส่วนหัวของแอป (Top Bar) -->
     <header class="app-header">
-      <button class="header-icon" onclick="alert('กลับ')">
+      <button class="header-icon" id="backButton"> <!-- ตรวจสอบ: ไม่มี onclick="alert('กลับ')" แล้ว -->
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
       </button>
       <span class="header-title">ภาพรวม</span>
       <button class="header-icon" onclick="alert('แจ้งเตือน')">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
       </button>
-      <button class="header-icon" onclick="alert('เพิ่ม')">
+      <button class="header-icon" onclick="addNewTransaction()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
       </button>
     </header>
@@ -45,46 +45,50 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h12a2 2 0 0 1 0 4H5a2 2 0 0 0 0 4h12c.78 0 1.53.39 2 1m0 0v2a1 1 0 0 1-1 1H5a2 2 0 0 1 0-4h12a2 2 0 0 0 0-4H5a2 2 0 0 0 0-4h12V7m-3 0V4m0 8v-2m0 8v-2"/></svg>
             </button>
             <span class="account-name">My Account 1</span>
-            <button class="edit-button" onclick="alert('ปรับแต่ง')">ปรับแต่ง</button>
+            <button class="edit-button" onclick="alert('ปรับแต่งบัญชี')">ปรับแต่ง</button>
           </div>
           <div class="balance-info">
             <div class="balance-item">
-              <span class="balance-label">191 วัน</span>
-              <span class="balance-value">711 รายการ</span>
+              <span class="balance-label">จำนวนวัน</span>
+              <span class="balance-value" id="overviewDaysCount">0 วัน</span>
+            </div>
+            <div class="balance-item">
+              <span class="balance-label">จำนวนรายการ</span>
+              <span class="balance-value" id="overviewItemsCount">0 รายการ</span>
             </div>
             <div class="balance-item">
               <span class="balance-label">เงินสด</span>
-              <span class="balance-value">448,464</span>
-              <button class="more-button">...</button>
+              <span class="balance-value" id="overviewCashBalance">0</span>
+              <button class="more-button" onclick="alert('ดูรายละเอียดเงินสด')">...</button>
             </div>
             <div class="balance-item">
               <span class="balance-label">บัญชีธนาคาร</span>
-              <span class="balance-value">550</span>
-              <button class="more-button">...</button>
+              <span class="balance-value" id="overviewBankBalance">0</span>
+              <button class="more-button" onclick="alert('ดูรายละเอียดบัญชีธนาคาร')">...</button>
             </div>
             <div class="balance-item">
               <span class="balance-label">ค้างรับ</span>
-              <span class="balance-value">1,900</span>
-              <button class="more-button">...</button>
+              <span class="balance-value" id="overviewReceivable">0</span>
+              <button class="more-button" onclick="alert('ดูรายละเอียดค้างรับ')">...</button>
             </div>
             <div class="balance-item">
               <span class="balance-label">หนี้สิน</span>
-              <span class="balance-value debt">642,100</span>
-              <button class="more-button">...</button>
+              <span class="balance-value debt" id="overviewDebt">0</span>
+              <button class="more-button" onclick="alert('ดูรายละเอียดหนี้สิน')">...</button>
             </div>
             <div class="balance-item">
-              <span class="balance-label">บัตรเครดิต (1 รายการ)</span>
-              <span class="balance-value">0</span>
-              <button class="more-button">...</button>
+              <span class="balance-label">บัตรเครดิต</span>
+              <span class="balance-value" id="overviewCreditCard">0</span>
+              <button class="more-button" onclick="alert('ดูรายละเอียดบัตรเครดิต')">...</button>
             </div>
           </div>
           <div class="total-balance">
             <span class="total-label">รวม (เงินสด + บัญชีธนาคาร)</span>
-            <span class="total-value">449,014</span>
+            <span class="total-value" id="overviewCashBankTotal">0</span>
           </div>
           <div class="total-balance">
-            <span class="total-label">รวม</span>
-            <span class="total-value debt">-191,186</span>
+            <span class="total-label">รวมทั้งหมด</span>
+            <span class="total-value" id="overviewOverallTotal">0</span>
           </div>
         </div>
 
@@ -92,191 +96,198 @@
           <h3>วันนี้</h3>
           <div class="today-items">
             <div class="today-item">
-              <span class="today-label">0 รายการ</span>
-              <span class="today-value">0</span>
+              <span class="today-label">จำนวนรายการ</span>
+              <span class="today-value" id="todayItemsCount">0</span>
             </div>
             <div class="today-item">
               <span class="today-label">รายรับ</span>
-              <span class="today-value income">0</span>
+              <span class="today-value income" id="todayIncome">0</span>
+            </div>
+            <div class="today-item">
+              <span class="today-label">รายจ่าย</span>
+              <span class="today-value expense" id="todayExpense">0</span>
             </div>
           </div>
-          <button class="add-item-button" onclick="alert('เพิ่มรายการ')">
+          <button class="add-item-button" onclick="addNewTransaction()">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M12 5v14"/><path d="M5 12h14"/></svg> เพิ่มรายการ
           </button>
         </div>
       </div>
 
-      <!-- เนื้อหาของแท็บ "รายการ" (ซ่อนไว้ก่อน) -->
+      <!-- เนื้อหาของแท็บ "รายการ" -->
       <div id="items-tab" class="tab-content">
         <div class="items-list-header">
-          <button class="list-icon">
+          <button class="list-icon" onclick="alert('กรองรายการ')">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-checks"><path d="m3 16 2 2 4-4"/><path d="M12 6h8"/><path d="M12 12h8"/><path d="M12 18h8"/><path d="M3 6l2 2 4-4"/></svg>
           </button>
-          <button class="list-icon">
+          <button class="list-icon" onclick="alert('กรองบัญชี')">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
           </button>
-          <button class="list-icon">
+          <button class="list-icon" onclick="alert('กรองประเภท')">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </button>
-          <button class="list-icon">
+          <button class="list-icon" onclick="alert('ดูสรุปกราฟ')">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart-2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
           </button>
-          <button class="list-button active">รายวัน</button>
+          <button class="list-button active" onclick="alert('เรียงตามรายวัน')">รายวัน</button>
         </div>
         <div class="daily-items-list">
-          <div class="date-group">
-            <span class="date-header">5 ก.ย. 2023</span>
-            <span class="item-count">3 รายการ</span>
-            <div class="item-cards">
-              <div class="item-card">
-                <div class="item-icon-wrapper expense">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utensils"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15v2a2 2 0 0 1-2 2H7"/><path d="M15 15v7"/></svg>
-                </div>
-                <div class="item-details">
-                  <span class="item-category">อาหาร</span>
-                  <span class="item-amount expense">▾ 60</span>
-                  <span class="item-time">00:55</span>
-                </div>
-              </div>
-              <div class="item-card">
-                <div class="item-icon-wrapper expense">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-car"><path d="M19 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2Z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
-                </div>
-                <div class="item-details">
-                  <span class="item-category">เดินทาง</span>
-                  <span class="item-amount expense">▾ 1,400</span>
-                  <span class="item-time">00:55</span>
-                </div>
-              </div>
-              <div class="item-card">
-                <div class="item-icon-wrapper expense">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-music"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                </div>
-                <div class="item-details">
-                  <span class="item-category">บันเทิง</span>
-                  <span class="item-amount expense">▾ 333</span>
-                  <span class="item-time">00:54</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="date-group">
-            <span class="date-header">4 ก.ย. 2023</span>
-            <span class="item-count">2 รายการ</span>
-            <div class="item-cards">
-              <div class="item-card">
-                <div class="item-icon-wrapper expense">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utensils"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15v2a2 2 0 0 1-2 2H7"/><path d="M15 15v7"/></svg>
-                </div>
-                <div class="item-details">
-                  <span class="item-category">อาหาร</span>
-                  <span class="item-amount expense">▾ 290</span>
-                  <span class="item-time">12:03</span>
-                </div>
-              </div>
-              <div class="item-card">
-                <div class="item-icon-wrapper expense">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utensils"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15v2a2 2 0 0 1-2 2H7"/><path d="M15 15v7"/></svg>
-                </div>
-                <div class="item-details">
-                  <span class="item-category">อาหาร</span>
-                  <span class="item-amount expense">▾ 60</span>
-                  <span class="item-time">12:03</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- รายการจะถูกโหลดด้วย JavaScript -->
         </div>
       </div>
 
-      <!-- เนื้อหาของแท็บ "สรุป" (ซ่อนไว้ก่อน) -->
+      <!-- เนื้อหาของแท็บ "สรุป" -->
       <div id="summary-tab" class="tab-content">
         <h2>สรุปรายรับ-รายจ่าย</h2>
-        <p>เนื้อหาสำหรับหน้ารายรับ-รายจ่ายสรุป</p>
+        <div class="summary-period-selector">
+            <button class="period-button active" data-period="day">รายวัน</button>
+            <button class="period-button" data-period="week">รายสัปดาห์</button>
+            <button class="period-button" data-period="month">รายเดือน</button>
+            <button class="period-button" data-period="year">รายปี</button>
+        </div>
+        <div class="summary-details-card">
+            <h3>สรุปยอด</h3>
+            <div class="summary-total-row">
+                <span>รายรับสุทธิ</span>
+                <span id="summaryNetIncome" class="income">0</span>
+            </div>
+            <div class="summary-total-row">
+                <span>รายจ่ายสุทธิ</span>
+                <span id="summaryNetExpense" class="expense">0</span>
+            </div>
+            <div class="summary-total-row total">
+                <span>ยอดคงเหลือ</span>
+                <span id="summaryBalance">0</span>
+            </div>
+        </div>
+        <div class="summary-category-breakdown-card">
+            <h3>แยกตามหมวดหมู่ (รายจ่าย)</h3>
+            <div id="expenseCategoryBreakdown">
+                <!-- ข้อมูลจะถูกโหลดด้วย JavaScript -->
+                <p style="text-align: center; color: #666;">กำลังโหลดข้อมูล...</p>
+            </div>
+        </div>
+        <div class="summary-category-breakdown-card">
+            <h3>แยกตามหมวดหมู่ (รายรับ)</h3>
+            <div id="incomeCategoryBreakdown">
+                <!-- ข้อมูลจะถูกโหลดด้วย JavaScript -->
+                <p style="text-align: center; color: #666;">กำลังโหลดข้อมูล...</p>
+            </div>
+        </div>
       </div>
 
-      <!-- เนื้อหาของแท็บ "ข้อมูล" (ซ่อนไว้ก่อน) -->
+      <!-- เนื้อหาของแท็บ "ข้อมูล" -->
       <div id="data-tab" class="tab-content">
         <h2>ข้อมูล</h2>
-        <p>เนื้อหาสำหรับหน้าข้อมูล</p>
+        <p>เนื้อหาสำหรับหน้าข้อมูล (เช่น นำเข้า/ส่งออกข้อมูล)</p>
+        <div class="menu-options">
+            <button class="menu-button" onclick="alert('นำเข้าข้อมูล')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-input"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h6"/><path d="m5 18-3-3 3-3"/></svg>
+                <span>นำเข้าข้อมูล</span>
+            </button>
+            <button class="menu-button" onclick="alert('ส่งออกข้อมูล')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-output"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M22 15h-6"/><path d="m19 18 3-3-3-3"/></svg>
+                <span>ส่งออกข้อมูล</span>
+            </button>
+        </div>
       </div>
 
-      <!-- เนื้อหาของแท็บ "เมนู" (ซ่อนไว้ก่อน) -->
+      <!-- เนื้อหาของแท็บ "เมนู" -->
       <div id="menu-tab" class="tab-content">
         <h2>เมนู</h2>
-        <button onclick="logout()">🚪 ออกจากระบบ</button>
+        <div class="menu-options">
+            <button class="menu-button" onclick="alert('ตั้งค่าบัญชี')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>ตั้งค่าบัญชี</span>
+            </button>
+            <button class="menu-button" onclick="alert('จัดการหมวดหมู่')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-open"><path d="M6 15V4a2 2 0 0 1 2-2h4l2 2h5a2 2 0 0 1 2 2v11"/><path d="M2 11h20v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9z"/></svg>
+                <span>จัดการหมวดหมู่</span>
+            </button>
+            <button class="menu-button" onclick="alert('ตั้งค่าแอป')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.22a2 2 0 0 0 .73 2.73l.04.02a2 2 0 0 1 .97 1.95v.44a2 2 0 0 1-.97 1.95l-.04.02a2 2 0 0 0-.73 2.73l.78 1.22a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.22a2 2 0 0 0-.73-2.73l-.04-.02a2 2 0 0 1-.97-1.95v-.44a2 2 0 0 1 .97-1.95l.04-.02a2 2 0 0 0 .73-2.73l-.78-1.22a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>ตั้งค่าแอป</span>
+            </button>
+            <button class="menu-button logout-button" onclick="logout()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="17 16 22 12 17 8"/><line x1="22" x2="11" y1="12" y2="12"/></svg>
+                <span>ออกจากระบบ</span>
+            </button>
+        </div>
       </div>
 
     </main>
 
-    <!-- ปุ่มเพิ่มรายการลอยน้ำ (Floating Action Button) -->
-    <button class="fab" onclick="alert('เพิ่มรายการใหม่')">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-    </button>
+    <!-- Modal สำหรับเพิ่ม/แก้ไขรายการ -->
+    <div id="transactionModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" onclick="closeTransactionModal()">&times;</span>
+        <h2 id="modalTitle">เพิ่มรายการใหม่</h2>
+        <form id="transactionForm">
+          <input type="hidden" id="transactionId" name="id"> <!-- สำหรับเก็บ ID รายการเมื่อแก้ไข -->
 
-    <!-- แถบนำทางด้านล่าง (Bottom Navigation) -->
-    <nav class="bottom-nav">
-      <button class="nav-item active" onclick="showTab('overview')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-        <span>ภาพรวม</span>
-      </button>
-      <button class="nav-item" onclick="showTab('items')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-        <span>รายการ</span>
-      </button>
-      <button class="nav-item" onclick="showTab('summary')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-        <span>สรุป</span>
-      </button>
-      <button class="nav-item" onclick="showTab('data')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
-        <span>ข้อมูล</span>
-      </button>
-      <button class="nav-item" onclick="showTab('menu')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-        <span>เมนู</span>
-      </button>
-    </nav>
-  </div>
+          <div class="form-group">
+            <label for="transactionType">ประเภท:</label>
+            <div class="type-selection">
+              <button type="button" class="type-button active" id="typeExpense" data-type="expense">รายจ่าย</button>
+              <button type="button" class="type-button" id="typeIncome" data-type="income">รายรับ</button>
+            </div>
+            <input type="hidden" id="selectedType" name="type" value="expense">
+          </div>
 
-  <script>
-    // ฟังก์ชันสำหรับสลับแท็บ
-    function showTab(tabId) {
-      // ซ่อนทุกแท็บ
-      document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      // แสดงแท็บที่เลือก
-      document.getElementById(tabId + '-tab').classList.add('active');
+          <div class="form-group">
+            <label for="transactionAmount">จำนวนเงิน:</label>
+            <input type="number" id="transactionAmount" name="amount" placeholder="0.00" step="0.01" required>
+          </div>
 
-      // อัปเดตสถานะปุ่มแท็บด้านบน
-      document.querySelectorAll('.tab-button').forEach(button => {
-        button.classList.remove('active');
-      });
-      document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).classList.add('active');
+          <div class="form-group">
+            <label for="transactionCategory">หมวดหมู่:</label>
+            <select id="transactionCategory" name="category" required>
+              <option value="">เลือกหมวดหมู่</option>
+              <option value="อาหาร">อาหาร</option>
+              <option value="เดินทาง">เดินทาง</option>
+              <option value="บันเทิง">บันเทิง</option>
+              <option value="เงินเดือน">เงินเดือน</option>
+              <option value="คืนเงิน">คืนเงิน</option>
+              <option value="สัตว์เลี้ยง">สัตว์เลี้ยง</option>
+              <option value="ของใช้">ของใช้</option>
+              <option value="บริการ">บริการ</option>
+              <option value="ที่พัก">ที่พัก</option>
+              <option value="ถูกยืม">ถูกยืม</option>
+              <option value="ค่ารักษา">ค่ารักษา</option>
+              <option value="บริจาค">บริจาค</option>
+              <option value="การศึกษา">การศึกษา</option>
+              <option value="คนรัก">คนรัก</option>
+              <option value="เสื้อผ้า">เสื้อผ้า</option>
+              <option value="เครื่องสำอาง">เครื่องสำอาง</option>
+              <option value="เครื่องประดับ">เครื่องประดับ</option>
+              <!-- เพิ่มหมวดหมู่อื่นๆ ได้ที่นี่ -->
+            </select>
+          </div>
 
-      // อัปเดตสถานะปุ่มนำทางด้านล่าง
-      document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      document.querySelector(`.bottom-nav .nav-item[onclick="showTab('${tabId}')"]`).classList.add('active');
+          <div class="form-group">
+            <label for="transactionAccount">บัญชี:</label>
+            <select id="transactionAccount" name="account" required>
+              <option value="">เลือกบัญชี</option>
+              <option value="เงินสด">เงินสด</option>
+              <option value="บัญชีธนาคาร">บัญชีธนาคาร</option>
+              <option value="บัตรเครดิต">บัตรเครดิต</option>
+              <!-- เพิ่มบัญชีอื่นๆ ได้ที่นี่ -->
+            </select>
+          </div>
 
-      // อัปเดตชื่อหัวข้อด้านบน
-      const headerTitle = document.querySelector('.app-header .header-title');
-      if (headerTitle) {
-        headerTitle.innerText = tabId.charAt(0).toUpperCase() + tabId.slice(1); // เปลี่ยนเป็นชื่อแท็บ
-        if (tabId === 'overview') headerTitle.innerText = 'ภาพรวม';
-        if (tabId === 'items') headerTitle.innerText = 'รายการของฉัน';
-        if (tabId === 'summary') headerTitle.innerText = 'สรุป';
-        if (tabId === 'data') headerTitle.innerText = 'ข้อมูล';
-        if (tabId === 'menu') headerTitle.innerText = 'เมนู';
-      }
-    }
+          <div class="form-group">
+            <label for="transactionDate">วันที่:</label>
+            <input type="date" id="transactionDate" name="date" required>
+          </div>
 
-    // เรียก showTab('overview') เมื่อโหลดหน้าครั้งแรก
-    document.addEventListener('DOMContentLoaded', () => {
-      showTab('overview');
-    });
-  </script>
+          <div class="form-group">
+            <label for="transactionDescription">คำอธิบาย (ไม่บังคับ):</label>
+            <textarea id="transactionDescription" name="description" rows="3"></textarea>
+          </div>
+
+          <button type="submit" class="submit-button" id="saveTransactionButton">บันทึกรายการ</button>
+        </form>
+      </div>
+    </div>
 </body>
 </html>
