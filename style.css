@@ -1,138 +1,183 @@
+/* General Body Styling */
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif; /* ใช้ Font 'Segoe UI' หรือ Sans-serif ทั่วไป */
-  background-image: url("bg.jpg"); /* รูปภาพพื้นหลัง */
+  font-family: 'Inter', sans-serif; /* ใช้ Inter font */
+  background: url('bg.jpg') no-repeat center center fixed; /* รูปภาพพื้นหลัง */
   background-size: cover; /* ครอบคลุมพื้นที่ทั้งหมด */
-  background-position: center; /* จัดตำแหน่งรูปภาพให้อยู่ตรงกลาง */
-  background-attachment: fixed; /* ทำให้รูปภาพพื้นหลังไม่เลื่อนตามเมื่อ Scroll */
-  color: #ffffff; /* สีตัวอักษรเริ่มต้นเป็นสีขาว */
-  display: flex; /* ใช้ Flexbox เพื่อจัดวางเนื้อหา */
-  justify-content: center; /* จัดให้อยู่ตรงกลางแนวนอน */
-  align-items: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
-  height: 100vh; /* กำหนดความสูงเต็ม Viewport */
+  color: #fff; /* สีข้อความเริ่มต้น */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  flex-direction: column; /* จัดเรียงในแนวตั้ง */
 }
 
+/* Login Box Styling (ใช้สำหรับ index, register, admin) */
 .login-box {
-  background-color: rgba(30, 30, 47, 0.8); /* สีพื้นหลังกล่อง Login (สีเข้ม + ความโปร่งใส) */
-  backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอพื้นหลัง */
-  padding: 30px 40px; /* ระยะห่างภายในกล่อง */
+  background-color: rgba(255, 255, 255, 0.9); /* สีขาวโปร่งใส */
+  backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอ */
+  padding: 40px;
   border-radius: 12px; /* มุมโค้งมน */
-  box-shadow: 0 0 20px rgba(0,0,0,0.5); /* เงาของกล่อง */
-  text-align: center; /* จัดข้อความให้อยู่ตรงกลาง */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* เงา */
+  text-align: center;
   max-width: 400px; /* กำหนดความกว้างสูงสุด */
-  width: 100%; /* กำหนดความกว้างเป็น 100% ของ Parent */
+  width: 100%;
+  color: #333; /* สีตัวอักษรสำหรับกล่อง */
+  box-sizing: border-box; /* รวม padding ในขนาดของ element */
 }
 
-h2 {
-  margin-bottom: 20px; /* ระยะห่างด้านล่างของหัวข้อ */
-  color: #ffffff; /* สีหัวข้อเป็นสีขาว */
+.login-box h2 {
+  margin-bottom: 25px;
+  color: #333;
+  font-size: 2em;
 }
 
-input[type="text"],
-input[type="password"],
-input[type="email"] { /* เพิ่ม input type="email" */
-  width: 100%; /* ความกว้างเต็ม Parent */
-  padding: 12px; /* ระยะห่างภายใน Input */
-  margin: 10px 0; /* ระยะห่างด้านบนและล่าง */
-  border: none; /* ไม่มีเส้นขอบ */
-  border-radius: 6px; /* มุมโค้งมน */
-  background-color: #2c2c3d; /* สีพื้นหลัง Input */
-  color: white; /* สีตัวอักษรใน Input */
-}
-
-button {
-  background-color: #4c6ef5; /* สีพื้นหลังปุ่ม (น้ำเงิน) */
-  color: white; /* สีตัวอักษรปุ่ม */
-  padding: 12px 18px; /* ระยะห่างภายในปุ่ม */
-  border: none; /* ไม่มีเส้นขอบ */
-  border-radius: 6px; /* มุมโค้งมน */
-  margin-top: 10px; /* ระยะห่างด้านบน */
-  cursor: pointer; /* เปลี่ยน Cursor เมื่อชี้ */
-  transition: 0.3s; /* เพิ่ม Transition เมื่อ Hover */
-}
-
-button:hover {
-  background-color: #3b5bdb; /* สีพื้นหลังปุ่มเมื่อ Hover */
-}
-
-button.logout {
-  background-color: #ff6b6b; /* สีพื้นหลังปุ่ม Logout (แดง) */
-}
-
-button.logout:hover {
-  background-color: #fa5252; /* สีพื้นหลังปุ่ม Logout เมื่อ Hover */
-}
-
-#message,
-#reg-message,
-#reset-message { /* เพิ่ม #reset-message */
-  margin-top: 10px;
-  font-weight: bold; /* ตัวอักษรหนา */
-}
-
-/* สำหรับลิงก์ */
-a {
-  color: #87ceeb; /* สีลิงก์ */
-  text-decoration: none; /* ไม่มีขีดเส้นใต้ */
-  transition: 0.3s;
-}
-
-a:hover {
-  color: #5bbad5; /* สีลิงก์เมื่อ Hover */
-  text-decoration: underline; /* เพิ่มขีดเส้นใต้เมื่อ Hover */
-}
-
-/* สำหรับ input group */
+/* Input Group (ถ้ามีในอนาคต) */
 .input-group {
-  margin-bottom: 15px;
-  text-align: left; /* จัดข้อความใน Input Group ให้อยู่ชิดซ้าย */
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 .input-group label {
-  display: block; /* ทำให้ Label ขึ้นบรรทัดใหม่ */
-  margin-bottom: 5px; /* ระยะห่างด้านล่างของ Label */
-  color: #cccccc; /* สีของ Label */
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #555;
 }
 
-/* ปรับปรุงการแสดงผลสำหรับหน้า Admin */
-#user-list ul {
-    list-style-type: none; /* ไม่มี Bullet Point */
-    padding: 0;
+.input-group input[type="text"],
+.input-group input[type="email"],
+.input-group input[type="password"] {
+  width: calc(100% - 20px); /* ลบ padding ออก */
+  padding: 12px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1em;
+  box-sizing: border-box; /* รวม padding ในขนาดของ element */
 }
 
-#user-list li {
-    background-color: rgba(44, 44, 61, 0.9); /* สีพื้นหลังของแต่ละรายการผู้ใช้ */
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column; /* จัดเรียงในแนวตั้ง */
-    align-items: flex-start; /* จัดชิดซ้าย */
-    text-align: left;
+/* General Button Styling */
+button {
+  background-color: #007bff; /* สีน้ำเงิน */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%; /* ทำให้ปุ่มกว้างเต็ม */
+  margin-top: 15px;
 }
 
-#user-list li button {
-    margin-top: 10px;
-    align-self: flex-end; /* จัดปุ่มให้อยู่ด้านขวาของรายการ */
-    background-color: #ff6b6b; /* สีแดงสำหรับปุ่มลบ */
+button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px); /* ยกขึ้นเล็กน้อยเมื่อ hover */
 }
 
-#user-list li button:hover {
-    background-color: #fa5252;
+button:active {
+  background-color: #004085;
+  transform: translateY(0); /* กลับสู่ตำแหน่งเดิมเมื่อคลิก */
+}
+
+p {
+  margin-top: 15px;
+  font-size: 0.95em;
+  color: #666;
+}
+
+p a {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+p a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+#message, #reg-message {
+  color: red;
+  margin-top: 10px;
+  font-weight: bold;
 }
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-  .login-container {
-    flex-direction: column; /* เปลี่ยนเป็นแนวตั้งบนหน้าจอขนาดเล็ก */
-    align-items: center; /* จัดให้อยู่ตรงกลาง */
-    padding-top: 20px;
+  .login-box {
+    padding: 25px;
+    margin: 20px;
   }
+  .login-box h2 {
+    font-size: 1.8em;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 1em;
+  }
+}
 
-  .login-box, .google-signin-box {
-    margin-top: 20px; /* ลด margin-top */
-    width: 90%; /* ความกว้างมากขึ้นบนมือถือ */
-    max-width: 350px; /* จำกัดความกว้างสูงสุด */
-    padding: 20px 25px; /* ปรับ padding */
-  }
+/* --- Styles for home.html (Simple Welcome Page) --- */
+.welcome-container {
+  background-color: rgba(255, 255, 255, 0.9); /* สีขาวโปร่งใส */
+  backdrop-filter: blur(5px); /* เอฟเฟกต์เบลอ */
+  padding: 40px;
+  border-radius: 12px; /* มุมโค้งมน */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* เงา */
+  text-align: center;
+  max-width: 500px; /* กำหนดความกว้างสูงสุด */
+  width: 100%;
+  margin: 50px auto; /* จัดให้อยู่ตรงกลางหน้าจอและมีระยะห่างด้านบน */
+  color: #333;
+  box-sizing: border-box;
+}
+
+.welcome-container h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 2.5em;
+}
+
+.welcome-container p {
+  font-size: 1.2em;
+  margin-bottom: 30px;
+}
+
+.welcome-container button {
+    background-color: #dc3545; /* สีแดงสำหรับปุ่ม Logout */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: auto; /* ให้ปุ่มมีขนาดตามเนื้อหา */
+    margin-top: 0; /* ลบ margin-top ที่อาจมาจาก style.css */
+}
+
+.welcome-container button:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+.welcome-container button:active {
+    background-color: #b02a37;
+    transform: translateY(0);
+}
+
+/* Responsive adjustments for welcome-container */
+@media (max-width: 600px) {
+    .welcome-container {
+        margin: 20px auto;
+        padding: 25px;
+    }
+    .welcome-container h2 {
+        font-size: 2em;
+    }
+    .welcome-container p {
+        font-size: 1em;
+    }
 }
