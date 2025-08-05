@@ -1,30 +1,551 @@
 /* General Body Styling */
 body {
   font-family: 'Inter', sans-serif; /* ใช้ Inter font */
-  background: url('bg.jpg') no-repeat center center fixed; /* รูปภาพพื้นหลัง */
-  background-size: cover; /* ครอบคลุมพื้นที่ทั้งหมด */
-  color: #fff; /* สีข้อความเริ่มต้น */
+  background: #f0f2f5; /* สีพื้นหลังอ่อนๆ */
+  color: #333; /* สีข้อความเริ่มต้น */
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  flex-direction: column; /* จัดเรียงในแนวตั้ง */
+  flex-direction: column;
+  overflow: hidden; /* ป้องกัน scrollbar ที่ไม่จำเป็น */
 }
 
-/* Login Box Styling (ใช้สำหรับ index, register, admin) */
-.login-box {
-  background-color: rgba(255, 255, 255, 0.9); /* สีขาวโปร่งใส */
-  backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอ */
-  padding: 40px;
-  border-radius: 12px; /* มุมโค้งมน */
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* เงา */
-  text-align: center;
-  max-width: 400px; /* กำหนดความกว้างสูงสุด */
+/* App Container (สำหรับครอบคลุมทั้งแอป) */
+.app-container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  color: #333; /* สีตัวอักษรสำหรับกล่อง */
-  box-sizing: border-box; /* รวม padding ในขนาดของ element */
+  max-width: 480px; /* ความกว้างสูงสุดสำหรับ Mobile View */
+  height: 100vh; /* สูงเต็มหน้าจอ */
+  background-color: #fff;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden; /* ซ่อนเนื้อหาที่เกินขอบ */
+  position: relative; /* สำหรับ FAB */
+}
+
+/* Header (Top Bar) */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background-color: #34C759; /* สีเขียว */
+  color: white;
+  font-size: 1.2em;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-header .header-icon {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-header .header-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.app-header .header-title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+/* Tab Buttons (ด้านบนเนื้อหาหลัก) */
+.tab-buttons {
+  display: flex;
+  justify-content: space-around;
+  background-color: #34C759; /* สีเขียว */
+  padding: 10px 0;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 15px;
+}
+
+.tab-button {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  flex-grow: 1;
+  margin: 0 5px;
+  max-width: 100px;
+}
+
+.tab-button.active {
+  background-color: #FF3B30; /* สีแดงสำหรับ active tab */
+  border-color: #FF3B30;
+}
+
+.tab-button:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Main Content Area */
+.app-content {
+  flex-grow: 1;
+  overflow-y: auto; /* ทำให้เนื้อหาเลื่อนได้ */
+  padding: 15px;
+  background-color: #f0f2f5; /* สีพื้นหลังของเนื้อหา */
+}
+
+/* Tab Content */
+.tab-content {
+  display: none; /* ซ่อนทุกแท็บเริ่มต้น */
+  padding-bottom: 80px; /* เผื่อพื้นที่ให้ bottom nav และ FAB */
+}
+
+.tab-content.active {
+  display: block; /* แสดงแท็บที่ active */
+}
+
+/* Account Summary Card (Overview Tab) */
+.account-summary-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.account-header .account-icon {
+  background-color: #007AFF; /* สีน้ำเงิน */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.account-header .account-name {
+  font-weight: bold;
+  font-size: 1.1em;
+  flex-grow: 1;
+}
+
+.account-header .edit-button {
+  background-color: #FF9500; /* สีส้ม */
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.balance-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 คอลัมน์ */
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.balance-item {
+  background-color: #F2F2F7;
+  border-radius: 8px;
+  padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+}
+
+.balance-item .balance-label {
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.balance-item .balance-value {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
+}
+
+.balance-item .balance-value.debt {
+  color: #FF3B30; /* สีแดงสำหรับหนี้สิน */
+}
+
+.balance-item .more-button {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.2em;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+
+.total-balance {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  margin-top: 10px;
+}
+
+.total-balance:first-of-type {
+  border-top: none; /* ลบเส้นบนสำหรับอันแรก */
+}
+
+.total-balance .total-label {
+  font-size: 1em;
+  color: #555;
+}
+
+.total-balance .total-value {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
+}
+
+.total-balance .total-value.debt {
+  color: #FF3B30; /* สีแดงสำหรับรวมหนี้สิน */
+}
+
+/* Today Summary Section */
+.today-summary {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.today-summary h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.today-items {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.today-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.today-item .today-label {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.today-item .today-value {
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #333;
+}
+
+.today-item .today-value.income {
+  color: #34C759; /* สีเขียวสำหรับรายรับ */
+}
+
+.add-item-button {
+  background-color: #34C759; /* สีเขียว */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.add-item-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Items List Header (Items Tab) */
+.items-list-header {
+  display: flex;
+  justify-content: space-around;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.items-list-header .list-icon {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.items-list-header .list-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.items-list-header .list-button {
+  background-color: #34C759;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.items-list-header .list-button.active {
+  background-color: #FF3B30;
+}
+
+/* Daily Items List (Items Tab) */
+.daily-items-list {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.date-group {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.date-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.date-header {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.item-count {
+  font-size: 0.9em;
+  color: #666;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.item-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* ปรับตามขนาดจอ */
+  gap: 10px;
+}
+
+.item-card {
+  background-color: #F2F2F7;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+}
+
+.item-icon-wrapper {
+  background-color: white;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.item-icon-wrapper svg {
+  width: 24px;
+  height: 24px;
+  color: #333;
+}
+
+.item-icon-wrapper.expense {
+  background-color: #FFEBEE; /* Light red */
+}
+.item-icon-wrapper.expense svg {
+  color: #FF3B30; /* Red */
+}
+
+.item-icon-wrapper.income {
+  background-color: #E6F7EC; /* Light green */
+}
+.item-icon-wrapper.income svg {
+  color: #34C759; /* Green */
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9em;
+}
+
+.item-category {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.item-amount {
+  font-size: 1em;
+  font-weight: bold;
+  color: #333;
+}
+
+.item-amount.expense {
+  color: #FF3B30; /* Red */
+}
+
+.item-amount.income {
+  color: #34C759; /* Green */
+}
+
+.item-time {
+  font-size: 0.8em;
+  color: #999;
+}
+
+/* Floating Action Button (FAB) */
+.fab {
+  position: absolute;
+  bottom: 80px; /* เหนือ bottom-nav */
+  right: 20px;
+  background-color: #34C759; /* สีเขียว */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 20;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.fab:hover {
+  background-color: #28a745;
+  transform: translateY(-3px);
+}
+
+.fab:active {
+  background-color: #218838;
+  transform: translateY(0);
+}
+
+.fab svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #fff;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+.bottom-nav .nav-item {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75em;
+  padding: 5px;
+  transition: color 0.3s ease;
+}
+
+.bottom-nav .nav-item.active {
+  color: #34C759; /* สีเขียวสำหรับ active item */
+}
+
+.bottom-nav .nav-item svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 3px;
+}
+
+/* Responsive adjustments for overall layout */
+@media (max-width: 480px) {
+  .app-container {
+    border-radius: 0; /* ไม่มีขอบมนบนมือถือ */
+    box-shadow: none;
+  }
+}
+
+/* Old login-box styles (kept for index.html, register.html, admin.html) */
+.login-box {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  color: #333;
+  box-sizing: border-box;
 }
 
 .login-box h2 {
@@ -33,7 +554,6 @@ body {
   font-size: 2em;
 }
 
-/* Input Group (ถ้ามีในอนาคต) */
 .input-group {
   margin-bottom: 20px;
   text-align: left;
@@ -49,17 +569,16 @@ body {
 .input-group input[type="text"],
 .input-group input[type="email"],
 .input-group input[type="password"] {
-  width: calc(100% - 20px); /* ลบ padding ออก */
+  width: calc(100% - 20px);
   padding: 12px 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1em;
-  box-sizing: border-box; /* รวม padding ในขนาดของ element */
+  box-sizing: border-box;
 }
 
-/* General Button Styling */
 button {
-  background-color: #007bff; /* สีน้ำเงิน */
+  background-color: #007bff;
   color: white;
   border: none;
   padding: 12px 25px;
@@ -67,18 +586,18 @@ button {
   cursor: pointer;
   font-size: 1.1em;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  width: 100%; /* ทำให้ปุ่มกว้างเต็ม */
+  width: 100%;
   margin-top: 15px;
 }
 
 button:hover {
   background-color: #0056b3;
-  transform: translateY(-2px); /* ยกขึ้นเล็กน้อยเมื่อ hover */
+  transform: translateY(-2px);
 }
 
 button:active {
   background-color: #004085;
-  transform: translateY(0); /* กลับสู่ตำแหน่งเดิมเมื่อคลิก */
+  transform: translateY(0);
 }
 
 p {
@@ -104,7 +623,6 @@ p a:hover {
   font-weight: bold;
 }
 
-/* Responsive adjustments */
 @media (max-width: 600px) {
   .login-box {
     padding: 25px;
@@ -117,67 +635,4 @@ p a:hover {
     padding: 10px 20px;
     font-size: 1em;
   }
-}
-
-/* --- Styles for home.html (Simple Welcome Page) --- */
-.welcome-container {
-  background-color: rgba(255, 255, 255, 0.9); /* สีขาวโปร่งใส */
-  backdrop-filter: blur(5px); /* เอฟเฟกต์เบลอ */
-  padding: 40px;
-  border-radius: 12px; /* มุมโค้งมน */
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* เงา */
-  text-align: center;
-  max-width: 500px; /* กำหนดความกว้างสูงสุด */
-  width: 100%;
-  margin: 50px auto; /* จัดให้อยู่ตรงกลางหน้าจอและมีระยะห่างด้านบน */
-  color: #333;
-  box-sizing: border-box;
-}
-
-.welcome-container h2 {
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 2.5em;
-}
-
-.welcome-container p {
-  font-size: 1.2em;
-  margin-bottom: 30px;
-}
-
-.welcome-container button {
-    background-color: #dc3545; /* สีแดงสำหรับปุ่ม Logout */
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    width: auto; /* ให้ปุ่มมีขนาดตามเนื้อหา */
-    margin-top: 0; /* ลบ margin-top ที่อาจมาจาก style.css */
-}
-
-.welcome-container button:hover {
-    background-color: #c82333;
-    transform: translateY(-2px);
-}
-
-.welcome-container button:active {
-    background-color: #b02a37;
-    transform: translateY(0);
-}
-
-/* Responsive adjustments for welcome-container */
-@media (max-width: 600px) {
-    .welcome-container {
-        margin: 20px auto;
-        padding: 25px;
-    }
-    .welcome-container h2 {
-        font-size: 2em;
-    }
-    .welcome-container p {
-        font-size: 1em;
-    }
 }
