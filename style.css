@@ -636,3 +636,171 @@ p a:hover {
     font-size: 1em;
   }
 }
+
+/* --- Modal Styles --- */
+.modal {
+  display: none; /* ซ่อน modal โดยค่าเริ่มต้น */
+  position: fixed; /* อยู่เหนือเนื้อหาอื่นๆ */
+  z-index: 100; /* อยู่ด้านบนสุด */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* เปิดใช้งาน scroll ถ้าเนื้อหาเกิน */
+  background-color: rgba(0, 0, 0, 0.6); /* พื้นหลังทึบแสง */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 450px;
+  position: relative;
+  animation: fadeIn 0.3s ease-out; /* เพิ่ม animation */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.close-button {
+  color: #aaa;
+  float: right;
+  font-size: 32px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-content h2 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.8em;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.95em;
+}
+
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+  width: calc(100% - 22px); /* ลบ padding และ border */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1em;
+  box-sizing: border-box;
+  background-color: #f8f8f8;
+}
+
+.form-group input[type="number"]:focus,
+.form-group input[type="date"]:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #34C759;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.2);
+}
+
+.type-selection {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.type-selection .type-button {
+  flex: 1;
+  padding: 10px 15px;
+  border: none;
+  background-color: #f2f2f7;
+  color: #666;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border-radius: 0; /* ลบ border-radius เดิม */
+  margin-top: 0; /* ลบ margin-top เดิม */
+  width: auto; /* ลบ width: 100% เดิม */
+}
+
+.type-selection .type-button:first-child {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.type-selection .type-button:last-child {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.type-selection .type-button.active {
+  background-color: #FF3B30; /* สีแดงสำหรับรายจ่าย active */
+  color: white;
+  font-weight: bold;
+}
+
+.type-selection .type-button#typeIncome.active {
+  background-color: #34C759; /* สีเขียวสำหรับรายรับ active */
+}
+
+.submit-button {
+  background-color: #34C759; /* สีเขียว */
+  color: white;
+  padding: 12px 25px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1em;
+  width: 100%;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #28a745;
+}
+
+/* Responsive for Modal */
+@media (max-width: 600px) {
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
+  .modal-content h2 {
+    font-size: 1.5em;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 8px;
+    font-size: 0.9em;
+  }
+}
