@@ -2,7 +2,7 @@
 const BACKEND_URL = 'https://my-backend-server-2kup.onrender.com'; // **ตรวจสอบให้แน่ใจว่าเป็น URL ล่าสุดของคุณ**
 
 // --- ฟังก์ชันสำหรับถอดรหัส JWT (ทำให้เป็น Global) ---
-window.parseJwt = function(token) { // เพิ่ม window.
+window.parseJwt = function(token) {
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
@@ -12,15 +12,14 @@ window.parseJwt = function(token) { // เพิ่ม window.
 };
 
 // --- ฟังก์ชันสำหรับจัดการการตอบกลับจาก Google Sign-In (ทำให้เป็น Global) ---
-window.handleCredentialResponse = function(response) { // เพิ่ม window.
+window.handleCredentialResponse = function(response) {
   if (response && response.credential) {
-    const profile = window.parseJwt(response.credential); // เรียกใช้ window.parseJwt
+    const profile = window.parseJwt(response.credential);
     console.log("ID: " + profile.sub);
     console.log('Full Name: ' + profile.name);
     console.log('Email: ' + profile.email);
     console.log('Picture: ' + profile.picture);
 
-    // เก็บข้อมูล profile ทั้งหมดเป็น JSON string
     sessionStorage.setItem("loggedInUser", JSON.stringify(profile));
     window.location.href = "home.html";
   } else {
@@ -30,26 +29,21 @@ window.handleCredentialResponse = function(response) { // เพิ่ม window
 
 
 // --- ฟังก์ชันการจัดการผู้ใช้และ UI (checkLogin ทำให้เป็น Global) ---
-window.checkLogin = function() { // เพิ่ม window.
+window.checkLogin = function() {
   const userJson = sessionStorage.getItem("loggedInUser");
 
   if (!userJson) {
-    // ถ้ายังไม่ได้ล็อกอินและพยายามเข้าหน้า home.html หรือ admin.html
     if (window.location.pathname.endsWith("home.html") || window.location.pathname.endsWith("admin.html")) {
-      window.location.href = "index.html"; // Redirect ไปหน้า login
+      window.location.href = "index.html";
     }
   } else {
-    const user = JSON.parse(userJson); // แปลง JSON string กลับเป็น Object
+    const user = JSON.parse(userJson);
 
-    // ถ้าล็อกอินแล้วและพยายามเข้าหน้า index.html
     if (window.location.pathname.endsWith("index.html")) {
-      window.location.href = "home.html"; // Redirect ไปหน้า home
+      window.location.href = "home.html";
     }
-    // สำหรับหน้า home.html (ตอนนี้เป็นแอปจัดการรายจ่าย)
-    // โหลดข้อมูลภาพรวมเมื่อผู้ใช้ล็อกอินสำเร็จ
     if (window.location.pathname.endsWith("home.html")) {
-        window.loadOverviewData(); // เรียกใช้ window.loadOverviewData
-        // อัปเดตชื่ออีเมลและรูปโปรไฟล์ใน UI
+        window.loadOverviewData();
         const userEmailDisplay = document.getElementById('userEmailDisplay');
         const userProfilePicture = document.getElementById('userProfilePicture');
 
@@ -58,36 +52,34 @@ window.checkLogin = function() { // เพิ่ม window.
         }
         if (userProfilePicture && user.picture) {
             userProfilePicture.innerHTML = `<img src="${user.picture}" alt="Profile Picture">`;
-        } else if (userProfilePicture) { // Fallback to SVG if no picture
+        } else if (userProfilePicture) {
             userProfilePicture.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
         }
-        window.setupAIChat(); // เรียกใช้ฟังก์ชันตั้งค่า AI Chat เมื่อหน้า home โหลด
+        window.setupAIChat();
     }
   }
 };
 
 // ฟังก์ชันสำหรับออกจากระบบ
-window.logout = function() { // เพิ่ม window.
+window.logout = function() {
   sessionStorage.removeItem("loggedInUser");
-  // ลบข้อมูลรูปโปรไฟล์และอีเมลจาก UI เมื่อ logout
   const userEmailDisplay = document.getElementById('userEmailDisplay');
   const userProfilePicture = document.getElementById('userProfilePicture');
   if (userEmailDisplay) {
-      userEmailDisplay.innerText = 'My Account 1'; // คืนค่าเริ่มต้น
+      userEmailDisplay.innerText = 'My Account 1';
   }
   if (userProfilePicture) {
-      // คืนค่าเป็น SVG icon fallback
       userProfilePicture.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
   }
 
   if (google.accounts.id) {
-    google.accounts.id.disableAutoSelect(); // สำหรับ Google Sign-In
+    google.accounts.id.disableAutoSelect();
   }
-  window.location.href = "index.html"; // Redirect ไปหน้า login
+  window.location.href = "index.html";
 };
 
 // ฟังก์ชันสำหรับแสดง Custom Alert/Confirm Modal
-window.showCustomModal = function(title, message, isConfirm = false, onConfirm = null, onCancel = null) { // เพิ่ม window.
+window.showCustomModal = function(title, message, isConfirm = false, onConfirm = null, onCancel = null) {
     const modal = document.getElementById('customAlertModal');
     const modalTitle = document.getElementById('customAlertTitle');
     const modalMessage = document.getElementById('customAlertMessage');
@@ -112,17 +104,17 @@ window.showCustomModal = function(title, message, isConfirm = false, onConfirm =
         cancelButton.style.display = 'none';
     }
 
-    modal.style.display = 'flex'; // ใช้ flex เพื่อจัดกลาง
+    modal.style.display = 'flex';
 };
 
 // Override alert และ confirm
-window.alert = function(message) { // เพิ่ม window.
-    window.showCustomModal('แจ้งเตือน', message); // เรียกใช้ window.showCustomModal
+window.alert = function(message) {
+    window.showCustomModal('แจ้งเตือน', message);
 };
 
-window.confirm = function(message) { // เพิ่ม window.
+window.confirm = function(message) {
     return new Promise((resolve) => {
-        window.showCustomModal('ยืนยัน', message, true, () => resolve(true), () => resolve(false)); // เรียกใช้ window.showCustomModal
+        window.showCustomModal('ยืนยัน', message, true, () => resolve(true), () => resolve(false));
     });
 };
 
@@ -130,35 +122,29 @@ window.confirm = function(message) { // เพิ่ม window.
 // --- ฟังก์ชันการจัดการ UI และแท็บ ---
 
 // ฟังก์ชันสำหรับสลับแท็บ
-window.showTab = function(tabName) { // เพิ่ม window.
-  // ซ่อนทุกแท็บ
+window.showTab = function(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.remove('active');
   });
-  // ลบ active class ออกจากปุ่มทุกปุ่ม
   document.querySelectorAll('.tab-button').forEach(button => {
     button.classList.remove('active');
   });
 
-  // แสดงแท็บที่เลือก
   document.getElementById(`${tabName}-tab`).classList.add('active');
-  // เพิ่ม active class ให้กับปุ่มที่เลือก
   document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
 
-  // อัปเดตชื่อ Header ตามแท็บ
   const headerTitle = document.querySelector('.app-header .header-title');
   switch (tabName) {
     case 'overview':
       headerTitle.innerText = 'ภาพรวม';
-      window.loadOverviewData(); // โหลดข้อมูลภาพรวมเมื่อกลับมาแท็บนี้
+      window.loadOverviewData();
       break;
     case 'items':
       headerTitle.innerText = 'รายการ';
-      window.loadTransactions(); // โหลดรายการเมื่อเข้าแท็บนี้
+      window.loadTransactions();
       break;
     case 'data':
-      headerTitle.innerText = 'AI Chat'; // เปลี่ยนชื่อ Header สำหรับแท็บ AI Chat
-      // เมื่อเข้าแท็บ AI Chat ให้เลื่อนไปข้อความล่าสุด
+      headerTitle.innerText = 'AI Chat';
       const chatMessages = document.getElementById('chatMessages');
       if (chatMessages) {
           chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -166,8 +152,7 @@ window.showTab = function(tabName) { // เพิ่ม window.
       break;
     case 'summary':
       headerTitle.innerText = 'สรุป';
-      // โหลดข้อมูลสรุปเริ่มต้นเมื่อเข้าแท็บนี้
-      window.loadSummaryData(document.querySelector('.summary-period-selector .period-button.active').dataset.period); // เรียกใช้ window.loadSummaryData
+      window.loadSummaryData(document.querySelector('.summary-period-selector .period-button.active').dataset.period);
       break;
     case 'menu':
       headerTitle.innerText = 'เมนู';
@@ -180,7 +165,7 @@ window.showTab = function(tabName) { // เพิ่ม window.
 // --- ฟังก์ชันการจัดการข้อมูล (Mock/Backend) ---
 
 // ฟังก์ชันสำหรับโหลดข้อมูลภาพรวม (สมมติ)
-window.loadOverviewData = async function() { // เพิ่ม window.
+window.loadOverviewData = async function() {
     const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
     if (!user || !user.id) {
         console.error("User not logged in or user ID not found.");
@@ -214,7 +199,7 @@ window.loadOverviewData = async function() { // เพิ่ม window.
 };
 
 // ฟังก์ชันสำหรับโหลดรายการธุรกรรม
-window.loadTransactions = async function() { // เพิ่ม window.
+window.loadTransactions = async function() {
     const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
     if (!user || !user.id) {
         console.error("User not logged in or user ID not found.");
@@ -262,7 +247,7 @@ window.loadTransactions = async function() { // เพิ่ม window.
                 dailySection.classList.add('daily-section');
                 dailySection.innerHTML = `
                     <div class="daily-header">
-                        <h4>${window.formatDateForDisplay(date)}</h4> <!-- เรียกใช้ window.formatDateForDisplay -->
+                        <h4>${window.formatDateForDisplay(date)}</h4>
                         <span class="daily-summary-amount ${netClass}">${netAmount.toFixed(2)}</span>
                     </div>
                     <div class="transactions-on-date">
@@ -280,7 +265,7 @@ window.loadTransactions = async function() { // เพิ่ม window.
                     transactionItem.innerHTML = `
                         <div class="transaction-icon">
                             <!-- Icon based on category or type -->
-                            ${window.getCategoryIcon(transaction.category)} <!-- เรียกใช้ window.getCategoryIcon -->
+                            ${window.getCategoryIcon(transaction.category)}
                         </div>
                         <div class="transaction-details">
                             <div class="transaction-category">${transaction.category} (${transaction.account})</div>
@@ -290,7 +275,7 @@ window.loadTransactions = async function() { // เพิ่ม window.
                             ${transaction.type === 'รายรับ' ? '+' : '-'} ${transaction.amount.toFixed(2)}
                         </div>
                     `;
-                    transactionItem.addEventListener('click', () => window.editTransaction(transaction)); // เรียกใช้ window.editTransaction
+                    transactionItem.addEventListener('click', () => window.editTransaction(transaction));
                     transactionsContainer.appendChild(transactionItem);
                 });
                 dailyItemsList.appendChild(dailySection);
@@ -305,7 +290,7 @@ window.loadTransactions = async function() { // เพิ่ม window.
 };
 
 // Helper function to format date for display (e.g., "วันนี้", "เมื่อวาน", "1 ม.ค. 2568")
-window.formatDateForDisplay = function(dateString) { // เพิ่ม window.
+window.formatDateForDisplay = function(dateString) {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
@@ -323,7 +308,7 @@ window.formatDateForDisplay = function(dateString) { // เพิ่ม window.
 };
 
 // Helper function to get category icon (you can expand this)
-window.getCategoryIcon = function(category) { // เพิ่ม window.
+window.getCategoryIcon = function(category) {
     // You can use different SVG icons or emojis based on category
     switch (category) {
         case 'อาหาร': return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-soup"><path d="M12 21V3"/><path d="M15 16a6 6 0 0 0-6 0"/><path d="M10 12h4"/><path d="M12 3a4 4 0 0 0-4 4v2a4 4 0 0 0 4 4h0a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4Z"/></svg>';
@@ -337,7 +322,7 @@ window.getCategoryIcon = function(category) { // เพิ่ม window.
 
 
 // ฟังก์ชันสำหรับเปิด Modal เพิ่ม/แก้ไขรายการ
-window.addNewTransaction = function(transaction = null) { // เพิ่ม window.
+window.addNewTransaction = function(transaction = null) {
     const modal = document.getElementById('transactionModal');
     const form = document.getElementById('transactionForm');
 
@@ -360,17 +345,17 @@ window.addNewTransaction = function(transaction = null) { // เพิ่ม win
 };
 
 // ฟังก์ชันสำหรับแก้ไขรายการ
-window.editTransaction = function(transaction) { // เพิ่ม window.
-    window.addNewTransaction(transaction); // เรียกใช้ window.addNewTransaction
+window.editTransaction = function(transaction) {
+    window.addNewTransaction(transaction);
 };
 
 // ฟังก์ชันสำหรับปิด Modal
-window.closeTransactionModal = function() { // เพิ่ม window.
+window.closeTransactionModal = function() {
     document.getElementById('transactionModal').style.display = 'none';
 };
 
 // ฟังก์ชันสำหรับโหลดข้อมูลสรุป
-window.loadSummaryData = async function(period) { // เพิ่ม window.
+window.loadSummaryData = async function(period) {
     const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
     if (!user || !user.id) {
         console.error("User not logged in or user ID not found.");
@@ -445,7 +430,7 @@ window.loadSummaryData = async function(period) { // เพิ่ม window.
 // --- AI Chatbot Functions ---
 let chatHistory = [{ role: "model", parts: [{ text: "สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ?" }] }]; // เก็บประวัติการสนทนา
 
-window.setupAIChat = function() { // เพิ่ม window.
+window.setupAIChat = function() {
     const chatInput = document.getElementById('chatInput');
     const sendButton = document.getElementById('sendButton');
     const chatMessages = document.getElementById('chatMessages');
@@ -455,14 +440,14 @@ window.setupAIChat = function() { // เพิ่ม window.
         // Do nothing, keep the initial message
     } else {
         // If there's existing history, render it
-        window.renderChatHistory(); // เรียกใช้ window.renderChatHistory
+        window.renderChatHistory();
     }
 
 
-    sendButton.addEventListener('click', window.sendMessage); // เรียกใช้ window.sendMessage
+    sendButton.addEventListener('click', window.sendMessage);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            window.sendMessage(); // เรียกใช้ window.sendMessage
+            window.sendMessage();
         }
     });
 
@@ -470,7 +455,7 @@ window.setupAIChat = function() { // เพิ่ม window.
     chatMessages.scrollTop = chatMessages.scrollHeight;
 };
 
-window.renderChatHistory = function() { // เพิ่ม window.
+window.renderChatHistory = function() {
     const chatMessages = document.getElementById('chatMessages');
     chatMessages.innerHTML = ''; // Clear current messages
 
@@ -483,7 +468,7 @@ window.renderChatHistory = function() { // เพิ่ม window.
     chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the latest message
 };
 
-window.sendMessage = async function() { // เพิ่ม window.
+window.sendMessage = async function() {
     const chatInput = document.getElementById('chatInput');
     const chatMessages = document.getElementById('chatMessages');
     const loadingIndicator = document.getElementById('loadingIndicator');
@@ -615,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
             if (!user || !user.id) {
-                window.alert('ไม่พบข้อมูลผู้ใช้. กรุณาเข้าสู่ระบบใหม่.'); // เรียกใช้ window.alert
+                window.alert('ไม่พบข้อมูลผู้ใช้. กรุณาเข้าสู่ระบบใหม่.'); // ใช้ window.alert
                 return;
             }
 
@@ -646,19 +631,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    window.alert(data.message || 'บันทึกรายการสำเร็จ!'); // เรียกใช้ window.alert
-                    window.closeTransactionModal(); // เรียกใช้ window.closeTransactionModal
-                    window.loadOverviewData(); // เรียกใช้ window.loadOverviewData
-                    window.loadTransactions(); // เรียกใช้ window.loadTransactions
+                    window.alert(data.message || 'บันทึกรายการสำเร็จ!'); // ใช้ window.alert
+                    window.closeTransactionModal(); // ใช้ window.closeTransactionModal
+                    window.loadOverviewData(); // ใช้ window.loadOverviewData
+                    window.loadTransactions(); // ใช้ window.loadTransactions
                     if (document.getElementById('summary-tab').classList.contains('active')) {
-                        window.loadSummaryData(document.querySelector('.summary-period-selector .period-button.active').dataset.period); // เรียกใช้ window.loadSummaryData
+                        window.loadSummaryData(document.querySelector('.summary-period-selector .period-button.active').dataset.period); // ใช้ window.loadSummaryData
                     }
                 } else {
-                    window.alert(data.message || 'เกิดข้อผิดพลาดในการบันทึกรายการ. โปรดลองใหม่อีกครั้ง.'); // เรียกใช้ window.alert
+                    window.alert(data.message || 'เกิดข้อผิดพลาดในการบันทึกรายการ. โปรดลองใหม่อีกครั้ง.'); // ใช้ window.alert
                 }
             } catch (error) {
                 console.error('Error saving transaction:', error);
-                window.alert('ไม่สามารถเชื่อมต่อกับ Backend เพื่อบันทึกรายการได้'); // เรียกใช้ window.alert
+                window.alert('ไม่สามารถเชื่อมต่อกับ Backend เพื่อบันทึกรายการได้'); // ใช้ window.alert
             }
         });
     }
@@ -666,17 +651,37 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.summary-period-selector .period-button').forEach(button => {
         button.addEventListener('click', function() {
             const period = this.dataset.period;
-            window.loadSummaryData(period); // เรียกใช้ window.loadSummaryData
+            window.loadSummaryData(period); // ใช้ window.loadSummaryData
         });
     });
+
+    // --- Google Sign-In Initialization for index.html ---
+    if (window.location.pathname.endsWith("index.html")) {
+        // Initialize Google Identity Services
+        google.accounts.id.initialize({
+            client_id: "896330929514-ktrmgrol8v2he3dubl591j0cap13np5p.apps.googleusercontent.com", // แทนที่ด้วย Client ID ของคุณ
+            callback: window.handleCredentialResponse // ชี้ไปที่ Global function
+        });
+
+        // Render the Google Sign-In button
+        google.accounts.id.renderButton(
+            document.getElementById("googleSignInButton"), // ID ของ div ที่จะแสดงปุ่ม
+            { type: "standard", size: "large", theme: "outline", text: "signin_with", shape: "rectangular", logo_alignment: "left" } // customization attributes
+        );
+    }
+
+    // Call checkLogin after DOM is loaded and GSI is initialized (if on index.html)
+    // This ensures checkLogin is defined and GSI is ready before it's called.
+    window.checkLogin();
+
 });
 
 // ปิด Modal เมื่อคลิกนอก Modal
-window.onclick = function(event) { // เพิ่ม window.
+window.onclick = function(event) {
     const modal = document.getElementById('transactionModal');
     const customAlertModal = document.getElementById('customAlertModal');
     if (event.target == modal) {
-        window.closeTransactionModal(); // เรียกใช้ window.closeTransactionModal
+        window.closeTransactionModal(); // ใช้ window.closeTransactionModal
     }
     if (event.target == customAlertModal) {
         customAlertModal.style.display = 'none';
