@@ -30,15 +30,15 @@ body {
 /* Header (Top Bar) */
 .app-header {
   display: flex;
+  justify-content: center; /* จัดองค์ประกอบให้อยู่ตรงกลาง */
   align-items: center;
-  /* justify-content: space-between; */ /* ลบออกเพื่อให้ header-title จัดกลางได้ง่ายขึ้น */
   padding: 15px 20px;
   background-color: #34C759; /* สีเขียว */
   color: white;
   font-size: 1.2em;
   font-weight: bold;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: sticky;
+  position: relative; /* สำคัญ: สำหรับการจัดตำแหน่ง absolute ของปุ่มลูกศร */
   top: 0;
   z-index: 10;
 }
@@ -48,12 +48,18 @@ body {
   border: none;
   color: white;
   cursor: pointer;
-  padding: 5px;
+  padding: 0; /* ลบ padding ออกไป */
+  width: 34px; /* กำหนดความกว้างคงที่ (24px SVG + 5px padding ซ้าย + 5px padding ขวา) */
+  height: 34px; /* กำหนดความสูงคงที่ (24px SVG + 5px padding บน + 5px padding ล่าง) */
   display: flex;
   align-items: center;
   justify-content: center;
-  /* เพิ่ม margin-right เพื่อให้มีช่องว่างระหว่างปุ่มกับชื่อหน้า */
-  margin-right: 10px;
+  
+  position: absolute; /* ทำให้ปุ่มออกจาก flow ปกติ */
+  left: 20px; /* จัดตำแหน่งด้านซ้าย ให้ตรงกับ padding ของ header */
+  top: 50%; /* จัดตำแหน่งกึ่งกลางแนวตั้ง */
+  transform: translateY(-50%); /* ปรับตำแหน่งให้กึ่งกลางจริงๆ */
+  margin-right: 0; /* ลบ margin-right ที่ไม่จำเป็นแล้ว */
 }
 
 .app-header .header-icon svg {
@@ -62,19 +68,12 @@ body {
 }
 
 .app-header .header-title {
-  flex-grow: 1; /* ทำให้กินพื้นที่ที่เหลือทั้งหมด */
+  /* ไม่ต้องใช้ flex-grow แล้ว เพราะ justify-content: center จะจัดการพื้นที่ */
   text-align: center; /* จัดข้อความให้อยู่ตรงกลาง */
-  margin-right: 0; /* ลบ margin-right ที่เคยใช้เพื่อการจัดกลางแบบเก่า */
+  margin: 0; /* ลบ margin ที่อาจมีผลต่อการจัดกลาง */
 }
 
-/* เพิ่ม CSS ใหม่สำหรับ Placeholder เพื่อให้ Header Title อยู่ตรงกลาง */
-.header-icon-placeholder {
-  /* กำหนดความกว้างและความสูงให้เท่ากับปุ่ม header-icon (รวม padding และ margin-right ของปุ่ม) */
-  /* header-icon มี SVG 24x24px, padding 5px รอบ (รวมเป็น 34x34px), และ margin-right 10px */
-  width: 44px; /* 34px (ปุ่ม) + 10px (margin) */
-  height: 34px; /* ความสูงเท่ากับปุ่ม */
-  /* element นี้จะมองไม่เห็น แต่จะช่วยให้ header-title อยู่ตรงกลางเมื่อมีปุ่มด้านซ้ายเพียงปุ่มเดียว */
-}
+
 
 /* Tab Buttons (ด้านบนเนื้อหาหลัก) */
 .tab-buttons {
