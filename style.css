@@ -31,7 +31,7 @@ body {
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* justify-content: space-between; */ /* ลบออกเพื่อให้ header-title จัดกลางได้ง่ายขึ้น */
   padding: 15px 20px;
   background-color: #34C759; /* สีเขียว */
   color: white;
@@ -52,6 +52,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* เพิ่ม margin-right เพื่อให้มีช่องว่างระหว่างปุ่มกับชื่อหน้า */
+  margin-right: 10px;
 }
 
 .app-header .header-icon svg {
@@ -60,8 +62,10 @@ body {
 }
 
 .app-header .header-title {
-  flex-grow: 1;
-  text-align: center;
+  flex-grow: 1; /* ทำให้กินพื้นที่ที่เหลือทั้งหมด */
+  text-align: center; /* จัดข้อความให้อยู่ตรงกลาง */
+  /* เพิ่ม margin-right เท่ากับ margin-left ของ header-icon เพื่อให้ชื่อหน้าอยู่ตรงกลางจริงๆ */
+  margin-right: 34px; /* 24px (icon width) + 10px (margin) */
 }
 
 /* Tab Buttons (ด้านบนเนื้อหาหลัก) */

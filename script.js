@@ -36,7 +36,7 @@ function logout() {
 
 // ฟังก์ชันสำหรับสลับแท็บใน UI ของแอปจัดการรายจ่าย
 function showTab(tabId) {
-  console.log(`Switching to tab: ${tabId}`);
+  console.log(`Switching to tab: ${tabId}`); // เพิ่ม console log เพื่อ debug
 
   // ซ่อนทุกแท็บ
   document.querySelectorAll('.tab-content').forEach(tab => {
@@ -592,6 +592,7 @@ document.querySelector('.modal .close-button').onclick = closeTransactionModal;
 // กำหนดให้ปุ่มลูกศรย้อนกลับใน Header ทำงาน
 // เมื่อคลิกปุ่มย้อนกลับ จะเรียก showTab('overview') เพื่อกลับไปที่แท็บภาพรวมเสมอ
 document.getElementById('backButton').onclick = () => {
+    console.log("Back button clicked. Navigating to overview tab.");
     showTab('overview');
 };
 
