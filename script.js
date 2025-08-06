@@ -728,4 +728,3 @@ window.onclick = function(event) {
         closeTransactionModal();
     }
 }
-}
