@@ -30,7 +30,7 @@ body {
 /* Header (Top Bar) */
 .app-header {
   display: flex;
-  justify-content: center; /* จัดองค์ประกอบให้อยู่ตรงกลาง */
+  justify-content: space-between; /* เปลี่ยนเป็น space-between เพื่อกระจายองค์ประกอบซ้าย-กลาง-ขวา */
   align-items: center;
   padding: 15px 20px;
   background-color: #34C759; /* สีเขียว */
@@ -38,7 +38,7 @@ body {
   font-size: 1.2em;
   font-weight: bold;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: relative; /* สำคัญ: สำหรับการจัดตำแหน่ง absolute ของปุ่มลูกศร */
+  /* position: relative; ลบออก เพราะปุ่มจะไม่ใช้ absolute positioning แล้ว */
   top: 0;
   z-index: 10;
 }
@@ -48,18 +48,12 @@ body {
   border: none;
   color: white;
   cursor: pointer;
-  padding: 0; /* ลบ padding ออกไป */
-  width: 34px; /* กำหนดความกว้างคงที่ (24px SVG + 5px padding ซ้าย + 5px padding ขวา) */
-  height: 34px; /* กำหนดความสูงคงที่ (24px SVG + 5px padding บน + 5px padding ล่าง) */
+  padding: 5px; /* คืนค่า padding เดิม */
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  position: absolute; /* ทำให้ปุ่มออกจาก flow ปกติ */
-  left: 20px; /* จัดตำแหน่งด้านซ้าย ให้ตรงกับ padding ของ header */
-  top: 50%; /* จัดตำแหน่งกึ่งกลางแนวตั้ง */
-  transform: translateY(-50%); /* ปรับตำแหน่งให้กึ่งกลางจริงๆ */
-  margin-right: 0; /* ลบ margin-right ที่ไม่จำเป็นแล้ว */
+  margin-right: 10px; /* เพิ่ม margin-right เพื่อให้มีช่องว่างระหว่างปุ่มกับชื่อหน้า */
+  /* ลบ position: absolute, left, top, transform ออกทั้งหมด */
 }
 
 .app-header .header-icon svg {
@@ -68,9 +62,9 @@ body {
 }
 
 .app-header .header-title {
-  /* ไม่ต้องใช้ flex-grow แล้ว เพราะ justify-content: center จะจัดการพื้นที่ */
+  flex-grow: 1; /* ทำให้กินพื้นที่ที่เหลือทั้งหมด เพื่อให้ text-align: center ทำงานได้ดี */
   text-align: center; /* จัดข้อความให้อยู่ตรงกลาง */
-  margin: 0; /* ลบ margin ที่อาจมีผลต่อการจัดกลาง */
+  margin: 0; /* ให้แน่ใจว่าไม่มี margin ภายนอกมารบกวน */
 }
 
 
@@ -1151,4 +1145,12 @@ p a:hover {
     padding: 10px 20px;
     font-size: 1em;
   }
+}
+
+/* เพิ่ม CSS ใหม่สำหรับ Spacer ด้านขวา เพื่อให้ Header Title อยู่ตรงกลาง */
+.header-right-spacer {
+  /* คำนวณความกว้าง: ความกว้างของ .header-icon (24px SVG + 2*5px padding = 34px) + margin-right (10px) */
+  width: 44px;
+  height: 34px; /* ความสูงเท่ากับปุ่ม */
+  /* element นี้จะมองไม่เห็น แต่จะช่วยให้ header-title อยู่ตรงกลางอย่างสมดุล */
 }
