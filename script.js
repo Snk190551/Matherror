@@ -44,7 +44,7 @@ function checkLogin() {
         }
     }
 }
-
+}
 // ฟังก์ชันสำหรับออกจากระบบ
 function logout() {
   sessionStorage.removeItem("loggedInUser");
