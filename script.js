@@ -591,10 +591,22 @@ document.querySelector('.modal .close-button').onclick = closeTransactionModal;
 
 // กำหนดให้ปุ่มลูกศรย้อนกลับใน Header ทำงาน
 // เมื่อคลิกปุ่มย้อนกลับ จะเรียก showTab('overview') เพื่อกลับไปที่แท็บภาพรวมเสมอ
+// กำหนดให้ปุ่มลูกศรย้อนกลับใน Header ทำงาน
+// เมื่อคลิกปุ่มย้อนกลับ จะเรียก showTab('overview') เพื่อกลับไปที่แท็บภาพรวมเสมอ
 document.getElementById('backButton').onclick = () => {
     console.log("Back button clicked. Navigating to overview tab.");
     showTab('overview');
 };
+
+// ... (ภายในฟังก์ชัน showTab) ...
+  const backButton = document.getElementById('backButton');
+  if (backButton) {
+      if (tabId === 'overview') {
+          backButton.style.visibility = 'hidden'; // ซ่อนปุ่มย้อนกลับในหน้าภาพรวม
+      } else {
+          backButton.style.visibility = 'visible'; // แสดงปุ่มย้อนกลับในหน้าอื่น
+      }
+  }
 
 
 // Logic สำหรับปุ่มสลับประเภท (รายจ่าย/รายรับ) ใน Modal
