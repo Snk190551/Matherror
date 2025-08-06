@@ -34,10 +34,14 @@
       <div id="overview-tab" class="tab-content active">
         <div class="account-summary-card">
           <div class="account-header">
-            <button class="account-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h12a2 2 0 0 1 0 4H5a2 2 0 0 0 0 4h12c.78 0 1.53.39 2 1m0 0v2a1 1 0 0 1-1 1H5a2 2 0 0 1 0-4h12a2 2 0 0 0 0-4H5a2 2 0 0 0 0-4h12V7m-3 0V4m0 8v-2m0 8v-2"/></svg>
-            </button>
-            <span class="account-name">My Account 1</span>
+            <!-- เปลี่ยนจาก button เป็น div และเพิ่ม img สำหรับรูปโปรไฟล์ -->
+            <div class="account-icon" id="userProfilePicture">
+              <!-- รูปภาพโปรไฟล์จะถูกโหลดด้วย JavaScript -->
+              <!-- หากไม่มีรูปภาพ จะแสดง SVG icon เดิมเป็น fallback -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <!-- เพิ่ม id ให้กับ span เพื่อให้ JavaScript สามารถอัปเดตข้อความได้ -->
+            <span class="account-name" id="userEmailDisplay">My Account 1</span>
             <button class="edit-button" onclick="alert('ปรับแต่งบัญชี')">ปรับแต่ง</button>
           </div>
           <div class="balance-info">

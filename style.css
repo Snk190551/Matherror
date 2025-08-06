@@ -42,29 +42,7 @@ body {
   z-index: 10;
 }
 
-.app-header .header-icon {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 0; /* ลบ padding ออกไป */
-  width: 34px; /* กำหนดความกว้างคงที่ (24px SVG + 5px padding ซ้าย + 5px padding ขวา) */
-  height: 34px; /* กำหนดความสูงคงที่ (24px SVG + 5px padding บน + 5px padding ล่าง) */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  position: absolute; /* ทำให้ปุ่มออกจาก flow ปกติ */
-  left: 20px; /* จัดตำแหน่งด้านซ้าย ให้ตรงกับ padding ของ header */
-  top: 50%; /* จัดตำแหน่งกึ่งกลางแนวตั้ง */
-  transform: translateY(-50%); /* ปรับตำแหน่งให้กึ่งกลางจริงๆ */
-  margin-right: 0; /* ลบ margin-right ที่ไม่จำเป็นแล้ว */
-}
 
-.app-header .header-icon svg {
-  width: 24px;
-  height: 24px;
-}
 
 .app-header .header-title {
   /* ไม่ต้องใช้ flex-grow แล้ว เพราะ justify-content: center จะจัดการพื้นที่ */
@@ -154,6 +132,22 @@ body {
   align-items: center;
   justify-content: center;
   margin-right: 10px;
+  overflow: hidden; /* สำคัญ: เพื่อให้รูปภาพที่เกินขอบวงกลมถูกซ่อน */
+}
+
+/* เพิ่มสไตล์สำหรับรูปภาพโปรไฟล์ภายใน account-icon */
+.account-header .account-icon img {
+  width: 100%; /* ทำให้รูปภาพเต็มพื้นที่ของวงกลม */
+  height: 100%;
+  object-fit: cover; /* ครอบคลุมพื้นที่โดยไม่บิดเบี้ยว */
+  border-radius: 50%; /* ทำให้รูปภาพเป็นวงกลม */
+}
+
+/* สไตล์สำหรับ SVG icon fallback (ถ้าไม่มีรูปโปรไฟล์) */
+.account-header .account-icon svg {
+  width: 20px; /* ขนาดของ SVG icon */
+  height: 20px;
+  color: white; /* สีของ SVG icon */
 }
 
 .account-header .account-name {

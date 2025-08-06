@@ -5,14 +5,16 @@ const BACKEND_URL = 'https://my-backend-server-2kup.onrender.com'; // **ตร�
 
 // ฟังก์ชันสำหรับตรวจสอบสถานะการเข้าสู่ระบบ
 function checkLogin() {
-  const user = sessionStorage.getItem("loggedInUser");
+  const userJson = sessionStorage.getItem("loggedInUser"); // เปลี่ยนเป็น userJson เพราะจะเก็บเป็น JSON string
 
-  if (!user) {
+  if (!userJson) {
     // ถ้ายังไม่ได้ล็อกอินและพยายามเข้าหน้า home.html หรือ admin.html
     if (window.location.pathname.endsWith("home.html") || window.location.pathname.endsWith("admin.html")) {
       window.location.href = "index.html"; // Redirect ไปหน้า login
     }
   } else {
+    const user = JSON.parse(userJson); // แปลง JSON string กลับเป็น Object
+
     // ถ้าล็อกอินแล้วและพยายามเข้าหน้า index.html
     if (window.location.pathname.endsWith("index.html")) {
       window.location.href = "home.html"; // Redirect ไปหน้า home
@@ -21,13 +23,42 @@ function checkLogin() {
     // โหลดข้อมูลภาพรวมเมื่อผู้ใช้ล็อกอินสำเร็จ
     if (window.location.pathname.endsWith("home.html")) {
         loadOverviewData();
+        // อัปเดตชื่ออีเมลและรูปโปรไฟล์ใน UI
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const userProfilePicture = document.getElementById('userProfilePicture');
+
+        if (userEmailDisplay && user.email) {
+            userEmailDisplay.innerText = user.email;
+        }
+        if (userProfilePicture && user.picture) {
+            // สร้าง img element และใส่รูปโปรไฟล์
+            const img = document.createElement('img');
+            img.src = user.picture;
+            img.alt = 'User Profile Picture';
+            // ลบ SVG icon เดิมออกก่อน
+            userProfilePicture.innerHTML = '';
+            userProfilePicture.appendChild(img);
+        } else if (userProfilePicture) {
+            // ถ้าไม่มีรูปโปรไฟล์ ให้แสดง SVG icon เดิม
+            userProfilePicture.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+        }
     }
-  }
 }
 
 // ฟังก์ชันสำหรับออกจากระบบ
 function logout() {
   sessionStorage.removeItem("loggedInUser");
+  // ลบข้อมูลรูปโปรไฟล์และอีเมลจาก UI เมื่อ logout
+  const userEmailDisplay = document.getElementById('userEmailDisplay');
+  const userProfilePicture = document.getElementById('userProfilePicture');
+  if (userEmailDisplay) {
+      userEmailDisplay.innerText = 'My Account 1'; // คืนค่าเริ่มต้น
+  }
+  if (userProfilePicture) {
+      // คืนค่าเป็น SVG icon fallback
+      userProfilePicture.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+  }
+
   if (google.accounts.id) {
     google.accounts.id.disableAutoSelect(); // สำหรับ Google Sign-In
   }
@@ -79,16 +110,6 @@ function showTab(tabId) {
     }
   }
 
-  // จัดการการแสดงผลปุ่มลูกศรย้อนกลับ
-  const backButton = document.getElementById('backButton');
-  if (backButton) {
-      if (tabId === 'overview') {
-          backButton.style.visibility = 'hidden'; // ซ่อนปุ่มย้อนกลับในหน้าภาพรวม
-      } else {
-          backButton.style.visibility = 'visible'; // แสดงปุ่มย้อนกลับในหน้าอื่น
-      }
-  }
-
   // โหลดข้อมูลเมื่อสลับไปยังแท็บที่เกี่ยวข้อง
   if (tabId === 'items') {
       loadTransactions();
@@ -106,8 +127,10 @@ function handleCredentialResponse(response) {
     console.log("ID: " + profile.sub);
     console.log('Full Name: ' + profile.name);
     console.log('Email: ' + profile.email);
+    console.log('Picture: ' + profile.picture); // เพิ่ม log สำหรับรูปโปรไฟล์
 
-    sessionStorage.setItem("loggedInUser", profile.email);
+    // เก็บข้อมูล profile ทั้งหมดเป็น JSON string
+    sessionStorage.setItem("loggedInUser", JSON.stringify(profile));
     window.location.href = "home.html";
   } else {
     console.error("Google Sign-In failed or no credential received.");
@@ -588,15 +611,6 @@ document.querySelector('.fab').onclick = addNewTransaction;
 document.querySelector('.today-summary .add-item-button').onclick = addNewTransaction;
 // กำหนดให้ปุ่มปิด Modal ทำงาน
 document.querySelector('.modal .close-button').onclick = closeTransactionModal;
-
-// กำหนดให้ปุ่มลูกศรย้อนกลับใน Header ทำงาน
-// เมื่อคลิกปุ่มย้อนกลับ จะเรียก showTab('overview') เพื่อกลับไปที่แท็บภาพรวมเสมอ
-// กำหนดให้ปุ่มลูกศรย้อนกลับใน Header ทำงาน
-// เมื่อคลิกปุ่มย้อนกลับ จะเรียก showTab('overview') เพื่อกลับไปที่แท็บภาพรวมเสมอ
-document.getElementById('backButton').onclick = () => {
-    console.log("Back button clicked. Navigating to overview tab.");
-    showTab('overview');
-};
 
 // ... (ภายในฟังก์ชัน showTab) ...
   const backButton = document.getElementById('backButton');
