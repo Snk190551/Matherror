@@ -18,10 +18,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
       </button>
       <span class="header-title">ภาพรวม</span>
-      <!-- ปุ่มแจ้งเตือน (กระดิ่ง) ถูกลบออกแล้ว -->
-      <button class="header-icon" onclick="addNewTransaction()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-      </button>
+      <!-- ปุ่ม + (เพิ่มรายการ) ถูกลบออกจาก Header แล้ว -->
     </header>
 
     <!-- ส่วนเนื้อหาหลักของแอป -->
@@ -30,8 +27,8 @@
       <div class="tab-buttons">
         <button class="tab-button active" onclick="showTab('overview')">ภาพรวม</button>
         <button class="tab-button" onclick="showTab('items')">รายการ</button>
-        <button class="tab-button" onclick="showTab('summary')">สรุป</button>
-        <button class="tab-button" onclick="showTab('data')">ข้อมูล</button>
+        <button class="tab-button" onclick="showTab('data')">ข้อมูล</button> <!-- สลับตำแหน่ง -->
+        <button class="tab-button" onclick="showTab('summary')">สรุป</button> <!-- สลับตำแหน่ง -->
         <button class="tab-button" onclick="showTab('menu')">เมนู</button>
       </div>
 
@@ -134,6 +131,22 @@
         </div>
       </div>
 
+      <!-- เนื้อหาของแท็บ "ข้อมูล" -->
+      <div id="data-tab" class="tab-content">
+        <h2>ข้อมูล</h2>
+        <p>เนื้อหาสำหรับหน้าข้อมูล (เช่น นำเข้า/ส่งออกข้อมูล)</p>
+        <div class="menu-options">
+            <button class="menu-button" onclick="alert('นำเข้าข้อมูล')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-input"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h6"/><path d="m5 18-3-3 3-3"/></svg>
+                <span>นำเข้าข้อมูล</span>
+            </button>
+            <button class="menu-button" onclick="alert('ส่งออกข้อมูล')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-output"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M22 15h-6"/><path d="m19 18 3-3-3-3"/></svg>
+                <span>ส่งออกข้อมูล</span>
+            </button>
+        </div>
+      </div>
+
       <!-- เนื้อหาของแท็บ "สรุป" -->
       <div id="summary-tab" class="tab-content">
         <h2>สรุปรายรับ-รายจ่าย</h2>
@@ -171,22 +184,6 @@
                 <!-- ข้อมูลจะถูกโหลดด้วย JavaScript -->
                 <p style="text-align: center; color: #666;">กำลังโหลดข้อมูล...</p>
             </div>
-        </div>
-      </div>
-
-      <!-- เนื้อหาของแท็บ "ข้อมูล" -->
-      <div id="data-tab" class="tab-content">
-        <h2>ข้อมูล</h2>
-        <p>เนื้อหาสำหรับหน้าข้อมูล (เช่น นำเข้า/ส่งออกข้อมูล)</p>
-        <div class="menu-options">
-            <button class="menu-button" onclick="alert('นำเข้าข้อมูล')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-input"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h6"/><path d="m5 18-3-3 3-3"/></svg>
-                <span>นำเข้าข้อมูล</span>
-            </button>
-            <button class="menu-button" onclick="alert('ส่งออกข้อมูล')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-output"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M22 15h-6"/><path d="m19 18 3-3-3-3"/></svg>
-                <span>ส่งออกข้อมูล</span>
-            </button>
         </div>
       </div>
 
@@ -230,13 +227,13 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
         <span>รายการ</span>
       </button>
-      <button class="nav-item" onclick="showTab('summary')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-        <span>สรุป</span>
-      </button>
-      <button class="nav-item" onclick="showTab('data')">
+      <button class="nav-item" onclick="showTab('data')"> <!-- สลับตำแหน่ง -->
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
         <span>ข้อมูล</span>
+      </button>
+      <button class="nav-item" onclick="showTab('summary')"> <!-- สลับตำแหน่ง -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        <span>สรุป</span>
       </button>
       <button class="nav-item" onclick="showTab('menu')">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
@@ -298,7 +295,7 @@
             <option value="">เลือกบัญชี</option>
             <option value="เงินสด">เงินสด</option>
             <option value="บัญชีธนาคาร">บัญชีธนาคาร</option>
-            <option value="บัตรเครดิต">บัoption>
+            <option value="บัตรเครดิต">บัตรเครดิต</option>
             <!-- เพิ่มบัญชีอื่นๆ ได้ที่นี่ -->
           </select>
         </div>

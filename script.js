@@ -36,7 +36,7 @@ function logout() {
 
 // ฟังก์ชันสำหรับสลับแท็บใน UI ของแอปจัดการรายจ่าย
 function showTab(tabId) {
-  console.log(`Switching to tab: ${tabId}`); // เพิ่ม console log เพื่อ debug
+  console.log(`Switching to tab: ${tabId}`);
 
   // ซ่อนทุกแท็บ
   document.querySelectorAll('.tab-content').forEach(tab => {
@@ -72,11 +72,21 @@ function showTab(tabId) {
     switch (tabId) {
       case 'overview': headerTitle.innerText = 'ภาพรวม'; break;
       case 'items': headerTitle.innerText = 'รายการของฉัน'; break;
-      case 'summary': headerTitle.innerText = 'สรุป'; loadSummaryData('month'); break; // โหลดสรุปรายเดือนเริ่มต้น
-      case 'data': headerTitle.innerText = 'ข้อมูล'; break;
+      case 'data': headerTitle.innerText = 'ข้อมูล'; break; // สลับตำแหน่ง
+      case 'summary': headerTitle.innerText = 'สรุป'; loadSummaryData('month'); break; // สลับตำแหน่ง & โหลดสรุปรายเดือนเริ่มต้น
       case 'menu': headerTitle.innerText = 'เมนู'; break;
       default: headerTitle.innerText = 'แอปจัดการรายจ่าย';
     }
+  }
+
+  // จัดการการแสดงผลปุ่มลูกศรย้อนกลับ
+  const backButton = document.getElementById('backButton');
+  if (backButton) {
+      if (tabId === 'overview') {
+          backButton.style.visibility = 'hidden'; // ซ่อนปุ่มย้อนกลับในหน้าภาพรวม
+      } else {
+          backButton.style.visibility = 'visible'; // แสดงปุ่มย้อนกลับในหน้าอื่น
+      }
   }
 
   // โหลดข้อมูลเมื่อสลับไปยังแท็บที่เกี่ยวข้อง
@@ -84,6 +94,8 @@ function showTab(tabId) {
       loadTransactions();
   } else if (tabId === 'overview') {
       loadOverviewData();
+  } else if (tabId === 'summary') {
+      loadSummaryData(document.querySelector('.summary-period-selector .period-button.active')?.dataset.period || 'month');
   }
 }
 
@@ -578,9 +590,8 @@ document.querySelector('.today-summary .add-item-button').onclick = addNewTransa
 document.querySelector('.modal .close-button').onclick = closeTransactionModal;
 
 // กำหนดให้ปุ่มลูกศรย้อนกลับใน Header ทำงาน
-// เมื่อคลิกปุ่มย้อนกลับ จะเรียก showTab('overview') เพื่อกลับไปที่แท็บภาพรวม
+// เมื่อคลิกปุ่มย้อนกลับ จะเรียก showTab('overview') เพื่อกลับไปที่แท็บภาพรวมเสมอ
 document.getElementById('backButton').onclick = () => {
-    console.log("Back button clicked. Navigating to overview tab."); // เพิ่ม console log
     showTab('overview');
 };
 
@@ -660,7 +671,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     // โหลดข้อมูลใหม่หลังจากเพิ่ม/แก้ไขสำเร็จ
                     loadOverviewData();
                     loadTransactions();
-                    loadSummaryData(document.querySelector('.summary-period-selector .period-button.active').dataset.period);
+                    // ตรวจสอบว่าแท็บสรุป active อยู่หรือไม่ก่อนโหลดข้อมูลสรุป
+                    if (document.getElementById('summary-tab').classList.contains('active')) {
+                        loadSummaryData(document.querySelector('.summary-period-selector .period-button.active').dataset.period);
+                    }
                 } else {
                     alert(data.message || 'เกิดข้อผิดพลาดในการบันทึกรายการ. โปรดลองใหม่อีกครั้ง.');
                 }
