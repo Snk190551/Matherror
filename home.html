@@ -15,8 +15,6 @@
     <!-- ส่วนหัวของแอป (Top Bar) -->
     <header class="app-header">
       <span class="header-title">ภาพรวม</span>
-      <!-- ปุ่ม + (เพิ่มรายการ) ถูกลบออกจาก Header แล้ว -->
-      <!-- ไม่ต้องมี placeholder div แล้ว -->
     </header>
 
     <!-- ส่วนเนื้อหาหลักของแอป -->
@@ -25,8 +23,8 @@
       <div class="tab-buttons">
         <button class="tab-button active" onclick="showTab('overview')">ภาพรวม</button>
         <button class="tab-button" onclick="showTab('items')">รายการ</button>
-        <button class="tab-button" onclick="showTab('data')">ข้อมูล</button> <!-- สลับตำแหน่ง -->
-        <button class="tab-button" onclick="showTab('summary')">สรุป</button> <!-- สลับตำแหน่ง -->
+        <button class="tab-button" onclick="showTab('data')">AI Chat</button> <!-- เปลี่ยนชื่อแท็บเป็น AI Chat -->
+        <button class="tab-button" onclick="showTab('summary')">สรุป</button>
         <button class="tab-button" onclick="showTab('menu')">เมนู</button>
       </div>
 
@@ -34,7 +32,7 @@
       <div id="overview-tab" class="tab-content active">
         <div class="account-summary-card">
           <div class="account-header">
-            <!-- เปลี่ยนจาก button เป็น div และเพิ่ม img สำหรับรูปโปรไฟล์ -->
+            <!-- เพิ่ม id ให้กับ div เพื่อให้ JavaScript สามารถอัปเดตรูปโปรไฟล์ได้ -->
             <div class="account-icon" id="userProfilePicture">
               <!-- รูปภาพโปรไฟล์จะถูกโหลดด้วย JavaScript -->
               <!-- หากไม่มีรูปภาพ จะแสดง SVG icon เดิมเป็น fallback -->
@@ -133,19 +131,27 @@
         </div>
       </div>
 
-      <!-- เนื้อหาของแท็บ "ข้อมูล" -->
+      <!-- เนื้อหาของแท็บ "AI Chat" -->
       <div id="data-tab" class="tab-content">
-        <h2>ข้อมูล</h2>
-        <p>เนื้อหาสำหรับหน้าข้อมูล (เช่น นำเข้า/ส่งออกข้อมูล)</p>
-        <div class="menu-options">
-            <button class="menu-button" onclick="alert('นำเข้าข้อมูล')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-input"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h6"/><path d="m5 18-3-3 3-3"/></svg>
-                <span>นำเข้าข้อมูล</span>
+        <div class="chat-container">
+          <div id="chatMessages" class="chat-messages">
+            <!-- ข้อความแชทจะแสดงที่นี่ -->
+            <div class="chat-message ai-message">
+              <div class="message-bubble">
+                สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ?
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="พิมพ์ข้อความของคุณ...">
+            <button id="sendButton">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M15 7l-6 6"/></svg>
             </button>
-            <button class="menu-button" onclick="alert('ส่งออกข้อมูล')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-output"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M22 15h-6"/><path d="m19 18 3-3-3-3"/></svg>
-                <span>ส่งออกข้อมูล</span>
-            </button>
+          </div>
+          <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <span>AI กำลังคิด...</span>
+          </div>
         </div>
       </div>
 
@@ -202,119 +208,111 @@
                 <span>จัดการหมวดหมู่</span>
             </button>
             <button class="menu-button" onclick="alert('ตั้งค่าแอป')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.22a2 2 0 0 0 .73 2.73l.04.02a2 2 0 0 1 .97 1.95v.44a2 2 0 0 1-.97 1.95l-.04.02a2 2 0 0 0-.73 2.73l.78 1.22a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.22a2 2 0 0 0-.73-2.73l-.04-.02a2 2 0 0 1-.97-1.95v-.44a2 2 0 0 1 .97-1.95l.04-.02a2 2 0 0 0 .73-2.73l-.78-1.22a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.22a2 2 0 0 0 .73 2.73l.04.02a2 2 0 0 1 .97 1.95v.44a2 2 0 0 1-.97 1.95l-.04.02a2 2 0 0 0-.73 2.73l.78 1.22a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.22a2 2 0 0 0-.73-2.73l-.04-.02a2 2 0 0 1 .97-1.95v-.44a2 2 0 0 1-.97-1.95l.04-.02a2 2 0 0 0 .73-2.73l-.78-1.22a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                 <span>ตั้งค่าแอป</span>
             </button>
+            <button class="menu-button" onclick="alert('ช่วยเหลือและสนับสนุน')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                <span>ช่วยเหลือและสนับสนุน</span>
+            </button>
             <button class="menu-button logout-button" onclick="logout()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="17 16 22 12 17 8"/><line x1="22" x2="11" y1="12" y2="12"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="17 16 22 12 17 8"/><line x1="22" x2="10" y1="12" y2="12"/></svg>
                 <span>ออกจากระบบ</span>
             </button>
         </div>
       </div>
-
     </main>
 
-    <!-- ปุ่มเพิ่มรายการลอยน้ำ (Floating Action Button) -->
-    <button class="fab" onclick="addNewTransaction()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-    </button>
+    <!-- Floating Action Button (FAB) - เพิ่มรายการใหม่ -->
+    <!-- FAB ถูกย้ายไปอยู่ในส่วนของ overview-tab แล้ว -->
 
-    <!-- แถบนำทางด้านล่าง (Bottom Navigation) -->
-    <nav class="bottom-nav">
-      <button class="nav-item active" onclick="showTab('overview')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-        <span>ภาพรวม</span>
-      </button>
-      <button class="nav-item" onclick="showTab('items')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-        <span>รายการ</span>
-      </button>
-      <button class="nav-item" onclick="showTab('data')"> <!-- สลับตำแหน่ง -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
-        <span>ข้อมูล</span>
-      </button>
-      <button class="nav-item" onclick="showTab('summary')"> <!-- สลับตำแหน่ง -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-        <span>สรุป</span>
-      </button>
-      <button class="nav-item" onclick="showTab('menu')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-        <span>เมนู</span>
-      </button>
-    </nav>
-  </div>
-
-  <!-- Modal สำหรับเพิ่ม/แก้ไขรายการ -->
-  <div id="transactionModal" class="modal">
-    <div class="modal-content">
-      <span class="close-button" onclick="closeTransactionModal()">&times;</span>
-      <h2 id="modalTitle">เพิ่มรายการใหม่</h2>
-      <form id="transactionForm">
-        <input type="hidden" id="transactionId" name="id"> <!-- สำหรับเก็บ ID รายการเมื่อแก้ไข -->
-
-        <div class="form-group">
-          <label for="transactionType">ประเภท:</label>
-          <div class="type-selection">
-            <button type="button" class="type-button active" id="typeExpense" data-type="expense">รายจ่าย</button>
-            <button type="button" class="type-button" id="typeIncome" data-type="income">รายรับ</button>
+    <!-- Modal สำหรับเพิ่ม/แก้ไขรายการ -->
+    <div id="transactionModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" onclick="closeTransactionModal()">&times;</span>
+        <h2>เพิ่ม/แก้ไขรายการ</h2>
+        <form id="transactionForm">
+          <input type="hidden" id="transactionId">
+          <div class="form-group">
+            <label for="transactionType">ประเภท:</label>
+            <select id="transactionType" name="type" required>
+              <option value="">เลือกประเภท</option>
+              <option value="รายรับ">รายรับ</option>
+              <option value="รายจ่าย">รายจ่าย</option>
+            </select>
           </div>
-          <input type="hidden" id="selectedType" name="type" value="expense">
-        </div>
 
-        <div class="form-group">
-          <label for="transactionAmount">จำนวนเงิน:</label>
-          <input type="number" id="transactionAmount" name="amount" placeholder="0.00" step="0.01" required>
-        </div>
+          <div class="form-group">
+            <label for="transactionAmount">จำนวนเงิน:</label>
+            <input type="number" id="transactionAmount" name="amount" placeholder="0.00" step="0.01" required>
+          </div>
 
-        <div class="form-group">
-          <label for="transactionCategory">หมวดหมู่:</label>
-          <select id="transactionCategory" name="category" required>
-            <option value="">เลือกหมวดหมู่</option>
-            <option value="อาหาร">อาหาร</option>
-            <option value="เดินทาง">เดินทาง</option>
-            <option value="บันเทิง">บันเทิง</option>
-            <option value="เงินเดือน">เงินเดือน</option>
-            <option value="คืนเงิน">คืนเงิน</option>
-            <option value="สัตว์เลี้ยง">สัตว์เลี้ยง</option>
-            <option value="ของใช้">ของใช้</option>
-            <option value="บริการ">บริการ</option>
-            <option value="ที่พัก">ที่พัก</option>
-            <option value="ถูกยืม">ถูกยืม</option>
-            <option value="ค่ารักษา">ค่ารักษา</option>
-            <option value="บริจาค">บริจาค</option>
-            <option value="การศึกษา">การศึกษา</option>
-            <option value="คนรัก">คนรัก</option>
-            <option value="เสื้อผ้า">เสื้อผ้า</option>
-            <option value="เครื่องสำอาง">เครื่องสำอาง</option>
-            <option value="เครื่องประดับ">เครื่องประดับ</option>
-            <!-- เพิ่มหมวดหมู่อื่นๆ ได้ที่นี่ -->
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="transactionCategory">หมวดหมู่:</label>
+            <select id="transactionCategory" name="category" required>
+              <option value="">เลือกหมวดหมู่</option>
+              <!-- หมวดหมู่รายรับ -->
+              <option value="เงินเดือน">เงินเดือน</option>
+              <option value="โบนัส">โบนัส</option>
+              <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
+              <option value="เงินปันผล">เงินปันผล</option>
+              <option value="ของขวัญ">ของขวัญ</option>
+              <!-- หมวดหมู่รายจ่าย -->
+              <option value="อาหาร">อาหาร</option>
+              <option value="เดินทาง">เดินทาง</option>
+              <option value="ช้อปปิ้ง">ช้อปปิ้ง</option>
+              <option value="บันเทิง">บันเทิง</option>
+              <option value="ค่าเช่า">ค่าเช่า</option>
+              <option value="บิล">บิล</option>
+              <option value="ค่ารักษา">ค่ารักษา</option>
+              <option value="บริจาค">บริจาค</option>
+              <option value="การศึกษา">การศึกษา</option>
+              <option value="คนรัก">คนรัก</option>
+              <option value="เสื้อผ้า">เสื้อผ้า</option>
+              <option value="เครื่องสำอาง">เครื่องสำอาง</option>
+              <option value="เครื่องประดับ">เครื่องประดับ</option>
+              <!-- เพิ่มหมวดหมู่อื่นๆ ได้ที่นี่ -->
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label for="transactionAccount">บัญชี:</label>
-          <select id="transactionAccount" name="account" required>
-            <option value="">เลือกบัญชี</option>
-            <option value="เงินสด">เงินสด</option>
-            <option value="บัญชีธนาคาร">บัญชีธนาคาร</option>
-            <option value="บัตรเครดิต">บัตรเครดิต</option>
-            <!-- เพิ่มบัญชีอื่นๆ ได้ที่นี่ -->
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="transactionAccount">บัญชี:</label>
+            <select id="transactionAccount" name="account" required>
+              <option value="">เลือกบัญชี</option>
+              <option value="เงินสด">เงินสด</option>
+              <option value="บัญชีธนาคาร">บัญชีธนาคาร</option>
+              <option value="บัตรเครดิต">บัตรเครดิต</option>
+              <!-- เพิ่มบัญชีอื่นๆ ได้ที่นี่ -->
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label for="transactionDate">วันที่:</label>
-          <input type="date" id="transactionDate" name="date" required>
-        </div>
+          <div class="form-group">
+            <label for="transactionDate">วันที่:</label>
+            <input type="date" id="transactionDate" name="date" required>
+          </div>
 
-        <div class="form-group">
-          <label for="transactionDescription">คำอธิบาย (ไม่บังคับ):</label>
-          <textarea id="transactionDescription" name="description" rows="3"></textarea>
-        </div>
+          <div class="form-group">
+            <label for="transactionDescription">คำอธิบาย (ไม่บังคับ):</label>
+            <textarea id="transactionDescription" name="description" rows="3"></textarea>
+          </div>
 
-        <button type="submit" class="submit-button" id="saveTransactionButton">บันทึกรายการ</button>
-      </form>
+          <button type="submit" class="save-button">บันทึกรายการ</button>
+        </form>
+      </div>
     </div>
+
+    <!-- Custom Alert/Confirm Modal -->
+    <div id="customAlertModal" class="modal">
+      <div class="modal-content small-modal">
+        <h3 id="customAlertTitle"></h3>
+        <p id="customAlertMessage"></p>
+        <div class="modal-actions">
+          <button id="customAlertOkButton" class="modal-button ok-button">ตกลง</button>
+          <button id="customAlertCancelButton" class="modal-button cancel-button" style="display: none;">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </body>
 </html>

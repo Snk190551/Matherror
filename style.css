@@ -32,604 +32,270 @@ body {
   justify-content: center; /* จัดองค์ประกอบให้อยู่ตรงกลาง */
   align-items: center;
   padding: 15px 20px;
-  background-color: #34C759; /* สีเขียว */
+  background-color: #4CAF50; /* สีเขียว */
   color: white;
-  font-size: 1.2em;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: relative; /* สำคัญ: สำหรับการจัดตำแหน่ง absolute ของปุ่มลูกศร */
-  top: 0;
-  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative; /* เพื่อจัดตำแหน่ง backButton */
 }
-
-
 
 .app-header .header-title {
-  /* ไม่ต้องใช้ flex-grow แล้ว เพราะ justify-content: center จะจัดการพื้นที่ */
-  text-align: center; /* จัดข้อความให้อยู่ตรงกลาง */
-  margin: 0; /* ลบ margin ที่อาจมีผลต่อการจัดกลาง */
+  font-size: 1.3em;
+  font-weight: bold;
+  flex-grow: 1; /* ทำให้ title ขยายเต็มที่ */
+  text-align: center; /* จัด title ให้อยู่ตรงกลาง */
 }
 
-
-
-/* Tab Buttons (ด้านบนเนื้อหาหลัก) */
+/* Tab Buttons (แถบเลือกแท็บด้านบน) */
 .tab-buttons {
   display: flex;
   justify-content: space-around;
-  background-color: #34C759; /* สีเขียว */
+  background-color: #e0e0e0;
   padding: 10px 0;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
+  border-bottom: 1px solid #ccc;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  margin-bottom: 15px;
 }
 
 .tab-button {
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  color: white;
-  padding: 8px 15px;
-  border-radius: 20px;
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background-color: transparent;
+  color: #555;
+  font-size: 1em;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9em;
-  font-weight: bold;
   transition: background-color 0.3s ease, color 0.3s ease;
-  flex-grow: 1;
-  margin: 0 5px;
-  max-width: 100px;
+  border-radius: 8px; /* มุมโค้งมน */
+  margin: 0 5px; /* ระยะห่างระหว่างปุ่ม */
+}
+
+.tab-button:hover {
+  background-color: #d0d0d0;
 }
 
 .tab-button.active {
-  background-color: #FF3B30; /* สีแดงสำหรับ active tab */
-  border-color: #FF3B30;
+  background-color: #4CAF50; /* สีเขียว */
+  color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.tab-button:hover:not(.active) {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Main Content Area */
+/* Tab Content (เนื้อหาแต่ละแท็บ) */
 .app-content {
   flex-grow: 1;
-  overflow-y: auto; /* ทำให้เนื้อหาเลื่อนได้ */
-  padding: 15px;
-  background-color: #f0f2f5; /* สีพื้นหลังของเนื้อหา */
+  overflow-y: auto; /* ทำให้เนื้อหาแท็บสามารถเลื่อนได้ */
+  padding: 20px;
+  background-color: #f9f9f9;
 }
 
-/* Tab Content */
 .tab-content {
   display: none; /* ซ่อนทุกแท็บเริ่มต้น */
-  padding-bottom: 80px; /* เผื่อพื้นที่ให้ bottom nav และ FAB */
+  height: 100%; /* ทำให้แท็บสูงเต็มพื้นที่ */
+  overflow-y: auto; /* ให้เนื้อหาภายในแท็บเลื่อนได้ */
+  padding-bottom: 80px; /* เผื่อพื้นที่สำหรับ FAB หรือ input bar ด้านล่าง */
 }
 
 .tab-content.active {
-  display: block; /* แสดงแท็บที่ active */
+  display: block; /* แสดงเฉพาะแท็บที่ active */
 }
 
-/* Account Summary Card (Overview Tab) */
+/* Account Summary Card */
 .account-summary-card {
-  background-color: #fff;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
 }
 
 .account-header {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.account-header .account-icon {
-  background-color: #007AFF; /* สีน้ำเงิน */
-  color: white;
-  border: none;
+.account-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #4CAF50; /* สีเขียว */
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  margin-right: 10px;
-  overflow: hidden; /* สำคัญ: เพื่อให้รูปภาพที่เกินขอบวงกลมถูกซ่อน */
-}
-
-/* เพิ่มสไตล์สำหรับรูปภาพโปรไฟล์ภายใน account-icon */
-.account-header .account-icon img {
-  width: 100%; /* ทำให้รูปภาพเต็มพื้นที่ของวงกลม */
-  height: 100%;
-  object-fit: cover; /* ครอบคลุมพื้นที่โดยไม่บิดเบี้ยว */
-  border-radius: 50%; /* ทำให้รูปภาพเป็นวงกลม */
-}
-
-/* สไตล์สำหรับ SVG icon fallback (ถ้าไม่มีรูปโปรไฟล์) */
-.account-header .account-icon svg {
-  width: 20px; /* ขนาดของ SVG icon */
-  height: 20px;
-  color: white; /* สีของ SVG icon */
-}
-
-.account-header .account-name {
+  align-items: center;
+  color: white;
   font-weight: bold;
+  font-size: 1.2em;
+  margin-right: 15px;
+  flex-shrink: 0; /* ป้องกันการย่อ */
+  overflow: hidden; /* ซ่อนส่วนเกินของรูปโปรไฟล์ */
+}
+
+.account-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ทำให้รูปภาพครอบคลุมพื้นที่ */
+    border-radius: 50%; /* ทำให้รูปภาพเป็นวงกลม */
+}
+
+.account-name {
   font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
   flex-grow: 1;
 }
 
-.account-header .edit-button {
-  background-color: #FF9500; /* สีส้ม */
-  color: white;
+.edit-button {
+  background-color: #f0f0f0;
+  color: #555;
   border: none;
-  padding: 5px 12px;
+  padding: 8px 15px;
   border-radius: 20px;
-  font-size: 0.8em;
   cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+  width: auto; /* Override general button width */
+  margin-top: 0; /* Override general button margin */
+}
+
+.edit-button:hover {
+  background-color: #e0e0e0;
 }
 
 .balance-info {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 คอลัมน์ */
-  gap: 10px;
-  margin-bottom: 15px;
+  grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์ */
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .balance-item {
-  background-color: #F2F2F7;
+  background-color: #f8f8f8;
   border-radius: 8px;
-  padding: 10px 15px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: flex-start;
-  position: relative;
+  border: 1px solid #eee;
+  position: relative; /* สำหรับปุ่ม ... */
 }
 
-.balance-item .balance-label {
-  font-size: 0.85em;
+.balance-label {
+  font-size: 0.9em;
   color: #666;
   margin-bottom: 5px;
 }
 
-.balance-item .balance-value {
-  font-size: 1.1em;
+.balance-value {
+  font-size: 1.2em;
   font-weight: bold;
   color: #333;
 }
 
-.balance-item .balance-value.debt {
-  color: #FF3B30; /* สีแดงสำหรับหนี้สิน */
+.balance-value.debt {
+  color: #e74c3c; /* สีแดงสำหรับหนี้สิน */
 }
 
-.balance-item .more-button {
-  background: none;
-  border: none;
-  color: #999;
-  font-size: 1.2em;
+.more-button {
   position: absolute;
   top: 5px;
   right: 5px;
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  color: #999;
   cursor: pointer;
+  padding: 5px;
+  width: auto; /* Override general button width */
+  margin-top: 0; /* Override general button margin */
+}
+
+.more-button:hover {
+  color: #555;
 }
 
 .total-balance {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
-  border-top: 1px solid #eee;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
   margin-top: 10px;
 }
 
-.total-balance:first-of-type {
-  border-top: none; /* ลบเส้นบนสำหรับอันแรก */
+.total-balance:last-child {
+  border-bottom: none;
 }
 
-.total-balance .total-label {
-  font-size: 1em;
+.total-label {
+  font-weight: bold;
   color: #555;
 }
 
-.total-balance .total-value {
-  font-size: 1.1em;
+.total-value {
+  font-size: 1.3em;
   font-weight: bold;
-  color: #333;
+  color: #4CAF50; /* สีเขียว */
 }
 
-.total-balance .total-value.debt {
-  color: #FF3B30; /* สีแดงสำหรับรวมหนี้สิน */
-}
-
-/* Today Summary Section */
+/* Today Summary */
 .today-summary {
-  background-color: #fff;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
-  text-align: left;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+  text-align: center;
 }
 
 .today-summary h3 {
+  margin-top: 0;
   color: #333;
-  margin-bottom: 15px;
   font-size: 1.2em;
+  margin-bottom: 15px;
 }
 
 .today-items {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   margin-bottom: 20px;
 }
 
 .today-item {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-}
-
-.today-item .today-label {
-  font-size: 0.9em;
-  color: #666;
-}
-
-.today-item .today-value {
-  font-size: 1.3em;
-  font-weight: bold;
-  color: #333;
-}
-
-.today-item .today-value.income {
-  color: #34C759; /* สีเขียวสำหรับรายรับ */
-}
-.today-item .today-value.expense { /* เพิ่มสำหรับรายจ่ายวันนี้ */
-  color: #FF3B30; /* สีแดงสำหรับรายจ่าย */
-}
-
-
-.add-item-button {
-  background-color: #34C759; /* สีเขียว */
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 25px;
-  font-size: 1em;
-  cursor: pointer;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-}
-
-.add-item-button svg {
-  width: 20px;
-  height: 20px;
-}
-
-/* Items List Header (Items Tab) */
-.items-list-header {
-  display: flex;
-  justify-content: space-around;
-  background-color: #fff;
   padding: 10px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
-}
-
-.items-list-header .list-icon {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 8px;
+  background-color: #f8f8f8;
   border-radius: 8px;
+  flex: 1;
+  margin: 0 5px;
+  border: 1px solid #eee;
 }
 
-.items-list-header .list-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.items-list-header .list-button {
-  background-color: #34C759;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 20px;
-  font-size: 0.9em;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.items-list-header .list-button.active {
-  background-color: #FF3B30;
-}
-
-/* Daily Items List (Items Tab) */
-.daily-items-list {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.date-group {
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
-}
-
-.date-group:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.date-header {
-  font-weight: bold;
-  font-size: 1.1em;
-  color: #333;
-  display: block;
+.today-label {
+  font-size: 0.85em;
+  color: #666;
   margin-bottom: 5px;
 }
 
-.item-count {
-  font-size: 0.9em;
-  color: #666;
-  display: block;
-  margin-bottom: 15px;
-}
-
-.item-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* ปรับตามขนาดจอ */
-  gap: 10px;
-}
-
-/* New: Item Card with Edit/Delete Buttons */
-.item-card {
-  background-color: #F2F2F7;
-  border-radius: 12px;
-  padding: 10px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-  position: relative; /* สำหรับปุ่มแก้ไข/ลบ */
-}
-
-.item-icon-wrapper {
-  background-color: white;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.item-icon-wrapper svg {
-  width: 24px;
-  height: 24px;
-  color: #333;
-}
-
-.item-icon-wrapper.expense {
-  background-color: #FFEBEE; /* Light red */
-}
-.item-icon-wrapper.expense svg {
-  color: #FF3B30; /* Red */
-}
-
-.item-icon-wrapper.income {
-  background-color: #E6F7EC; /* Light green */
-}
-.item-icon-wrapper.income svg {
-  color: #34C759; /* Green */
-}
-
-.item-details {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.9em;
-}
-
-.item-category {
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 3px;
-}
-
-.item-amount {
-  font-size: 1em;
+.today-value {
+  font-size: 1.1em;
   font-weight: bold;
   color: #333;
 }
 
-.item-amount.expense {
-  color: #FF3B30; /* Red */
+.today-value.income {
+  color: #28a745; /* สีเขียวสำหรับรายรับ */
 }
 
-.item-amount.income {
-  color: #34C759; /* Green */
+.today-value.expense {
+  color: #dc3545; /* สีแดงสำหรับรายจ่าย */
 }
 
-.item-time {
-  font-size: 0.8em;
-  color: #999;
-}
-
-/* New: Edit/Delete Buttons on Item Card */
-.item-actions {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    display: flex;
-    gap: 5px;
-    opacity: 0; /* ซ่อนไว้เริ่มต้น */
-    transition: opacity 0.2s ease-in-out;
-}
-
-.item-card:hover .item-actions {
-    opacity: 1; /* แสดงเมื่อ hover */
-}
-
-.item-action-button {
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.8em;
-    padding: 0;
-}
-
-.item-action-button:hover {
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.item-action-button svg {
-    width: 16px;
-    height: 16px;
-    color: white;
-}
-
-
-/* Floating Action Button (FAB) */
-.fab {
-  position: absolute;
-  bottom: 80px; /* เหนือ bottom-nav */
-  right: 20px;
-  background-color: #34C759; /* สีเขียว */
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2em;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  z-index: 20;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.fab:hover {
-  background-color: #28a745;
-  transform: translateY(-3px);
-}
-
-.fab:active {
-  background-color: #218838;
-  transform: translateY(0);
-}
-
-.fab svg {
-  width: 28px;
-  height: 28px;
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color: #fff;
-  padding: 10px 0;
-  border-top: 1px solid #eee;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  bottom: 0;
-  width: 100%;
-  z-index: 10;
-}
-
-.bottom-nav .nav-item {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 0.75em;
-  padding: 5px;
-  transition: color 0.3s ease;
-}
-
-.bottom-nav .nav-item.active {
-  color: #34C759; /* สีเขียวสำหรับ active item */
-}
-
-.bottom-nav .nav-item svg {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 3px;
-}
-
-/* Responsive adjustments for overall layout */
-@media (max-width: 480px) {
-  .app-container {
-    border-radius: 0; /* ไม่มีขอบมนบนมือถือ */
-    box-shadow: none;
-  }
-}
-
-/* Old login-box styles (kept for index.html, register.html, admin.html) */
-.login-box {
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(5px);
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  text-align: center;
-  max-width: 400px;
-  width: 100%;
-  color: #333;
-  box-sizing: border-box;
-}
-
-.login-box h2 {
-  margin-bottom: 25px;
-  color: #333;
-  font-size: 2em;
-  text-align: center; /* เพิ่มบรรทัดนี้ เพื่อให้แน่ใจว่าข้อความอยู่ตรงกลาง */
-}
-
-.input-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.input-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-  color: #555;
-}
-
-.input-group input[type="text"],
-.input-group input[type="email"],
-.input-group input[type="password"] {
-  width: calc(100% - 20px);
-  padding: 12px 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1em;
-  box-sizing: border-box;
-}
-
-button {
+.add-item-button {
   background-color: #007bff;
   color: white;
   border: none;
@@ -638,119 +304,370 @@ button {
   cursor: pointer;
   font-size: 1.1em;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  width: 100%;
+  width: auto; /* Override general button width */
   margin-top: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
 }
 
-button:hover {
+.add-item-button svg {
+  margin-right: 8px;
+}
+
+.add-item-button:hover {
   background-color: #0056b3;
   transform: translateY(-2px);
 }
 
-button:active {
-  background-color: #004085;
-  transform: translateY(0);
+/* Items List Header */
+.items-list-header {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  background-color: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
 }
 
-p {
-  margin-top: 15px;
-  font-size: 0.95em;
-  color: #666;
+.items-list-header .list-icon,
+.items-list-header .list-button {
+  background-color: transparent;
+  border: none;
+  color: #555;
+  font-size: 1em;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  width: auto; /* Override general button width */
+  margin-top: 0; /* Override general button margin */
 }
 
-p a {
-  color: #007bff;
-  text-decoration: none;
-  transition: color 0.2s ease;
+.items-list-header .list-icon:hover,
+.items-list-header .list-button:hover {
+  background-color: #f0f0f0;
+  color: #333;
 }
 
-p a:hover {
-  color: #0056b3;
-  text-decoration: underline;
+.items-list-header .list-button.active {
+  background-color: #4CAF50;
+  color: white;
 }
 
-#message, #reg-message {
-  color: red;
-  margin-top: 10px;
+/* Daily Items List */
+.daily-items-list {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+}
+
+.daily-section {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.daily-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.daily-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.daily-header h4 {
+  margin: 0;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.daily-summary-amount {
+  font-size: 1.1em;
   font-weight: bold;
+  color: #4CAF50; /* Default color, will change based on net */
 }
 
-@media (max-width: 600px) {
-  .login-box {
-    padding: 25px;
-    margin: 20px;
-  }
-  .login-box h2 {
-    font-size: 1.8em;
-  }
-  button {
-    padding: 10px 20px;
-    font-size: 1em;
-  }
+.daily-summary-amount.expense {
+  color: #dc3545; /* Red for net expense */
 }
 
-/* --- Modal Styles --- */
-.modal {
-  display: none; /* ซ่อน modal โดยค่าเริ่มต้น */
-  position: fixed; /* อยู่เหนือเนื้อหาอื่นๆ */
-  z-index: 100; /* อยู่ด้านบนสุด */
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto; /* เปิดใช้งาน scroll ถ้าเนื้อหาเกิน */
-  background-color: rgba(0, 0, 0, 0.6); /* พื้นหลังทึบแสง */
+.transaction-item {
   display: flex;
   align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.transaction-item:last-child {
+  border-bottom: none;
+}
+
+.transaction-icon {
+  width: 30px;
+  height: 30px;
+  background-color: #f0f0f0;
+  border-radius: 50%;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.transaction-details {
+  flex-grow: 1;
+}
+
+.transaction-category {
+  font-weight: bold;
+  color: #333;
+}
+
+.transaction-description {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 2px;
+}
+
+.transaction-amount {
+  font-weight: bold;
+  font-size: 1em;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.transaction-amount.income {
+  color: #28a745;
+}
+
+.transaction-amount.expense {
+  color: #dc3545;
+}
+
+/* Summary Tab */
+.summary-period-selector {
+    display: flex;
+    justify-content: space-around;
+    background-color: #ffffff;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+}
+
+.summary-period-selector .period-button {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    background-color: transparent;
+    color: #555;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 8px;
+    margin: 0 3px;
+    width: auto; /* Override general button width */
+    margin-top: 0; /* Override general button margin */
+}
+
+.summary-period-selector .period-button.active {
+    background-color: #007bff; /* สีน้ำเงิน */
+    color: white;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+.summary-details-card,
+.summary-category-breakdown-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+}
+
+.summary-details-card h3,
+.summary-category-breakdown-card h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.summary-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 1.1em;
+}
+
+.summary-total-row.total {
+    font-weight: bold;
+    font-size: 1.3em;
+    border-top: 2px solid #eee;
+    padding-top: 15px;
+    margin-top: 10px;
+}
+
+.summary-total-row .income {
+    color: #28a745;
+}
+
+.summary-total-row .expense {
+    color: #dc3545;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #f0f0f0;
+}
+
+.category-item:last-child {
+    border-bottom: none;
+}
+
+.category-name {
+    color: #555;
+}
+
+.category-amount {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Menu Tab */
+.menu-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.menu-button {
+  background-color: #ffffff;
+  color: #333;
+  border: 1px solid #eee;
+  padding: 15px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  width: 100%; /* Ensure full width */
+  margin-top: 0; /* Override general button margin */
+}
+
+.menu-button svg {
+  margin-right: 15px;
+  color: #4CAF50; /* สีเขียว */
+  flex-shrink: 0;
+}
+
+.menu-button span {
+  flex-grow: 1;
+}
+
+.menu-button:hover {
+  background-color: #f5f5f5;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.menu-button.logout-button {
+  background-color: #dc3545; /* สีแดง */
+  color: white;
+  margin-top: 30px;
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+}
+
+.menu-button.logout-button svg {
+  color: white;
+}
+
+.menu-button.logout-button:hover {
+  background-color: #c82333;
+  box-shadow: 0 6px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Modal Styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
 .modal-content {
   background-color: #fefefe;
   margin: auto;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 90%;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  width: 90%; /* Could be more responsive */
   max-width: 450px;
   position: relative;
-  animation: fadeIn 0.3s ease-out; /* เพิ่ม animation */
+  animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+.modal-content.small-modal {
+  max-width: 350px;
+  text-align: center;
 }
 
 .close-button {
   color: #aaa;
-  float: right;
-  font-size: 32px;
-  font-weight: bold;
   position: absolute;
-  top: 10px;
+  top: 15px;
   right: 20px;
+  font-size: 28px;
+  font-weight: bold;
   cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .close-button:hover,
 .close-button:focus {
   color: #333;
   text-decoration: none;
-  cursor: pointer;
 }
 
 .modal-content h2 {
-  color: #333;
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  color: #333;
   font-size: 1.8em;
   text-align: center;
 }
 
 .form-group {
-  margin-bottom: 15px;
-  text-align: left;
+  margin-bottom: 18px;
 }
 
 .form-group label {
@@ -761,300 +678,103 @@ p a:hover {
   font-size: 0.95em;
 }
 
+.form-group input[type="text"],
 .form-group input[type="number"],
 .form-group input[type="date"],
 .form-group select,
 .form-group textarea {
-  width: calc(100% - 22px); /* ลบ padding และ border */
-  padding: 10px;
+  width: calc(100% - 20px);
+  padding: 12px 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1em;
   box-sizing: border-box;
-  background-color: #f8f8f8;
+  font-family: 'Inter', sans-serif; /* ใช้ Inter font */
 }
 
-.form-group input[type="number"]:focus,
-.form-group input[type="date"]:focus,
+.form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #34C759;
+  border-color: #007bff;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
-.type-selection {
-  display: flex;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 15px;
-}
-
-.type-selection .type-button {
-  flex: 1;
-  padding: 10px 15px;
+.save-button {
+  background-color: #28a745; /* สีเขียว */
+  color: white;
   border: none;
-  background-color: #f2f2f7;
-  color: #666;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  border-radius: 0; /* ลบ border-radius เดิม */
-  margin-top: 0; /* ลบ margin-top เดิม */
-  width: auto; /* ลบ width: 100% เดิม */
-}
-
-.type-selection .type-button:first-child {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-}
-
-.type-selection .type-button:last-child {
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.type-selection .type-button.active {
-  background-color: #FF3B30; /* สีแดงสำหรับรายจ่าย active */
-  color: white;
-  font-weight: bold;
-}
-
-.type-selection .type-button#typeIncome.active {
-  background-color: #34C759; /* สีเขียวสำหรับรายรับ active */
-}
-
-.submit-button {
-  background-color: #34C759; /* สีเขียว */
-  color: white;
   padding: 12px 25px;
   border-radius: 8px;
-  border: none;
   cursor: pointer;
   font-size: 1.1em;
+  transition: background-color 0.3s ease, transform 0.2s ease;
   width: 100%;
   margin-top: 20px;
-  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
 }
 
-.submit-button:hover {
-  background-color: #28a745;
+.save-button:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
 }
 
-/* Responsive for Modal */
-@media (max-width: 600px) {
-  .modal-content {
-    width: 95%;
-    padding: 20px;
-  }
-  .modal-content h2 {
-    font-size: 1.5em;
-  }
-  .form-group input, .form-group select, .form-group textarea {
-    padding: 8px;
-    font-size: 0.9em;
-  }
+/* Custom Alert/Confirm Styles */
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
 }
 
-/* --- Summary Tab Styles --- */
-.summary-period-selector {
-    display: flex;
-    justify-content: space-around;
-    background-color: #fff;
-    border-radius: 12px;
-    padding: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    margin-bottom: 20px;
+.modal-button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
+  width: auto; /* Override general button width */
+  margin-top: 0; /* Override general button margin */
 }
 
-.summary-period-selector .period-button {
-    background: none;
-    border: none;
-    color: #666;
-    padding: 8px 15px;
-    border-radius: 10px;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    flex-grow: 1;
-    text-align: center;
-    margin: 0 3px;
-    width: auto; /* Override general button width */
-    margin-top: 0; /* Override general button margin-top */
+.modal-button.ok-button {
+  background-color: #007bff;
+  color: white;
 }
 
-.summary-period-selector .period-button.active {
-    background-color: #34C759; /* Active green */
-    color: white;
-    font-weight: bold;
+.modal-button.ok-button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
-.summary-period-selector .period-button:hover:not(.active) {
-    background-color: #f0f0f0;
+.modal-button.cancel-button {
+  background-color: #6c757d;
+  color: white;
 }
 
-.summary-details-card,
-.summary-category-breakdown-card {
-    background-color: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    margin-bottom: 20px;
+.modal-button.cancel-button:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
 }
 
-.summary-details-card h3,
-.summary-category-breakdown-card h3 {
-    color: #333;
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.2em;
-    text-align: left;
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.summary-total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.summary-total-row:last-child {
-    border-bottom: none;
-}
-
-.summary-total-row span {
-    font-size: 1em;
-    color: #555;
-}
-
-.summary-total-row span.income {
-    color: #34C759;
-    font-weight: bold;
-}
-
-.summary-total-row span.expense {
-    color: #FF3B30;
-    font-weight: bold;
-}
-
-.summary-total-row.total {
-    font-weight: bold;
-    font-size: 1.1em;
-    padding-top: 15px;
-    border-top: 2px solid #ddd;
-    margin-top: 10px;
-}
-
-.summary-total-row.total span {
-    font-size: 1.1em;
-    color: #333;
-}
-.summary-total-row.total span.debt {
-    color: #FF3B30;
-}
-
-.category-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.category-item:last-child {
-    border-bottom: none;
-}
-
-.category-item .category-name {
-    font-size: 0.95em;
-    color: #333;
-}
-
-.category-item .category-amount {
-    font-size: 0.95em;
-    font-weight: bold;
-    color: #333;
-}
-
-.category-item .category-amount.expense {
-    color: #FF3B30;
-}
-
-.category-item .category-amount.income {
-    color: #34C759;
-}
-
-/* --- Menu Tab Styles --- */
-.menu-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 2 คอลัมน์บนจอใหญ่, 1 คอลัมน์บนจอมือถือ */
-    gap: 15px;
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.menu-button {
-    background-color: #F2F2F7;
-    color: #333;
-    border: none;
-    padding: 15px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 1em;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    width: auto; /* Override general button width */
-    margin-top: 0; /* Override general button margin-top */
-}
-
-.menu-button:hover {
-    background-color: #e0e0e0;
-    transform: translateY(-2px);
-}
-
-.menu-button svg {
-    width: 30px;
-    height: 30px;
-    color: #007AFF; /* สีไอคอน */
-}
-
-.menu-button span {
-    font-weight: bold;
-}
-
-.menu-button.logout-button {
-    background-color: #FF3B30; /* สีแดงสำหรับปุ่ม Logout */
-    color: white;
-}
-
-.menu-button.logout-button svg {
-    color: white;
-}
-
-.menu-button.logout-button:hover {
-    background-color: #c0392b;
-}
-
-/* Old login-box styles (kept for index.html, register.html, admin.html) */
-/* (These styles are for pages outside the main app-container, like login/register) */
+/* Login/Register/Reset Page Specific Styles */
 .login-box {
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(5px);
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  background-color: rgba(255, 255, 255, 0.9); /* สีขาวโปร่งใส */
+  backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอ */
+  padding: 30px;
+  border-radius: 12px; /* มุมโค้งมน */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* เงา */
   text-align: center;
-  max-width: 400px;
+  max-width: 400px; /* กำหนดความกว้างสูงสุด */
   width: 100%;
-  color: #333;
-  box-sizing: border-box;
+  color: #333; /* สีตัวอักษรสำหรับกล่อง */
 }
 
 .login-box h2 {
@@ -1104,44 +824,172 @@ button:hover {
   transform: translateY(-2px);
 }
 
-button:active {
-  background-color: #004085;
-  transform: translateY(0);
+.links {
+  margin-top: 20px;
+  font-size: 0.9em;
 }
 
-p {
-  margin-top: 15px;
-  font-size: 0.95em;
-  color: #666;
-}
-
-p a {
+.links a {
   color: #007bff;
   text-decoration: none;
-  transition: color 0.2s ease;
+  margin: 0 10px;
 }
 
-p a:hover {
-  color: #0056b3;
+.links a:hover {
   text-decoration: underline;
 }
 
-#message, #reg-message {
-  color: red;
-  margin-top: 10px;
-  font-weight: bold;
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .app-container {
+    border-radius: 0;
+    height: 100vh; /* Full height on small screens */
+  }
+
+  .app-content {
+    padding: 15px;
+  }
+
+  .balance-info {
+    grid-template-columns: 1fr; /* Single column on small screens */
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
 }
 
-@media (max-width: 600px) {
-  .login-box {
-    padding: 25px;
-    margin: 20px;
-  }
-  .login-box h2 {
-    font-size: 1.8em;
-  }
-  button {
-    padding: 10px 20px;
-    font-size: 1em;
-  }
+/* AI Chat Specific Styles */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px); /* Adjust height based on header/tab/input */
+    background-color: #f0f2f5;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+    margin-bottom: 20px; /* Space above the bottom navigation */
 }
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-message {
+    display: flex;
+    max-width: 80%;
+}
+
+.user-message {
+    align-self: flex-end;
+    justify-content: flex-end;
+}
+
+.ai-message {
+    align-self: flex-start;
+    justify-content: flex-start;
+}
+
+.message-bubble {
+    padding: 10px 15px;
+    border-radius: 20px;
+    line-height: 1.4;
+    word-wrap: break-word; /* Ensure long words break */
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.user-message .message-bubble {
+    background-color: #007bff; /* Blue for user */
+    color: white;
+    border-bottom-right-radius: 5px; /* Sharpen corner for user */
+}
+
+.ai-message .message-bubble {
+    background-color: #e2e2e2; /* Light gray for AI */
+    color: #333;
+    border-bottom-left-radius: 5px; /* Sharpen corner for AI */
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 10px 15px;
+    border-top: 1px solid #ddd;
+    background-color: #fff;
+    gap: 10px;
+}
+
+#chatInput {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+#chatInput:focus {
+    border-color: #007bff;
+}
+
+#sendButton {
+    background-color: #4CAF50; /* Green send button */
+    color: white;
+    border: none;
+    border-radius: 50%; /* Circular button */
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-top: 0; /* Override general button margin */
+}
+
+#sendButton:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+#sendButton svg {
+    width: 24px;
+    height: 24px;
+}
+
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: #f0f2f5;
+    color: #666;
+    font-size: 0.9em;
+    gap: 10px;
+    border-top: 1px solid #eee;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #007bff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+

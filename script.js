@@ -27,651 +27,568 @@ function checkLogin() {
         const userEmailDisplay = document.getElementById('userEmailDisplay');
         const userProfilePicture = document.getElementById('userProfilePicture');
 
-        if (userEmailDisplay && user.email) {
-            userEmailDisplay.innerText = user.email;
+        if (userEmailDisplay) {
+            userEmailDisplay.innerText = user.email || 'ผู้ใช้';
         }
         if (userProfilePicture && user.picture) {
-            // สร้าง img element และใส่รูปโปรไฟล์
-            const img = document.createElement('img');
-            img.src = user.picture;
-            img.alt = 'User Profile Picture';
-            // ลบ SVG icon เดิมออกก่อน
-            userProfilePicture.innerHTML = '';
-            userProfilePicture.appendChild(img);
-        } else if (userProfilePicture) {
-            // ถ้าไม่มีรูปโปรไฟล์ ให้แสดง SVG icon เดิม
-            userProfilePicture.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+            userProfilePicture.innerHTML = `<img src="${user.picture}" alt="Profile Picture">`;
         }
+        setupAIChat(); // เรียกใช้ฟังก์ชันตั้งค่า AI Chat เมื่อหน้า home โหลด
     }
+  }
 }
-}
+
 // ฟังก์ชันสำหรับออกจากระบบ
 function logout() {
   sessionStorage.removeItem("loggedInUser");
-  // ลบข้อมูลรูปโปรไฟล์และอีเมลจาก UI เมื่อ logout
-  const userEmailDisplay = document.getElementById('userEmailDisplay');
-  const userProfilePicture = document.getElementById('userProfilePicture');
-  if (userEmailDisplay) {
-      userEmailDisplay.innerText = 'My Account 1'; // คืนค่าเริ่มต้น
-  }
-  if (userProfilePicture) {
-      // คืนค่าเป็น SVG icon fallback
-      userProfilePicture.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
-  }
-
   if (google.accounts.id) {
     google.accounts.id.disableAutoSelect(); // สำหรับ Google Sign-In
   }
-  window.location.href = "index.html";
+  window.location.href = "index.html"; // Redirect ไปหน้า login
 }
 
-// ฟังก์ชันสำหรับสลับแท็บใน UI ของแอปจัดการรายจ่าย
-function showTab(tabId) {
-  console.log(`Switching to tab: ${tabId}`); // เพิ่ม console log เพื่อ debug
+// ฟังก์ชันสำหรับแสดง Custom Alert/Confirm Modal
+function showCustomModal(title, message, isConfirm = false, onConfirm = null, onCancel = null) {
+    const modal = document.getElementById('customAlertModal');
+    const modalTitle = document.getElementById('customAlertTitle');
+    const modalMessage = document.getElementById('customAlertMessage');
+    const okButton = document.getElementById('customAlertOkButton');
+    const cancelButton = document.getElementById('customAlertCancelButton');
 
+    modalTitle.innerText = title;
+    modalMessage.innerText = message;
+
+    okButton.onclick = () => {
+        modal.style.display = 'none';
+        if (onConfirm) onConfirm();
+    };
+
+    if (isConfirm) {
+        cancelButton.style.display = 'inline-block';
+        cancelButton.onclick = () => {
+            modal.style.display = 'none';
+            if (onCancel) onCancel();
+        };
+    } else {
+        cancelButton.style.display = 'none';
+    }
+
+    modal.style.display = 'flex'; // ใช้ flex เพื่อจัดกลาง
+}
+
+// Override alert และ confirm
+window.alert = function(message) {
+    showCustomModal('แจ้งเตือน', message);
+};
+
+window.confirm = function(message) {
+    return new Promise((resolve) => {
+        showCustomModal('ยืนยัน', message, true, () => resolve(true), () => resolve(false));
+    });
+};
+
+
+// --- ฟังก์ชันการจัดการ UI และแท็บ ---
+
+// ฟังก์ชันสำหรับสลับแท็บ
+function showTab(tabName) {
   // ซ่อนทุกแท็บ
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.remove('active');
   });
-  // แสดงแท็บที่เลือก
-  const selectedTab = document.getElementById(tabId + '-tab');
-  if (selectedTab) {
-    selectedTab.classList.add('active');
-  }
-
-  // อัปเดตสถานะปุ่มแท็บด้านบน (ถ้ามี)
+  // ลบ active class ออกจากปุ่มทุกปุ่ม
   document.querySelectorAll('.tab-button').forEach(button => {
     button.classList.remove('active');
   });
-  const topButton = document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`);
-  if (topButton) {
-      topButton.classList.add('active');
-  }
 
-  // อัปเดตสถานะปุ่มนำทางด้านล่าง
-  document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  const bottomNavItem = document.querySelector(`.bottom-nav .nav-item[onclick="showTab('${tabId}')"]`);
-  if (bottomNavItem) {
-      bottomNavItem.classList.add('active');
-  }
+  // แสดงแท็บที่เลือก
+  document.getElementById(`${tabName}-tab`).classList.add('active');
+  // เพิ่ม active class ให้กับปุ่มที่เลือก
+  document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
 
-  // อัปเดตชื่อหัวข้อด้านบน
+  // อัปเดตชื่อ Header ตามแท็บ
   const headerTitle = document.querySelector('.app-header .header-title');
-  if (headerTitle) {
-    switch (tabId) {
-      case 'overview': headerTitle.innerText = 'ภาพรวม'; break;
-      case 'items': headerTitle.innerText = 'รายการของฉัน'; break;
-      case 'data': headerTitle.innerText = 'ข้อมูล'; break; // สลับตำแหน่ง
-      case 'summary': headerTitle.innerText = 'สรุป'; loadSummaryData('month'); break; // สลับตำแหน่ง & โหลดสรุปรายเดือนเริ่มต้น
-      case 'menu': headerTitle.innerText = 'เมนู'; break;
-      default: headerTitle.innerText = 'แอปจัดการรายจ่าย';
-    }
-  }
-
-  // โหลดข้อมูลเมื่อสลับไปยังแท็บที่เกี่ยวข้อง
-  if (tabId === 'items') {
-      loadTransactions();
-  } else if (tabId === 'overview') {
-      loadOverviewData();
-  } else if (tabId === 'summary') {
-      loadSummaryData(document.querySelector('.summary-period-selector .period-button.active')?.dataset.period || 'month');
-  }
-}
-
-// ฟังก์ชันสำหรับ Google Sign-In
-function handleCredentialResponse(response) {
-  if (response && response.credential) {
-    const profile = parseJwt(response.credential);
-    console.log("ID: " + profile.sub);
-    console.log('Full Name: ' + profile.name);
-    console.log('Email: ' + profile.email);
-    console.log('Picture: ' + profile.picture); // เพิ่ม log สำหรับรูปโปรไฟล์
-
-    // เก็บข้อมูล profile ทั้งหมดเป็น JSON string
-    sessionStorage.setItem("loggedInUser", JSON.stringify(profile));
-    window.location.href = "home.html";
-  } else {
-    console.error("Google Sign-In failed or no credential received.");
+  switch (tabName) {
+    case 'overview':
+      headerTitle.innerText = 'ภาพรวม';
+      loadOverviewData(); // โหลดข้อมูลภาพรวมเมื่อกลับมาแท็บนี้
+      break;
+    case 'items':
+      headerTitle.innerText = 'รายการ';
+      loadTransactions(); // โหลดรายการเมื่อเข้าแท็บนี้
+      break;
+    case 'data':
+      headerTitle.innerText = 'AI Chat'; // เปลี่ยนชื่อ Header สำหรับแท็บ AI Chat
+      break;
+    case 'summary':
+      headerTitle.innerText = 'สรุป';
+      // โหลดข้อมูลสรุปเริ่มต้นเมื่อเข้าแท็บนี้
+      loadSummaryData(document.querySelector('.summary-period-selector .period-button.active').dataset.period);
+      break;
+    case 'menu':
+      headerTitle.innerText = 'เมนู';
+      break;
+    default:
+      headerTitle.innerText = 'แอปจัดการรายจ่าย';
   }
 }
 
-// Helper function เพื่อถอดรหัส JWT
-function parseJwt (token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+// --- ฟังก์ชันการจัดการข้อมูล (Mock/Backend) ---
 
-    return JSON.parse(jsonPayload);
-};
-
-// --- ฟังก์ชันสำหรับจัดการข้อมูลรายรับ-รายจ่าย ---
-
-// ฟังก์ชันสำหรับโหลดรายการธุรกรรมจาก Backend
-async function loadTransactions() {
-    const userId = sessionStorage.getItem("loggedInUser");
-    const itemsListDiv = document.querySelector('.daily-items-list');
-
-    if (!userId || !itemsListDiv) {
-        return;
-    }
-
-    itemsListDiv.innerHTML = '<p style="text-align: center; color: #666;">กำลังโหลดรายการ...</p>';
-
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/transactions/${userId}`);
-        const transactions = await response.json();
-
-        if (response.ok) {
-            if (transactions.length === 0) {
-                itemsListDiv.innerHTML = '<p style="text-align: center; color: #666;">ยังไม่มีรายการ</p>';
-                return;
-            }
-
-            // จัดกลุ่มรายการตามวันที่
-            const groupedTransactions = transactions.reduce((groups, transaction) => {
-                const date = new Date(transaction.date).toISOString().split('T')[0]; // YYYY-MM-DD
-                if (!groups[date]) {
-                    groups[date] = [];
-                }
-                groups[date].push(transaction);
-                return groups;
-            }, {});
-
-            itemsListDiv.innerHTML = ''; // เคลียร์เนื้อหาเก่า
-
-            // เรียงลำดับวันที่จากใหม่ไปเก่า
-            const sortedDates = Object.keys(groupedTransactions).sort((a, b) => {
-                return new Date(b) - new Date(a);
-            });
-
-            sortedDates.forEach(dateString => {
-                const displayDate = new Date(dateString).toLocaleDateString('th-TH', {
-                    day: 'numeric', month: 'long', year: 'numeric'
-                });
-
-                const dateGroupDiv = document.createElement('div');
-                dateGroupDiv.classList.add('date-group');
-                dateGroupDiv.innerHTML = `
-                    <span class="date-header">${displayDate}</span>
-                    <span class="item-count">${groupedTransactions[dateString].length} รายการ</span>
-                    <div class="item-cards"></div>
-                `;
-                const itemCardsContainer = dateGroupDiv.querySelector('.item-cards');
-
-                // เรียงลำดับรายการภายในวันจากใหม่ไปเก่า
-                groupedTransactions[dateString].sort((a, b) => {
-                    return new Date(b.date) - new Date(a.date);
-                }).forEach(transaction => {
-                    const iconSvg = getCategoryIcon(transaction.category);
-                    const typeClass = transaction.type === 'expense' ? 'expense' : 'income';
-                    const displayAmount = transaction.type === 'expense' ? `▾ ${transaction.amount.toLocaleString()}` : `▴ ${transaction.amount.toLocaleString()}`;
-                    const time = new Date(transaction.date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-
-                    const itemCardHtml = `
-                        <div class="item-card">
-                            <div class="item-icon-wrapper ${typeClass}">
-                                ${iconSvg}
-                            </div>
-                            <div class="item-details">
-                                <span class="item-category">${transaction.category}</span>
-                                <span class="item-amount ${typeClass}">${displayAmount}</span>
-                                <span class="item-time">${time}</span>
-                            </div>
-                            <div class="item-actions">
-                                <button class="item-action-button" onclick="editTransaction('${transaction.id}')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-3"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                </button>
-                                <button class="item-action-button" onclick="confirmDeleteTransaction('${transaction.id}')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    itemCardsContainer.innerHTML += itemCardHtml;
-                });
-                itemsListDiv.appendChild(dateGroupDiv);
-            });
-
-        } else {
-            itemsListDiv.innerHTML = `<p style="text-align: center; color: red;">เกิดข้อผิดพลาดในการโหลดรายการ: ${transactions.message || 'Unknown error'}</p>`;
-        }
-    } catch (error) {
-        console.error('Error fetching transactions:', error);
-        itemsListDiv.innerHTML = '<p style="text-align: center; color: red;">ไม่สามารถเชื่อมต่อกับ Backend เพื่อโหลดรายการได้</p>';
-    }
-}
-
-// ฟังก์ชันสำหรับโหลดข้อมูลภาพรวม (Overview)
+// ฟังก์ชันสำหรับโหลดข้อมูลภาพรวม (สมมติ)
 async function loadOverviewData() {
-    const userId = sessionStorage.getItem("loggedInUser");
-    if (!userId) {
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || !user.id) {
+        console.error("User not logged in or user ID not found.");
         return;
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/transactions/${userId}`);
-        const transactions = await response.json();
+        const response = await fetch(`${BACKEND_URL}/transactions/overview/${user.id}`);
+        const data = await response.json();
 
         if (response.ok) {
-            let totalCash = 0;
-            let totalBankAccount = 0;
-            let totalReceivable = 0;
-            let totalDebt = 0;
-            let totalCreditCard = 0;
-            let todayItemsCount = 0;
-            let todayIncome = 0;
-            let todayExpense = 0;
+            document.getElementById('overviewDaysCount').innerText = `${data.daysCount} วัน`;
+            document.getElementById('overviewItemsCount').innerText = `${data.itemsCount} รายการ`;
+            document.getElementById('overviewCashBalance').innerText = data.cashBalance.toFixed(2);
+            document.getElementById('overviewBankBalance').innerText = data.bankBalance.toFixed(2);
+            document.getElementById('overviewReceivable').innerText = data.receivable.toFixed(2);
+            document.getElementById('overviewDebt').innerText = data.debt.toFixed(2);
+            document.getElementById('overviewCreditCard').innerText = data.creditCard.toFixed(2);
+            document.getElementById('overviewCashBankTotal').innerText = (data.cashBalance + data.bankBalance).toFixed(2);
+            document.getElementById('overviewOverallTotal').innerText = data.overallTotal.toFixed(2);
 
-            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-
-            transactions.forEach(t => {
-                // คำนวณยอดคงเหลือตามบัญชี
-                const amount = parseFloat(t.amount); // ตรวจสอบให้แน่ใจว่าเป็นตัวเลข
-                if (t.account === 'เงินสด') {
-                    totalCash += (t.type === 'income' ? amount : -amount);
-                } else if (t.account === 'บัญชีธนาคาร') {
-                    totalBankAccount += (t.type === 'income' ? amount : -amount);
-                } else if (t.account === 'ค้างรับ') {
-                    totalReceivable += amount;
-                } else if (t.account === 'หนี้สิน') {
-                    totalDebt += amount;
-                } else if (t.account === 'บัตรเครดิต') {
-                    totalCreditCard += (t.type === 'expense' ? amount : -amount);
-                }
-
-                // คำนวณรายการและรายรับ/รายจ่ายของวันนี้
-                const transactionDate = new Date(t.date).toISOString().split('T')[0];
-                if (transactionDate === today) {
-                    todayItemsCount++;
-                    if (t.type === 'income') {
-                        todayIncome += amount;
-                    } else if (t.type === 'expense') {
-                        todayExpense += amount;
-                    }
-                }
-            });
-
-            // อัปเดต UI ของ Account Summary Card
-            document.getElementById('overviewCashBalance').innerText = totalCash.toLocaleString();
-            document.getElementById('overviewBankBalance').innerText = totalBankAccount.toLocaleString();
-            document.getElementById('overviewReceivable').innerText = totalReceivable.toLocaleString();
-            document.getElementById('overviewDebt').innerText = totalDebt.toLocaleString();
-            document.getElementById('overviewCreditCard').innerText = totalCreditCard.toLocaleString();
-
-            const totalCashBank = totalCash + totalBankAccount;
-            document.getElementById('overviewCashBankTotal').innerText = totalCashBank.toLocaleString();
-
-            const overallTotal = totalCash + totalBankAccount + totalReceivable - totalDebt - totalCreditCard;
-            const overallTotalElement = document.getElementById('overviewOverallTotal');
-            overallTotalElement.innerText = overallTotal.toLocaleString();
-            if (overallTotal < 0) {
-                overallTotalElement.classList.add('debt');
-            } else {
-                overallTotalElement.classList.remove('debt');
-            }
-
-            // อัปเดต UI ของ Today Summary
-            document.getElementById('todayItemsCount').innerText = todayItemsCount.toLocaleString();
-            document.getElementById('todayIncome').innerText = todayIncome.toLocaleString();
-            document.getElementById('todayExpense').innerText = todayExpense.toLocaleString();
-
-            // อัปเดตจำนวนวันและรายการทั้งหมด
-            const firstTransactionDate = transactions.length > 0 ? new Date(transactions[transactions.length - 1].date) : new Date();
-            const daysSinceFirstTransaction = Math.floor((new Date() - firstTransactionDate) / (1000 * 60 * 60 * 24));
-            document.getElementById('overviewDaysCount').innerText = `${daysSinceFirstTransaction} วัน`;
-            document.getElementById('overviewItemsCount').innerText = `${transactions.length} รายการ`;
-
+            document.getElementById('todayItemsCount').innerText = data.todaySummary.itemsCount;
+            document.getElementById('todayIncome').innerText = data.todaySummary.income.toFixed(2);
+            document.getElementById('todayExpense').innerText = data.todaySummary.expense.toFixed(2);
         } else {
-            console.error('Error loading overview data:', transactions.message || 'Unknown error');
+            console.error('Failed to load overview data:', data.message);
         }
     } catch (error) {
         console.error('Error fetching overview data:', error);
     }
 }
 
-// ฟังก์ชันสำหรับโหลดข้อมูลสรุป (Summary)
-async function loadSummaryData(period = 'month') {
-    const userId = sessionStorage.getItem("loggedInUser");
-    if (!userId) {
+// ฟังก์ชันสำหรับโหลดรายการธุรกรรม
+async function loadTransactions() {
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || !user.id) {
+        console.error("User not logged in or user ID not found.");
         return;
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/transactions/${userId}`);
-        const transactions = await response.json();
+        const response = await fetch(`${BACKEND_URL}/transactions/${user.id}`);
+        const data = await response.json();
 
-        if (response.ok) {
-            let filteredTransactions = [];
-            const now = new Date();
+        const dailyItemsList = document.querySelector('.daily-items-list');
+        dailyItemsList.innerHTML = ''; // Clear existing items
 
-            // กรองข้อมูลตามช่วงเวลา
-            if (period === 'day') {
-                const today = now.toISOString().split('T')[0];
-                filteredTransactions = transactions.filter(t => new Date(t.date).toISOString().split('T')[0] === today);
-            } else if (period === 'week') {
-                const startOfWeek = new Date(now);
-                startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday of current week
-                startOfWeek.setHours(0, 0, 0, 0);
-
-                const endOfWeek = new Date(now);
-                endOfWeek.setDate(now.getDate() - now.getDay() + 6); // Saturday of current week
-                endOfWeek.setHours(23, 59, 59, 999);
-
-                filteredTransactions = transactions.filter(t => {
-                    const tDate = new Date(t.date);
-                    return tDate >= startOfWeek && tDate <= endOfWeek;
-                });
-            } else if (period === 'month') {
-                filteredTransactions = transactions.filter(t => {
-                    const tDate = new Date(t.date);
-                    return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
-                });
-            } else if (period === 'year') {
-                filteredTransactions = transactions.filter(t => new Date(t.date).getFullYear() === now.getFullYear());
-            }
-
-            let netIncome = 0;
-            let netExpense = 0;
-            const expenseCategories = {};
-            const incomeCategories = {};
-
-            filteredTransactions.forEach(t => {
-                const amount = parseFloat(t.amount);
-                if (t.type === 'income') {
-                    netIncome += amount;
-                    incomeCategories[t.category] = (incomeCategories[t.category] || 0) + amount;
-                } else if (t.type === 'expense') {
-                    netExpense += amount;
-                    expenseCategories[t.category] = (expenseCategories[t.category] || 0) + amount;
+        if (response.ok && data.transactions.length > 0) {
+            // Group transactions by date
+            const groupedTransactions = data.transactions.reduce((acc, transaction) => {
+                const date = transaction.date; // Assuming date is already in YYYY-MM-DD format
+                if (!acc[date]) {
+                    acc[date] = [];
                 }
-            });
+                acc[date].push(transaction);
+                return acc;
+            }, {});
 
-            const summaryBalance = netIncome - netExpense;
+            // Sort dates in descending order
+            const sortedDates = Object.keys(groupedTransactions).sort((a, b) => new Date(b) - new Date(a));
 
-            // อัปเดต UI สรุปยอด
-            document.getElementById('summaryNetIncome').innerText = netIncome.toLocaleString();
-            document.getElementById('summaryNetExpense').innerText = netExpense.toLocaleString();
-            const summaryBalanceElement = document.getElementById('summaryBalance');
-            summaryBalanceElement.innerText = summaryBalance.toLocaleString();
-            if (summaryBalance < 0) {
-                summaryBalanceElement.classList.add('debt');
-            } else {
-                summaryBalanceElement.classList.remove('debt');
-            }
+            sortedDates.forEach(date => {
+                const transactionsOnDate = groupedTransactions[date];
+                let dailyIncome = 0;
+                let dailyExpense = 0;
 
-            // อัปเดต UI แยกตามหมวดหมู่ (รายจ่าย)
-            const expenseBreakdownDiv = document.getElementById('expenseCategoryBreakdown');
-            expenseBreakdownDiv.innerHTML = '';
-            if (Object.keys(expenseCategories).length === 0) {
-                expenseBreakdownDiv.innerHTML = '<p style="text-align: center; color: #666;">ยังไม่มีรายจ่ายสำหรับช่วงเวลานี้</p>';
-            } else {
-                // เรียงตามจำนวนเงินจากมากไปน้อย
-                Object.entries(expenseCategories).sort(([, a], [, b]) => b - a).forEach(([category, amount]) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.classList.add('category-item');
-                    itemDiv.innerHTML = `
-                        <span class="category-name">${category}</span>
-                        <span class="category-amount expense">▾ ${amount.toLocaleString()}</span>
-                    `;
-                    expenseBreakdownDiv.appendChild(itemDiv);
+                transactionsOnDate.forEach(t => {
+                    if (t.type === 'รายรับ') {
+                        dailyIncome += t.amount;
+                    } else if (t.type === 'รายจ่าย') {
+                        dailyExpense += t.amount;
+                    }
                 });
-            }
 
-            // อัปเดต UI แยกตามหมวดหมู่ (รายรับ)
-            const incomeBreakdownDiv = document.getElementById('incomeCategoryBreakdown');
-            incomeBreakdownDiv.innerHTML = '';
-            if (Object.keys(incomeCategories).length === 0) {
-                incomeBreakdownDiv.innerHTML = '<p style="text-align: center; color: #666;">ยังไม่มีรายรับสำหรับช่วงเวลานี้</p>';
-            } else {
-                // เรียงตามจำนวนเงินจากมากไปน้อย
-                Object.entries(incomeCategories).sort(([, a], [, b]) => b - a).forEach(([category, amount]) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.classList.add('category-item');
-                    itemDiv.innerHTML = `
-                        <span class="category-name">${category}</span>
-                        <span class="category-amount income">▴ ${amount.toLocaleString()}</span>
+                const netAmount = dailyIncome - dailyExpense;
+                const netClass = netAmount < 0 ? 'expense' : 'income'; // Apply 'expense' class if net is negative
+
+                const dailySection = document.createElement('div');
+                dailySection.classList.add('daily-section');
+                dailySection.innerHTML = `
+                    <div class="daily-header">
+                        <h4>${formatDateForDisplay(date)}</h4>
+                        <span class="daily-summary-amount ${netClass}">${netAmount.toFixed(2)}</span>
+                    </div>
+                    <div class="transactions-on-date">
+                        <!-- Transactions will be appended here -->
+                    </div>
+                `;
+                const transactionsContainer = dailySection.querySelector('.transactions-on-date');
+
+                // Sort transactions within each day by creation time (or any relevant timestamp)
+                transactionsOnDate.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Assuming 'timestamp' field
+
+                transactionsOnDate.forEach(transaction => {
+                    const transactionItem = document.createElement('div');
+                    transactionItem.classList.add('transaction-item');
+                    transactionItem.innerHTML = `
+                        <div class="transaction-icon">
+                            <!-- Icon based on category or type -->
+                            ${getCategoryIcon(transaction.category)}
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-category">${transaction.category} (${transaction.account})</div>
+                            <div class="transaction-description">${transaction.description || 'ไม่มีคำอธิบาย'}</div>
+                        </div>
+                        <div class="transaction-amount ${transaction.type === 'รายรับ' ? 'income' : 'expense'}">
+                            ${transaction.type === 'รายรับ' ? '+' : '-'} ${transaction.amount.toFixed(2)}
+                        </div>
                     `;
-                    incomeBreakdownDiv.appendChild(itemDiv);
+                    transactionItem.addEventListener('click', () => editTransaction(transaction));
+                    transactionsContainer.appendChild(transactionItem);
                 });
-            }
-
-            // อัปเดตปุ่มช่วงเวลาที่ active
-            document.querySelectorAll('.summary-period-selector .period-button').forEach(button => {
-                button.classList.remove('active');
+                dailyItemsList.appendChild(dailySection);
             });
-            document.querySelector(`.summary-period-selector .period-button[data-period="${period}"]`).classList.add('active');
-
-
         } else {
-            console.error('Error loading summary data:', transactions.message || 'Unknown error');
+            dailyItemsList.innerHTML = '<p style="text-align: center; color: #666;">ยังไม่มีรายการธุรกรรม.</p>';
         }
     } catch (error) {
-        console.error('Error fetching summary data:', error);
+        console.error('Error fetching transactions:', error);
+        dailyItemsList.innerHTML = '<p style="text-align: center; color: #e74c3c;">ไม่สามารถโหลดรายการธุรกรรมได้.</p>';
+    }
+}
+
+// Helper function to format date for display (e.g., "วันนี้", "เมื่อวาน", "1 ม.ค. 2568")
+function formatDateForDisplay(dateString) {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const targetDate = new Date(dateString);
+
+    if (targetDate.toDateString() === today.toDateString()) {
+        return 'วันนี้';
+    } else if (targetDate.toDateString() === yesterday.toDateString()) {
+        return 'เมื่อวาน';
+    } else {
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        return targetDate.toLocaleDateString('th-TH', options);
+    }
+}
+
+// Helper function to get category icon (you can expand this)
+function getCategoryIcon(category) {
+    // You can use different SVG icons or emojis based on category
+    switch (category) {
+        case 'อาหาร': return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-soup"><path d="M12 21V3"/><path d="M15 16a6 6 0 0 0-6 0"/><path d="M10 12h4"/><path d="M12 3a4 4 0 0 0-4 4v2a4 4 0 0 0 4 4h0a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4Z"/></svg>';
+        case 'เดินทาง': return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-car"><path d="M19 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2Z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>';
+        case 'เงินเดือน': return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h12a2 2 0 0 1 0 4H5a2 2 0 0 0 0 4h12a2 2 0 0 0 2-2v-3"/><path d="M10 12h.01"/></svg>';
+        case 'ช้อปปิ้ง': return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2L3 7v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-3-5Z"/><path d="M3 7h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
+        case 'บันเทิง': return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gamepad"><path d="M6 12H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2"/><path d="M18 12h2a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="M12 18V20a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2"/><path d="M12 6V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2"/><path d="M12 10h.01"/><path d="M12 14h.01"/></svg>';
+        default: return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle"><circle cx="12" cy="12" r="10"/></svg>'; // Generic circle
     }
 }
 
 
-// --- ฟังก์ชันสำหรับจัดการ Modal เพิ่ม/แก้ไขรายการ ---
-
-// ฟังก์ชันเปิด Modal (สำหรับเพิ่มรายการใหม่)
-function addNewTransaction() {
+// ฟังก์ชันสำหรับเปิด Modal เพิ่ม/แก้ไขรายการ
+function addNewTransaction(transaction = null) {
     const modal = document.getElementById('transactionModal');
-    document.getElementById('modalTitle').innerText = 'เพิ่มรายการใหม่';
-    document.getElementById('transactionId').value = ''; // เคลียร์ ID สำหรับรายการใหม่
-    document.getElementById('transactionForm').reset(); // รีเซ็ตฟอร์ม
-    
-    // ตั้งค่าเริ่มต้น
-    document.getElementById('transactionDate').valueAsDate = new Date();
-    document.getElementById('selectedType').value = 'expense';
-    document.getElementById('typeExpense').classList.add('active');
-    document.getElementById('typeIncome').classList.remove('active');
+    const form = document.getElementById('transactionForm');
 
-    modal.style.display = 'flex'; // แสดง Modal
-}
+    // Reset form
+    form.reset();
+    document.getElementById('transactionId').value = '';
 
-// ฟังก์ชันเปิด Modal (สำหรับแก้ไขรายการ)
-async function editTransaction(transactionId) {
-    const userId = sessionStorage.getItem("loggedInUser");
-    if (!userId) {
-        alert('โปรดเข้าสู่ระบบก่อนแก้ไขรายการ');
-        return;
+    if (transaction) {
+        // Populate form for editing
+        document.getElementById('transactionId').value = transaction.id;
+        document.getElementById('transactionType').value = transaction.type;
+        document.getElementById('transactionAmount').value = transaction.amount;
+        document.getElementById('transactionCategory').value = transaction.category;
+        document.getElementById('transactionAccount').value = transaction.account;
+        document.getElementById('transactionDate').value = transaction.date;
+        document.getElementById('transactionDescription').value = transaction.description;
+    } else {
+        // Set default date to today for new transactions
+        document.getElementById('transactionDate').valueAsDate = new Date();
     }
 
-    try {
-        // ดึงรายการทั้งหมดเพื่อหาข้อมูลของ transactionId ที่ต้องการแก้ไข
-        const response = await fetch(`${BACKEND_URL}/api/transactions/${userId}`);
-        const transactions = await response.json();
-        if (!response.ok) {
-            alert(transactions.message || 'ไม่สามารถดึงข้อมูลรายการเพื่อแก้ไขได้');
-            return;
-        }
-
-        const transactionToEdit = transactions.find(t => t.id === transactionId);
-        if (!transactionToEdit) {
-            alert('ไม่พบรายการที่ต้องการแก้ไข');
-            return;
-        }
-
-        // เติมข้อมูลลงในฟอร์ม
-        document.getElementById('modalTitle').innerText = 'แก้ไขรายการ';
-        document.getElementById('transactionId').value = transactionToEdit.id;
-        document.getElementById('transactionAmount').value = transactionToEdit.amount;
-        document.getElementById('transactionCategory').value = transactionToEdit.category;
-        document.getElementById('transactionAccount').value = transactionToEdit.account;
-        // แปลง Date object เป็น YYYY-MM-DD สำหรับ input type="date"
-        document.getElementById('transactionDate').value = new Date(transactionToEdit.date).toISOString().split('T')[0];
-        document.getElementById('transactionDescription').value = transactionToEdit.description;
-
-        // ตั้งค่าปุ่มประเภท
-        document.getElementById('selectedType').value = transactionToEdit.type;
-        if (transactionToEdit.type === 'expense') {
-            document.getElementById('typeExpense').classList.add('active');
-            document.getElementById('typeIncome').classList.remove('active');
-        } else {
-            document.getElementById('typeIncome').classList.add('active');
-            document.getElementById('typeExpense').classList.remove('active');
-        }
-
-        document.getElementById('transactionModal').style.display = 'flex'; // แสดง Modal
-    } catch (error) {
-        console.error('Error loading transaction for edit:', error);
-        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลเพื่อแก้ไข');
-    }
+    modal.style.display = 'flex'; // ใช้ flex เพื่อจัดกลาง
 }
 
-// ฟังก์ชันปิด Modal
+// ฟังก์ชันสำหรับแก้ไขรายการ
+function editTransaction(transaction) {
+    addNewTransaction(transaction); // ใช้ฟังก์ชันเดิมเพื่อ populate form
+}
+
+// ฟังก์ชันสำหรับปิด Modal
 function closeTransactionModal() {
-    const modal = document.getElementById('transactionModal');
-    modal.style.display = 'none'; // ซ่อน Modal
-    document.getElementById('transactionForm').reset(); // รีเซ็ตฟอร์ม
+    document.getElementById('transactionModal').style.display = 'none';
 }
 
-// ฟังก์ชันยืนยันการลบรายการ (ใช้ Modal แทน alert ในอนาคต)
-function confirmDeleteTransaction(transactionId) {
-    // แทนที่ด้วย Modal ยืนยันที่สวยงามกว่านี้ในอนาคต
-    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
-        deleteTransaction(transactionId);
-    }
-}
-
-// ฟังก์ชันลบรายการ
-async function deleteTransaction(transactionId) {
-    const userId = sessionStorage.getItem("loggedInUser");
-    if (!userId) {
-        alert('โปรดเข้าสู่ระบบก่อนลบรายการ');
+// ฟังก์ชันสำหรับโหลดข้อมูลสรุป
+async function loadSummaryData(period) {
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || !user.id) {
+        console.error("User not logged in or user ID not found.");
         return;
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/transactions/${transactionId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId: userId }) // ส่ง userId ไปด้วยเพื่อยืนยันสิทธิ์
-        });
-
+        const response = await fetch(`${BACKEND_URL}/transactions/summary/${user.id}?period=${period}`);
         const data = await response.json();
 
         if (response.ok) {
-            alert(data.message || 'ลบรายการสำเร็จ!');
-            // โหลดข้อมูลใหม่หลังจากลบสำเร็จ
-            loadOverviewData();
-            loadTransactions();
-            loadSummaryData(document.querySelector('.summary-period-selector .period-button.active').dataset.period);
+            document.getElementById('summaryNetIncome').innerText = data.netIncome.toFixed(2);
+            document.getElementById('summaryNetExpense').innerText = data.netExpense.toFixed(2);
+            document.getElementById('summaryBalance').innerText = data.balance.toFixed(2);
+
+            const expenseBreakdown = document.getElementById('expenseCategoryBreakdown');
+            expenseBreakdown.innerHTML = '';
+            if (Object.keys(data.expenseBreakdown).length > 0) {
+                for (const category in data.expenseBreakdown) {
+                    const item = document.createElement('div');
+                    item.classList.add('category-item');
+                    item.innerHTML = `
+                        <span class="category-name">${category}</span>
+                        <span class="category-amount expense">${data.expenseBreakdown[category].toFixed(2)}</span>
+                    `;
+                    expenseBreakdown.appendChild(item);
+                }
+            } else {
+                expenseBreakdown.innerHTML = '<p style="text-align: center; color: #666;">ยังไม่มีรายจ่ายในหมวดหมู่นี้.</p>';
+            }
+
+            const incomeBreakdown = document.getElementById('incomeCategoryBreakdown');
+            incomeBreakdown.innerHTML = '';
+            if (Object.keys(data.incomeBreakdown).length > 0) {
+                for (const category in data.incomeBreakdown) {
+                    const item = document.createElement('div');
+                    item.classList.add('category-item');
+                    item.innerHTML = `
+                        <span class="category-name">${category}</span>
+                        <span class="category-amount income">${data.incomeBreakdown[category].toFixed(2)}</span>
+                    `;
+                    incomeBreakdown.appendChild(item);
+                }
+            } else {
+                incomeBreakdown.innerHTML = '<p style="text-align: center; color: #666;">ยังไม่มีรายรับในหมวดหมู่นี้.</p>';
+            }
+
+            // Update active period button
+            document.querySelectorAll('.summary-period-selector .period-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.summary-period-selector .period-button[data-period="${period}"]`).classList.add('active');
+
         } else {
-            alert(data.message || 'เกิดข้อผิดพลาดในการลบรายการ. โปรดลองใหม่อีกครั้ง.');
+            console.error('Failed to load summary data:', data.message);
+            document.getElementById('summaryNetIncome').innerText = '0.00';
+            document.getElementById('summaryNetExpense').innerText = '0.00';
+            document.getElementById('summaryBalance').innerText = '0.00';
+            document.getElementById('expenseCategoryBreakdown').innerHTML = '<p style="text-align: center; color: #666;">ไม่สามารถโหลดข้อมูลสรุปได้.</p>';
+            document.getElementById('incomeCategoryBreakdown').innerHTML = '<p style="text-align: center; color: #666;">ไม่สามารถโหลดข้อมูลสรุปได้.</p>';
         }
     } catch (error) {
-        console.error('Error deleting transaction:', error);
-        alert('ไม่สามารถเชื่อมต่อกับ Backend เพื่อลบรายการได้');
+        console.error('Error fetching summary data:', error);
+        document.getElementById('summaryNetIncome').innerText = '0.00';
+        document.getElementById('summaryNetExpense').innerText = '0.00';
+        document.getElementById('summaryBalance').innerText = '0.00';
+        document.getElementById('expenseCategoryBreakdown').innerHTML = '<p style="text-align: center; color: #e74c3c;">ไม่สามารถเชื่อมต่อกับ Backend เพื่อโหลดข้อมูลสรุปได้.</p>';
+        document.getElementById('incomeCategoryBreakdown').innerHTML = '<p style="text-align: center; color: #e74c3c;">ไม่สามารถเชื่อมต่อกับ Backend เพื่อโหลดข้อมูลสรุปได้.</p>';
     }
 }
 
 
-// Helper function เพื่อดึง SVG icon ตามหมวดหมู่
-function getCategoryIcon(category) {
-    switch (category) {
-        case 'อาหาร': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utensils"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15v2a2 2 0 0 1-2 2H7"/><path d="M15 15v7"/></svg>`;
-        case 'เดินทาง': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-car"><path d="M19 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2Z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>`;
-        case 'บันเทิง': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-music"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`;
-        case 'เงินเดือน': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h12a2 2 0 0 1 0 4H5a2 2 0 0 0 0 4h12c.78 0 1.53.39 2 1m0 0v2a1 1 0 0 1-1 1H5a2 2 0 0 1 0-4h12a2 2 0 0 0 0-4H5a2 2 0 0 0 0-4h12V7m-3 0V4m0 8v-2m0 8v-2"/></svg>`;
-        case 'คืนเงิน': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-receipt-text"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2h-2zm-2 0h-2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h2V2zm18 0v20h2c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2h-2zM8 8h8M8 12h8M8 16h6"/></svg>`;
-        case 'สัตว์เลี้ยง': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bone"><path d="M17 10c.8 0 1.6.3 2.2.9C20.4 11.8 21 12.6 21 13.5c0 .8-.3 1.6-.9 2.2-.6.6-1.4.9-2.2.9-.8 0-1.6-.3-2.2-.9-.6-.6-.9-1.4-.9-2.2 0-.8.3-1.6.9-2.2.6-.6 1.4-.9 2.2-.9z"/><path d="M7 14c-.8 0-1.6-.3-2.2-.9C3.6 12.2 3 11.4 3 10.5c0-.8.3-1.6.9-2.2.6-.6 1.4-.9 2.2-.9.8 0 1.6.3 2.2.9.6.6.9 1.4.9 2.2 0 .8-.3 1.6-.9 2.2-.6.6-1.4.9-2.2.9z"/><path d="M10.5 13.5 13.5 10.5"/></svg>`;
-        case 'ของใช้': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2L3 7v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-3-5Z"/><path d="M3 7h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;
-        case 'บริการ': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.22a2 2 0 0 0 .73 2.73l.04.02a2 2 0 0 1 .97 1.95v.44a2 2 0 0 1-.97 1.95l-.04.02a2 2 0 0 0-.73 2.73l.78 1.22a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.22a2 2 0 0 0-.73-2.73l-.04-.02a2 2 0 0 1-.97-1.95v-.44a2 2 0 0 1 .97-1.95l.04-.02a2 2 0 0 0 .73-2.73l-.78-1.22a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`;
-        case 'ที่พัก': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
-        case 'ถูกยืม': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hand-coins"><path d="M11 11V2h3l3 3v2"/><path d="M17 11V2h3l3 3v2"/><path d="M2 12c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1H1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1h1zm10 0c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1h1z"/><path d="M19 12c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1h1z"/><path d="M12 15h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M19 15h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M21 15h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M12 18h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M19 18h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M21 18h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M12 21h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M19 21h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M21 21h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/></svg>`;
-        case 'ค่ารักษา': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-pulse"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.2 12.8H2"/><path d="M22 12.8h-1.2"/><path d="M12.8 21.2V22"/><path d="M12.8 2v-1.2"/><path d="M10 10h.01"/><path d="M14 14h.01"/></svg>`;
-        case 'บริจาค': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hand-heart"><path d="M11 11V2h3l3 3v2"/><path d="M17 11V2h3l3 3v2"/><path d="M2 12c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1H1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1h1zm10 0c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1h1z"/><path d="M19 12c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1h1z"/><path d="M12 15h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M19 15h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M21 15h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M12 18h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M19 18h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M21 18h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M12 21h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M19 21h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/><path d="M21 21h1c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1h-1c-.5 0-1-.5-1-1v-2c0-.5.5-1 1-1z"/></svg>`;
-        case 'การศึกษา': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`;
-        case 'คนรัก': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
-        case 'เสื้อผ้า': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shirt"><path d="M20.38 3.46L16 2a4 4 0 0 1-4 4V2H8a4 4 0 0 0-4 4v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5l-.26-.33a1 1 0 0 0-.07-.08Z"/></svg>`;
-        case 'เครื่องสำอาง': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brush"><path d="M9.61 15.9l-6.93 6.92a2.12 2.12 0 0 1-3-3L6.69 12.99"/><path d="M12.5 5.2a2.12 2.12 0 0 1 3 3L9.61 15.9"/><path d="M17.6 15.8L22 11.4a2.12 2.12 0 0 0 0-3L19.6 5.4a2.12 2.12 0 0 0-3 0L12.5 12.5"/><path d="M7 17l-5 5"/><path d="M14 10l-2-2"/></svg>`;
-        case 'เครื่องประดับ': return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gem"><path d="M6 3h12l3 6-9 12-9-12z"/><path d="M12 15L3 6h18z"/></svg>`;
-        default: return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414L19 21l3-3L5.414 2.586z"/><circle cx="9" cy="9" r="2"/></svg>`; // ไอคอนเริ่มต้น
+// --- AI Chatbot Functions ---
+let chatHistory = [{ role: "model", parts: [{ text: "สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ?" }] }]; // เก็บประวัติการสนทนา
+
+function setupAIChat() {
+    const chatInput = document.getElementById('chatInput');
+    const sendButton = document.getElementById('sendButton');
+    const chatMessages = document.getElementById('chatMessages');
+
+    // Clear initial AI message if it's the only one and not the default
+    if (chatHistory.length === 1 && chatHistory[0].parts[0].text === "สวัสดีค่ะ! มีอะไรให้ช่วยไหมคะ?") {
+        // Do nothing, keep the initial message
+    } else {
+        // If there's existing history, render it
+        renderChatHistory();
+    }
+
+
+    sendButton.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    // Scroll to bottom when chat is opened
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function renderChatHistory() {
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = ''; // Clear current messages
+
+    chatHistory.forEach(msg => {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('chat-message', msg.role === 'user' ? 'user-message' : 'ai-message');
+        messageElement.innerHTML = `<div class="message-bubble">${msg.parts[0].text}</div>`;
+        chatMessages.appendChild(messageElement);
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the latest message
+}
+
+async function sendMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const userMessageText = chatInput.value.trim();
+
+    if (userMessageText === '') {
+        return;
+    }
+
+    // Add user message to UI
+    const userMessageElement = document.createElement('div');
+    userMessageElement.classList.add('chat-message', 'user-message');
+    userMessageElement.innerHTML = `<div class="message-bubble">${userMessageText}</div>`;
+    chatMessages.appendChild(userMessageElement);
+
+    // Add user message to chat history
+    chatHistory.push({ role: "user", parts: [{ text: userMessageText }] });
+
+    chatInput.value = ''; // Clear input field
+    chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+
+    loadingIndicator.style.display = 'flex'; // Show loading indicator
+
+    try {
+        const payload = { contents: chatHistory };
+        const apiKey = ""; // Canvas will automatically provide the API key
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        let response;
+        let result;
+        let retries = 0;
+        const maxRetries = 5;
+        const initialDelay = 1000; // 1 second
+
+        while (retries < maxRetries) {
+            try {
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.status === 429) { // Too Many Requests
+                    retries++;
+                    const delay = initialDelay * Math.pow(2, retries - 1);
+                    console.warn(`Too many requests. Retrying in ${delay / 1000} seconds... (Attempt ${retries}/${maxRetries})`);
+                    await new Promise(res => setTimeout(res, delay));
+                    continue; // Try fetching again
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.error.message}`);
+                }
+
+                result = await response.json();
+                break; // Success, exit loop
+            } catch (error) {
+                if (retries < maxRetries - 1) {
+                    retries++;
+                    const delay = initialDelay * Math.pow(2, retries - 1);
+                    console.error(`Fetch error: ${error.message}. Retrying in ${delay / 1000} seconds... (Attempt ${retries}/${maxRetries})`);
+                    await new Promise(res => setTimeout(res, delay));
+                } else {
+                    throw error; // Re-throw if max retries reached
+                }
+            }
+        }
+
+        if (!result) {
+            throw new Error("No response from AI after multiple retries.");
+        }
+
+        if (result.candidates && result.candidates.length > 0 &&
+            result.candidates[0].content && result.candidates[0].content.parts &&
+            result.candidates[0].content.parts.length > 0) {
+            const aiResponseText = result.candidates[0].content.parts[0].text;
+
+            // Add AI message to UI
+            const aiMessageElement = document.createElement('div');
+            aiMessageElement.classList.add('chat-message', 'ai-message');
+            aiMessageElement.innerHTML = `<div class="message-bubble">${aiResponseText}</div>`;
+            chatMessages.appendChild(aiMessageElement);
+
+            // Add AI message to chat history
+            chatHistory.push({ role: "model", parts: [{ text: aiResponseText }] });
+
+        } else {
+            console.error('Unexpected AI response structure:', result);
+            const errorMessageElement = document.createElement('div');
+            errorMessageElement.classList.add('chat-message', 'ai-message');
+            errorMessageElement.innerHTML = `<div class="message-bubble">ขออภัยค่ะ ไม่สามารถรับคำตอบจาก AI ได้ในขณะนี้.</div>`;
+            chatMessages.appendChild(errorMessageElement);
+            chatHistory.push({ role: "model", parts: [{ text: "ขออภัยค่ะ ไม่สามารถรับคำตอบจาก AI ได้ในขณะนี้." }] });
+        }
+    } catch (error) {
+        console.error('Error sending message to AI:', error);
+        const errorMessageElement = document.createElement('div');
+        errorMessageElement.classList.add('chat-message', 'ai-message');
+        errorMessageElement.innerHTML = `<div class="message-bubble">เกิดข้อผิดพลาดในการเชื่อมต่อ AI: ${error.message}.</div>`;
+        chatMessages.appendChild(errorMessageElement);
+        chatHistory.push({ role: "model", parts: [{ text: `เกิดข้อผิดพลาดในการเชื่อมต่อ AI: ${error.message}.` }] });
+    } finally {
+        loadingIndicator.style.display = 'none'; // Hide loading indicator
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom again
     }
 }
 
-// เรียก showTab('overview') เมื่อโหลดหน้า home.html ครั้งแรก
+
+// Event listener for when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-  // ตรวจสอบว่าอยู่ใน home.html ก่อนเรียก showTab
-  if (window.location.pathname.endsWith("home.html")) {
-    showTab('overview');
-  }
-});
-
-// กำหนดให้ปุ่ม FAB (Floating Action Button) เรียกฟังก์ชัน addNewTransaction
-document.querySelector('.fab').onclick = addNewTransaction;
-// กำหนดให้ปุ่ม "เพิ่มรายการ" ใน Today Summary เรียกฟังก์ชัน addNewTransaction
-document.querySelector('.today-summary .add-item-button').onclick = addNewTransaction;
-// กำหนดให้ปุ่มปิด Modal ทำงาน
-document.querySelector('.modal .close-button').onclick = closeTransactionModal;
-
-// ... (ภายในฟังก์ชัน showTab) ...
-  const backButton = document.getElementById('backButton');
-  if (backButton) {
-      if (tabId === 'overview') {
-          backButton.style.visibility = 'hidden'; // ซ่อนปุ่มย้อนกลับในหน้าภาพรวม
-      } else {
-          backButton.style.visibility = 'visible'; // แสดงปุ่มย้อนกลับในหน้าอื่น
-      }
-  }
-
-
-// Logic สำหรับปุ่มสลับประเภท (รายจ่าย/รายรับ) ใน Modal
-document.addEventListener('DOMContentLoaded', () => {
-    const typeExpenseButton = document.getElementById('typeExpense');
-    const typeIncomeButton = document.getElementById('typeIncome');
-    const selectedTypeInput = document.getElementById('selectedType');
+    // Attach event listener for transaction form submission
     const transactionForm = document.getElementById('transactionForm');
-
-    if (typeExpenseButton) {
-        typeExpenseButton.addEventListener('click', () => {
-            typeExpenseButton.classList.add('active');
-            typeIncomeButton.classList.remove('active');
-            selectedTypeInput.value = 'expense';
-        });
-    }
-
-    if (typeIncomeButton) {
-        typeIncomeButton.addEventListener('click', () => {
-            typeIncomeButton.classList.add('active');
-            typeExpenseButton.classList.remove('active');
-            selectedTypeInput.value = 'income';
-        });
-    }
-
-    // เมื่อฟอร์มถูก Submit
     if (transactionForm) {
         transactionForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // ป้องกันการ Submit ฟอร์มแบบปกติ
+            event.preventDefault(); // Prevent default form submission
 
-            const userId = sessionStorage.getItem("loggedInUser");
-            if (!userId) {
-                alert('โปรดเข้าสู่ระบบก่อนบันทึกรายการ');
-                return;
-            }
-
-            const transactionId = document.getElementById('transactionId').value; // มีค่าเมื่อแก้ไข
-            const amount = document.getElementById('transactionAmount').value;
+            const transactionId = document.getElementById('transactionId').value;
+            const type = document.getElementById('transactionType').value;
+            const amount = parseFloat(document.getElementById('transactionAmount').value);
             const category = document.getElementById('transactionCategory').value;
-            const type = document.getElementById('selectedType').value;
+            const account = document.getElementById('transactionAccount').value;
             const date = document.getElementById('transactionDate').value;
             const description = document.getElementById('transactionDescription').value;
-            const account = document.getElementById('transactionAccount').value;
+            const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
-            if (!amount || !category || !type || !date || !account) {
-                alert('โปรดกรอกข้อมูลที่จำเป็นให้ครบถ้วน (จำนวนเงิน, หมวดหมู่, บัญชี, วันที่)');
+            if (!user || !user.id) {
+                alert('ไม่พบข้อมูลผู้ใช้. กรุณาเข้าสู่ระบบใหม่.');
                 return;
             }
 
+            const transactionData = {
+                id: transactionId, // Will be empty string for new transactions
+                userId: user.id,
+                type,
+                amount,
+                category,
+                account,
+                date,
+                description,
+                timestamp: new Date().toISOString() // Add timestamp for sorting
+            };
+
+            const url = transactionId ? `${BACKEND_URL}/transactions/${transactionId}` : `${BACKEND_URL}/transactions`;
             const method = transactionId ? 'PUT' : 'POST';
-            const url = transactionId ? `${BACKEND_URL}/api/transactions/${transactionId}` : `${BACKEND_URL}/api/transactions`;
 
             try {
                 const response = await fetch(url, {
@@ -679,15 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        userId,
-                        amount: parseFloat(amount),
-                        category,
-                        type,
-                        date,
-                        description,
-                        account
-                    }),
+                    body: JSON.stringify(transactionData),
                 });
 
                 const data = await response.json();
@@ -724,7 +633,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // ปิด Modal เมื่อคลิกนอก Modal
 window.onclick = function(event) {
     const modal = document.getElementById('transactionModal');
+    const customAlertModal = document.getElementById('customAlertModal');
     if (event.target == modal) {
         closeTransactionModal();
+    }
+    if (event.target == customAlertModal) {
+        customAlertModal.style.display = 'none';
     }
 }
