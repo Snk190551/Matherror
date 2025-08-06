@@ -64,8 +64,16 @@ body {
 .app-header .header-title {
   flex-grow: 1; /* ทำให้กินพื้นที่ที่เหลือทั้งหมด */
   text-align: center; /* จัดข้อความให้อยู่ตรงกลาง */
-  /* เพิ่ม margin-right เท่ากับ margin-left ของ header-icon เพื่อให้ชื่อหน้าอยู่ตรงกลางจริงๆ */
-  margin-right: 34px; /* 24px (icon width) + 10px (margin) */
+  margin-right: 0; /* ลบ margin-right ที่เคยใช้เพื่อการจัดกลางแบบเก่า */
+}
+
+/* เพิ่ม CSS ใหม่สำหรับ Placeholder เพื่อให้ Header Title อยู่ตรงกลาง */
+.header-icon-placeholder {
+  /* กำหนดความกว้างและความสูงให้เท่ากับปุ่ม header-icon (รวม padding และ margin-right ของปุ่ม) */
+  /* header-icon มี SVG 24x24px, padding 5px รอบ (รวมเป็น 34x34px), และ margin-right 10px */
+  width: 44px; /* 34px (ปุ่ม) + 10px (margin) */
+  height: 34px; /* ความสูงเท่ากับปุ่ม */
+  /* element นี้จะมองไม่เห็น แต่จะช่วยให้ header-title อยู่ตรงกลางเมื่อมีปุ่มด้านซ้ายเพียงปุ่มเดียว */
 }
 
 /* Tab Buttons (ด้านบนเนื้อหาหลัก) */
@@ -603,6 +611,7 @@ body {
   margin-bottom: 25px;
   color: #333;
   font-size: 2em;
+  text-align: center; /* เพิ่มบรรทัดนี้ เพื่อให้แน่ใจว่าข้อความอยู่ตรงกลาง */
 }
 
 .input-group {
