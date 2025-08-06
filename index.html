@@ -17,8 +17,6 @@
       margin: 0;
       padding: 20px; /* เพิ่ม padding เพื่อไม่ให้ชิดขอบจอเกินไป */
       box-sizing: border-box; /* รวม padding ในขนาดของ element */
-      background: url('bg.jpg') no-repeat center center fixed; /* เพิ่มพื้นหลัง */
-      background-size: cover; /* ครอบคลุมพื้นที่ทั้งหมด */
     }
 
     .google-signin-box {
@@ -55,7 +53,7 @@
     <div id="googleSignInButton"></div> <!-- นี่คือ div ใหม่สำหรับปุ่มที่สร้างด้วย JS -->
   </div>
 
-  <!-- ย้าย script.js มาที่นี่เพื่อให้ฟังก์ชันพร้อมใช้งาน -->
+  <!-- ย้าย script.js มาที่นี่เพื่อให้ฟังก์ชันพร้อมใช้งานก่อน onload -->
 <script src="script.js" type="module"></script> <!-- นำเข้า JavaScript หลัก -->
 </body>
 </html>
