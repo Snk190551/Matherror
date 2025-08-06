@@ -491,9 +491,12 @@
 
         try {
             const payload = { contents: chatHistory };
-            const apiKey = ""; // Canvas will automatically provide the API key
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
+        // ดึง API Key จาก Environment Variable ที่ Netlify (หรือจากตัวแปรที่ Canvas จัดให้)
+        // ใน Netlify จะต้องตั้งชื่อ Environment Variable ให้ตรงกับที่ใช้ในโค้ด (เช่น VITE_GEMINI_API_KEY)
+        // สำหรับการทดสอบใน Canvas, apiKey จะยังคงเป็นค่าว่าง แต่ระบบจะจัดการให้
+        // เมื่อ Deploy ไป Netlify, Netlify จะแทนที่ import.meta.env.VITE_GEMINI_API_KEY ด้วยค่าจริง
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY || ""; // อ่านจาก Netlify Env Var หรือเป็นค่าว่างถ้าไม่พบ
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             let response;
             let result;
             let retries = 0;
