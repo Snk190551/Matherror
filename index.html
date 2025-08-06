@@ -45,15 +45,24 @@
     }
   </style>
 </head>
-<body> <!-- ลบ onload="checkLogin()" ออก -->
+<body onload="checkLogin()"> <!-- เรียกใช้ checkLogin เมื่อโหลดหน้า -->
   <div class="google-signin-box">
     <h2>เข้าสู่ระบบ</h2>
     <p>โปรดเข้าสู่ระบบด้วยบัญชี Google ของคุณ</p>
-    <!-- div สำหรับ Google Sign-In จะถูกสร้างและ Render ด้วย JavaScript -->
-    <div id="googleSignInButton"></div> <!-- นี่คือ div ใหม่สำหรับปุ่มที่สร้างด้วย JS -->
+    <div id="g_id_onload"
+         data-client_id="896330929514-ktrmgrol8v2he3dubl591j0cap13np5p.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"> <!-- data-client_id ของคุณ -->
+    </div>
+    <div class="g_id_signin"
+         data-type="standard"
+         data-size="large"
+         data-theme="outline"
+         data-text="signin_with"
+         data-shape="rectangular"
+         data-logo_alignment="left">
+    </div>
   </div>
 
-  <!-- ย้าย script.js มาที่นี่เพื่อให้ฟังก์ชันพร้อมใช้งานก่อน onload -->
-<script src="script.js" type="module"></script> <!-- นำเข้า JavaScript หลัก -->
+  <script src="script.js"></script> <!-- นำเข้า JavaScript หลัก -->
 </body>
 </html>
