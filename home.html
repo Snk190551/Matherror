@@ -335,3 +335,50 @@
   </div>
 </body>
 </html>
+
+<div id="transactionModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeTransactionModal()">&times;</span>
+    <h2 id="modal-title">เพิ่มรายการ</h2>
+    <form id="transactionForm">
+      <div class="form-group">
+        <label for="transactionType">ประเภท:</label>
+        <select id="transactionType" name="type" required>
+          <option value="income">รายรับ</option>
+          <option value="expense">รายจ่าย</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="transactionAmount">จำนวนเงิน:</label>
+        <input type="number" id="transactionAmount" name="amount" placeholder="กรอกจำนวนเงิน" required>
+      </div>
+
+      <div class="form-group">
+        <label for="transactionCategory">หมวดหมู่:</label>
+        <select id="transactionCategory" name="category" required>
+          <option value="">เลือกหมวดหมู่</option>
+          </select>
+      </div>
+
+      <div class="form-group">
+        <label for="transactionAccount">บัญชี:</label>
+        <select id="transactionAccount" name="account" required>
+          <option value="">เลือกบัญชี</option>
+          </select>
+      </div>
+
+      <div class="form-group">
+        <label for="transactionDate">วันที่:</label>
+        <input type="date" id="transactionDate" name="date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="transactionDescription">คำอธิบาย (ไม่บังคับ):</label>
+        <textarea id="transactionDescription" name="description" rows="3"></textarea>
+      </div>
+      
+      <button type="submit">บันทึกรายการ</button>
+    </form>
+  </div>
+</div>
