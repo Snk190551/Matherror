@@ -31,7 +31,26 @@
       </div>
 
       <!-- เนื้อหาของแท็บ "ภาพรวม" -->
-      <div id="overview-tab" class="tab-content active">
+  <div class="overview-section">
+    <div class="summary-cards">
+      <div class="card income-card">
+        <span class="card-label">รายรับ</span>
+        <span class="card-value" id="totalIncome">0.00</span>
+      </div>
+      <div class="card expense-card">
+        <span class="card-label">รายจ่าย</span>
+        <span class="card-value" id="totalExpense">0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="overview-section chart-section">
+    <h3>สัดส่วนรายจ่าย</h3>
+    <div class="chart-container">
+      <canvas id="categoryChart"></canvas>
+    </div>
+  </div>
+</div>
         <div class="account-summary-card">
           <div class="account-header">
             <button class="account-icon">
@@ -108,8 +127,8 @@
       </div>
 
       <!-- เนื้อหาของแท็บ "รายการ" -->
-      <div id="items-tab" class="tab-content">
-        <div class="items-list-header">
+      
+        der">
           <button class="list-icon" onclick="alert('กรองรายการ')">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-checks"><path d="m3 16 2 2 4-4"/><path d="M12 6h8"/><path d="M12 12h8"/><path d="M12 18h8"/><path d="M3 6l2 2 4-4"/></svg>
           </button>
@@ -123,7 +142,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart-2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
           </button>
           <button class="list-button active" onclick="alert('เรียงตามรายวัน')">รายวัน</button>
-        </div>
+        </div><div id="items-tab" class="tab-content">
         <div class="daily-items-list">
           <!-- รายการจะถูกโหลดด้วย JavaScript -->
         </div>
@@ -132,7 +151,7 @@
       <!-- เนื้อหาของแท็บ "ข้อมูล" -->
       <div id="data-tab" class="tab-content">
         <h2>ข้อมูล</h2>
-        <p>เนื้อหาสำหรับหน้าข้อมูล (เช่น นำเข้า/ส่งออกข้อมูล)</p>
+        <p>เนื้อหาสำหรับหน้าข้อมูล (เช่น นำ<div class="items-list-heaเข้า/ส่งออกข้อมูล)</p>
         <div class="menu-options">
             <button class="menu-button" onclick="alert('นำเข้าข้อมูล')">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-input"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h6"/><path d="m5 18-3-3 3-3"/></svg>
@@ -216,29 +235,7 @@
     </button>
 
     <!-- แถบนำทางด้านล่าง (Bottom Navigation) -->
-    <nav class="bottom-nav">
-      <button class="nav-item active" onclick="showTab('overview')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-        <span>ภาพรวม</span>
-      </button>
-      <button class="nav-item" onclick="showTab('items')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-        <span>รายการ</span>
-      </button>
-      <button class="nav-item" onclick="showTab('data')"> <!-- สลับตำแหน่ง -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
-        <span>ข้อมูล</span>
-      </button>
-      <button class="nav-item" onclick="showTab('summary')"> <!-- สลับตำแหน่ง -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-        <span>สรุป</span>
-      </button>
-      <button class="nav-item" onclick="showTab('menu')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-        <span>เมนู</span>
-      </button>
-    </nav>
-  </div>
+
 
   <!-- Modal สำหรับเพิ่ม/แก้ไขรายการ -->
   <div id="transactionModal" class="modal">

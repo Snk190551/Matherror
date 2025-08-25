@@ -2145,3 +2145,59 @@ p a:hover {
     100% { transform: rotate(360deg); }
 }
 
+/* --- Styles for Overview Tab --- */
+.overview-section {
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  margin: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.summary-cards {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.card {
+  flex: 1;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.income-card {
+  background: linear-gradient(45deg, #28a745, #218838);
+}
+
+.expense-card {
+  background: linear-gradient(45deg, #dc3545, #c82333);
+}
+
+.card-label {
+  font-size: 0.9em;
+  opacity: 0.8;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.card-value {
+  font-size: 1.8em;
+  font-weight: bold;
+}
+.chart-section {
+  text-align: center;
+}
+
+.chart-container {
+  max-width: 300px;
+  margin: 0 auto;
+}
