@@ -9,6 +9,7 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
+    <!-- Modal for messages -->
     <div id="message-modal" class="modal">
         <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
             <h3 id="modal-title" class="text-xl font-semibold mb-4 text-gray-800"></h3>
@@ -17,41 +18,23 @@
         </div>
     </div>
 
+    <!-- Main Container -->
     <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-4xl min-h-[700px] flex flex-col">
+        <!-- Navigation Links -->
         <nav class="flex justify-between md:justify-around p-2 mb-6 bg-gray-100 rounded-xl shadow-inner">
             <a href="index.html" id="nav-home" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">หน้าหลัก</a>
             <a href="invest.html" id="nav-invest" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">แนะนำการลงทุน</a>
             <a href="about.html" id="nav-about" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">เกี่ยวกับฉัน</a>
         </nav>
 
+        <!-- Content Section -->
         <div id="content-container" class="flex-1 flex flex-col">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">แนะนำการลงทุน</h1>
-            <div class="flex-1 overflow-y-auto pr-2">
-                <p class="text-gray-600 mb-4">
-                    การวางแผนการเงินที่ดีไม่ใช่แค่การบันทึกรายรับ-รายจ่าย แต่คือการทำความเข้าใจภาพรวมทั้งหมด
-                    เพื่อสร้างอนาคตที่มั่นคงและเติบโต
-                </p>
-                <h3 class="text-xl font-bold text-gray-700 mt-6">ทำไมต้องลงทุน?</h3>
-                <p class="text-gray-600 mt-2">
-                    การลงทุนคือการนำเงินไปสร้างการเติบโต เพื่อให้เงินของคุณเอาชนะเงินเฟ้อได้
-                    เมื่อเงินเฟ้อทำให้มูลค่าเงินลดลง การลงทุนจะช่วยให้คุณสร้างผลตอบแทนที่สูงกว่าอัตราเงินเฟ้อ ทำให้เงินของคุณยังคงมี "อำนาจซื้อ" อยู่
-                </p>
-                <p class="text-gray-600 mt-4">
-                    <strong>ตัวอย่างง่ายๆ:</strong>
-                    <ul class="list-disc list-inside mt-2 ml-4 text-gray-600">
-                        <li><span class="font-semibold text-gray-800">การฝากธนาคาร:</span> ผลตอบแทนมักจะต่ำกว่าอัตราเงินเฟ้อ ทำให้มูลค่าเงินลดลงอย่างช้าๆ</li>
-                        <li><span class="font-semibold text-gray-800">การลงทุนในหุ้นหรือกองทุนรวม:</span> สามารถสร้างผลตอบแทนที่สูงกว่าเงินเฟ้อในระยะยาวได้</li>
-                    </ul>
-                </p>
-                <h3 class="text-xl font-bold text-gray-700 mt-6">เริ่มต้นอย่างไร?</h3>
-                <p class="text-gray-600 mt-2">
-                    การลงทุนที่ดีที่สุดคือการเริ่มต้นตั้งแต่วันนี้ ด้วยความรู้และความเข้าใจ
-                    คุณไม่จำเป็นต้องมีเงินก้อนใหญ่ เริ่มต้นจากการออมและนำเงินส่วนหนึ่งไปลงทุนอย่างสม่ำเสมอในสินทรัพย์ที่คุณเข้าใจ
-                </p>
-                <p class="text-gray-600 mt-4">
-                    แอปพลิเคชันนี้เป็นเครื่องมือที่ดีในการบันทึกและติดตามการเงินส่วนบุคคลของคุณ เมื่อคุณมีข้อมูลที่ครบถ้วนแล้ว
-                    จะช่วยให้คุณตัดสินใจได้ดีขึ้นว่าควรนำเงินไปลงทุนเพื่อสร้างอนาคตการเงินที่ดีได้อย่างไร
-                </p>
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">ข่าวสารการลงทุนล่าสุด</h1>
+            
+            <!-- News Grid Container -->
+            <div id="news-grid" class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto pr-2">
+                <!-- JavaScript will populate news cards here -->
+                <p class="text-center text-gray-500 md:col-span-2">กำลังโหลดข่าวสารล่าสุด...</p>
             </div>
         </div>
     </div>
@@ -59,3 +42,4 @@
     <script type="module" src="app.js"></script>
 </body>
 </html>
+
