@@ -250,3 +250,116 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (currentPage === 'about.html') initAboutPage();
 });
 
+// app.js
+
+// Firebase Imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, query, serverTimestamp, updateDoc, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+// --- Global Variables & Firebase Setup ---
+let app, db, auth;
+let unsubscribeFromTransactions = null;
+let confirmCallback = null;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC6d1_FmSvfrnhpqFxdKrg-bleCVC5XkUM",
+  authDomain: "app-math-465713.firebaseapp.com",
+  projectId: "app-math-465713",
+  storageBucket: "app-math-465713.firebasestorage.app",
+  messagingSenderId: "896330929514",
+  appId: "1:896330929514:web:f2aa9442ab19a3f7574113",
+  measurementId: "G-8H400D8BHL"
+};
+const appId = firebaseConfig.projectId;
+
+try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+} catch (error) {
+    console.error("Firebase initialization failed:", error);
+}
+
+// --- Modal Functions ---
+window.showModal = function(title, message) { /* ... no changes ... */ };
+window.hideModal = function() { /* ... no changes ... */ };
+function showConfirmationModal(title, message, onConfirm) { /* ... no changes ... */ }
+function hideConfirmationModal() { /* ... no changes ... */ }
+
+/**
+ * ดึงข้อมูลอัตราเงินเฟ้อจริงจาก API ของธนาคารโลก (World Bank)
+ */
+async function fetchAndUpdateInflationRate() {
+    const inflationInput = document.getElementById('inflation-rate');
+    const inflationStatus = document.getElementById('inflation-status');
+
+    if (!inflationInput || !inflationStatus) return;
+
+    inflationStatus.textContent = 'กำลังโหลดข้อมูล...';
+
+    // API URL สำหรับดึงอัตราเงินเฟ้อ (CPI) ล่าสุดของประเทศไทยจากธนาคารโลก
+    // API นี้เป็นสาธารณะ ไม่ต้องใช้ Key และไม่มีปัญหา CORS
+    const worldBankApiUrl = 'https://api.worldbank.org/v2/country/THA/indicator/FP.CPI.TOTL.ZG?format=json&per_page=1';
+
+    try {
+        const response = await fetch(worldBankApiUrl);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        
+        // ข้อมูลจะซ้อนกันอยู่ เราต้องดึงค่าที่ถูกต้องออกมา
+        const latestDataPoint = data[1][0];
+        const latestInflationRate = latestDataPoint.value;
+        const latestYear = latestDataPoint.date;
+
+        if (latestInflationRate !== null) {
+            inflationInput.value = latestInflationRate.toFixed(2); // แสดงผลทศนิยม 2 ตำแหน่ง
+            inflationStatus.textContent = `ข้อมูลปี ${latestYear}`;
+        } else {
+            throw new Error('Inflation data not available');
+        }
+
+    } catch (error) {
+        console.error('Failed to fetch inflation rate:', error);
+        inflationStatus.textContent = 'เกิดข้อผิดพลาด';
+        // หากดึงข้อมูลล้มเหลว ให้ใช้ค่าเริ่มต้นไปก่อน
+        inflationInput.value = '3.0'; 
+    } finally {
+        // ไม่ว่าผลจะเป็นอย่างไร ให้คำนวณหน้าจอใหม่อีกครั้งเสมอ
+        startTransactionListener();
+    }
+}
+
+
+// --- Core App Functions ---
+async function handleDeleteTransaction(transactionId) { /* ... no changes ... */ }
+function renderTransactionsUI(transactions = []) { /* ... no changes ... */ }
+function startTransactionListener() { /* ... no changes ... */ }
+
+// --- Page Initialization Functions ---
+function initHomePage() {
+    const transactionForm = document.getElementById('transaction-form');
+    const transactionsListContainer = document.getElementById('transactions-list');
+
+    transactionForm?.addEventListener('submit', async (e) => { /* ... no changes ... */ });
+    
+    transactionsListContainer?.addEventListener('click', (e) => { /* ... no changes ... */ });
+
+    const dateInput = document.getElementById('date');
+    if (dateInput) dateInput.valueAsDate = new Date();
+    
+    // เรียกใช้ฟังก์ชันดึงข้อมูลจริง ซึ่งจะไปสั่งให้วาดหน้าจอใหม่อีกที
+    fetchAndUpdateInflationRate(); 
+}
+
+function initLoginPage() { /* ... no changes ... */ }
+function initAboutPage() { /* ... no changes ... */ }
+
+// --- Main Controller & Auth Observer ---
+onAuthStateChanged(auth, async (user) => { /* ... no changes ... */ });
+
+// --- Entry Point ---
+document.addEventListener('DOMContentLoaded', () => { /* ... no changes ... */ });
+
