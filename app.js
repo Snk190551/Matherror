@@ -25,7 +25,8 @@ try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
-} catch (error) {
+} catch (error)
+{
     console.error("Firebase initialization failed:", error);
 }
 
@@ -332,7 +333,6 @@ function initAboutPage() {
     });
 }
 
-// *** แก้ไขฟังก์ชันนี้ ให้ใช้ข้อมูลข่าวที่เตรียมไว้ ***
 function initInvestPage() {
     const newsGrid = document.getElementById('news-grid');
     if (!newsGrid) return;
@@ -415,6 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentPage === '' || currentPage === 'index.html') initHomePage();
     else if (currentPage === 'login.html') initLoginPage();
     else if (currentPage === 'about.html') initAboutPage();
+    // *** นี่คือบรรทัดที่ขาดไป ***
     else if (currentPage === 'invest.html') initInvestPage();
 });
 
