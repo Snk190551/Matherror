@@ -361,10 +361,17 @@ function initInvestPage() {
 onAuthStateChanged(auth, async (user) => {
     const protectedPages = ['', 'index.html', 'about.html', 'invest.html'];
     const loginPage = 'login.html';
-    let currentPage = window.location.pathname.split("/").pop();
+    let currentPage = window.location.pathname.split("/").pop() || 'index.html';
+    if(currentPage.endsWith('.html')) {
+        currentPage = currentPage.slice(0, -5);
+    }
+     if (currentPage === '') {
+        currentPage = 'index';
+    }
+
 
     if (user) {
-        if (currentPage === loginPage) {
+        if (currentPage === 'login') {
             window.location.replace('index.html');
             return;
         }
@@ -379,10 +386,11 @@ onAuthStateChanged(auth, async (user) => {
         }
 
     } else {
-        if (protectedPages.includes(currentPage)) {
+        const protectedPageNames = ['index', 'about', 'invest'];
+        if (protectedPageNames.includes(currentPage)) {
             if (unsubscribeFromTransactions) unsubscribeFromTransactions();
             renderTransactionsUI([]);
-            window.location.replace(loginPage);
+            window.location.replace('login.html');
         }
     }
 });
@@ -397,23 +405,35 @@ document.addEventListener('DOMContentLoaded', () => {
         hideConfirmationModal();
     });
 
-    let currentPage = window.location.pathname.split("/").pop();
+    let currentPage = window.location.pathname.split("/").pop() || 'index';
+    if(currentPage.endsWith('.html')) {
+        currentPage = currentPage.slice(0, -5);
+    }
+     if (currentPage === '') {
+        currentPage = 'index';
+    }
     
     document.querySelectorAll('nav a').forEach(link => {
-        const linkPage = link.getAttribute('href').split('/').pop();
-        if (linkPage === currentPage || (currentPage === '' && linkPage === 'index.html')) {
+        let linkPage = link.getAttribute('href').split('/').pop() || 'index';
+        if(linkPage.endsWith('.html')) {
+            linkPage = linkPage.slice(0, -5);
+        }
+        if (linkPage === '') {
+            linkPage = 'index';
+        }
+        
+        if (linkPage === currentPage) {
             link.classList.add('active-nav');
         }
     });
     
-    // This is the corrected routing logic
-    if (currentPage === '' || currentPage === 'index.html' || currentPage.toLowerCase() === 'index.html') {
+    if (currentPage === 'index') {
         initHomePage();
-    } else if (currentPage.toLowerCase() === 'login.html') {
+    } else if (currentPage === 'login') {
         initLoginPage();
-    } else if (currentPage.toLowerCase() === 'about.html') {
+    } else if (currentPage === 'about') {
         initAboutPage();
-    } else if (currentPage.toLowerCase() === 'invest.html') {
+    } else if (currentPage === 'invest') {
         initInvestPage();
     }
 });
