@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกี่ยวกับฉัน | แอปรายรับ-รายจ่าย</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div id="message-modal" class="modal">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
+            <h3 id="modal-title" class="text-xl font-semibold mb-4 text-gray-800"></h3>
+            <p id="modal-message" class="text-gray-600 mb-6"></p>
+            <button onclick="hideModal()" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors">ตกลง</button>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-4xl min-h-[700px] flex flex-col">
+        <nav class="flex justify-between md:justify-around p-2 mb-6 bg-gray-100 rounded-xl shadow-inner">
+            <a href="index.html" id="nav-home" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">หน้าหลัก</a>
+            <a href="invest.html" id="nav-invest" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">แนะนำการลงทุน</a>
+            <a href="about.html" id="nav-about" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">เกี่ยวกับฉัน</a>
+        </nav>
+
+        <div id="content-container" class="flex-1 flex flex-col items-center justify-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">เกี่ยวกับฉัน</h1>
+
+            <div id="user-section" class="flex flex-col items-center text-center">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">สวัสดี, <span id="user-greeting">ผู้ใช้งาน</span> 👋</h2>
+                <p class="text-sm text-gray-500 mb-6">User ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span></p>
+                <div class="flex space-x-4">
+                    <button id="edit-profile-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors">แก้ไขข้อมูล</button>
+                    <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-red-600 transition-colors">ออกจากระบบ</button>
+                </div>
+            </div>
+
+            <div id="edit-user-section" class="w-full max-w-sm hidden">
+                <form id="edit-user-form">
+                    <h2 class="text-2xl font-semibold text-center mb-6">แก้ไขข้อมูลผู้ใช้</h2>
+                    <div class="mb-4">
+                        <label for="edit-username" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้ใหม่</label>
+                        <input type="text" id="edit-username" class="w-full px-4 py-2 mt-1 border rounded-xl" required>
+                    </div>
+                    <div class="flex space-x-4 mt-6">
+                         <button type="button" id="cancel-edit-btn" class="flex-1 w-full bg-gray-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-gray-600 transition-colors">ยกเลิก</button>
+                        <button type="submit" class="flex-1 w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600 transition-colors">บันทึก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+

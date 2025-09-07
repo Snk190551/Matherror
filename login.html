@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ | แอปรายรับ-รายจ่าย</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div id="message-modal" class="modal">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
+            <h3 id="modal-title" class="text-xl font-semibold mb-4 text-gray-800"></h3>
+            <p id="modal-message" class="text-gray-600 mb-6"></p>
+            <button onclick="hideModal()" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors">ตกลง</button>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-sm">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">แอปรายรับ-รายจ่าย</h1>
+
+        <div id="auth-section" class="flex flex-col items-center">
+            <div id="login-container" class="w-full">
+                <h2 class="text-xl font-semibold mb-4 text-center">เข้าสู่ระบบ</h2>
+                <form id="login-form">
+                    <div class="mb-4">
+                        <label for="login-email" class="block text-sm font-medium text-gray-700">อีเมล</label>
+                        <input type="email" id="login-email" class="w-full px-4 py-2 border rounded-xl" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
+                        <input type="password" id="login-password" class="w-full px-4 py-2 border rounded-xl" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors">เข้าสู่ระบบ</button>
+                </form>
+                <p class="mt-4 text-center text-sm">
+                    ยังไม่มีบัญชี?
+                    <a href="#" id="show-register-btn" class="text-blue-500 hover:underline">สมัครสมาชิก</a>
+                </p>
+            </div>
+
+            <div id="register-container" class="w-full hidden">
+                <h2 class="text-xl font-semibold mb-4 text-center">สมัครสมาชิก</h2>
+                <form id="register-form">
+                    <div class="mb-4">
+                        <label for="register-email" class="block text-sm font-medium text-gray-700">อีเมล</label>
+                        <input type="email" id="register-email" class="w-full px-4 py-2 border rounded-xl" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="register-password" class="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
+                        <input type="password" id="register-password" class="w-full px-4 py-2 border rounded-xl" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="register-username" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้</label>
+                        <input type="text" id="register-username" class="w-full px-4 py-2 border rounded-xl" required>
+                    </div>
+                    <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600 transition-colors">สมัครสมาชิก</button>
+                </form>
+                <p class="mt-4 text-center text-sm">
+                    มีบัญชีแล้ว?
+                    <a href="#" id="show-login-btn" class="text-blue-500 hover:underline">เข้าสู่ระบบ</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+
