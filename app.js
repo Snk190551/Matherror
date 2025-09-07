@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentPage === '' || currentPage === 'index.html') initHomePage();
     else if (currentPage === 'login.html') initLoginPage();
     else if (currentPage === 'about.html') initAboutPage();
-    // *** นี่คือบรรทัดที่ขาดไป ***
+    // *** นี่คือบรรทัดที่แก้ไขแล้ว ***
     else if (currentPage === 'invest.html') initInvestPage();
 });
 
