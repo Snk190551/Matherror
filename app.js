@@ -3,12 +3,12 @@
 // Firebase Imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, query, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // --- Global Variables & Firebase Setup ---
 let app, db, auth;
+let unsubscribeFromTransactions = null; // ตัวแปรสำหรับหยุดการดักฟังข้อมูลเมื่อไม่จำเป็น
 
-// ใช้ Firebase Config ที่คุณหามาได้
 const firebaseConfig = {
   apiKey: "AIzaSyC6d1_FmSvfrnhpqFxdKrg-bleCVC5XkUM",
   authDomain: "app-math-465713.firebaseapp.com",
@@ -18,252 +18,234 @@ const firebaseConfig = {
   appId: "1:896330929514:web:f2aa9442ab19a3f7574113",
   measurementId: "G-8H400D8BHL"
 };
-
 const appId = firebaseConfig.projectId;
 
-// Initialize Firebase
 try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
-    console.log("Firebase initialized successfully.");
 } catch (error) {
     console.error("Firebase initialization failed:", error);
-    showModal("ข้อผิดพลาด", "Firebase ไม่ได้ถูกตั้งค่า. โปรดตรวจสอบการตั้งค่าแอปพลิเคชัน.");
 }
 
 // --- Modal Functions ---
-const messageModal = document.getElementById('message-modal');
-const modalTitle = document.getElementById('modal-title');
-const modalMessage = document.getElementById('modal-message');
-
 window.showModal = function(title, message) {
-    if (modalTitle && modalMessage && messageModal) {
-        modalTitle.textContent = title;
-        modalMessage.textContent = message;
-        messageModal.style.display = 'flex';
+    const modal = document.getElementById('message-modal');
+    if (modal) {
+        modal.querySelector('#modal-title').textContent = title;
+        modal.querySelector('#modal-message').textContent = message;
+        modal.style.display = 'flex';
     }
 }
-
 window.hideModal = function() {
-    if (messageModal) {
-        messageModal.style.display = 'none';
+    const modal = document.getElementById('message-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// --- Core App Functions ---
+
+/**
+ * ฟังก์ชันสำหรับวาดหน้าจอใหม่ทั้งหมด (ประวัติและยอดสรุป)
+ * @param {Array} transactions - อาร์เรย์ของข้อมูลรายการที่จะแสดง
+ */
+function renderTransactionsUI(transactions = []) {
+    const listEl = document.getElementById('transactions-list');
+    const incomeEl = document.getElementById('total-income');
+    const expenseEl = document.getElementById('total-expense');
+    const balanceEl = document.getElementById('total-balance');
+    const inflationRateInput = document.getElementById('inflation-rate');
+
+    if (!listEl || !incomeEl || !expenseEl || !balanceEl) return;
+
+    listEl.innerHTML = '';
+    let totalIncome = 0, totalExpense = 0;
+    const inflationRate = parseFloat(inflationRateInput?.value || 3.0) / 100;
+    const currentDate = new Date();
+
+    transactions.forEach(tx => {
+        const txDate = new Date(tx.date);
+        const diffYears = (currentDate - txDate) / (1000 * 60 * 60 * 24 * 365.25);
+        const adjustedAmount = tx.amount * Math.pow(1 + inflationRate, diffYears);
+
+        if (tx.type === 'income') totalIncome += adjustedAmount;
+        else totalExpense += adjustedAmount;
+
+        const typeClass = tx.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+        const sign = tx.type === 'income' ? '+' : '-';
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `flex justify-between items-center p-4 rounded-xl shadow-sm mb-2 ${typeClass}`;
+        itemDiv.innerHTML = `
+            <div class="flex items-center space-x-4">
+                <span class="text-xl font-bold">${sign}</span>
+                <div>
+                    <div class="text-lg font-semibold">${tx.category}</div>
+                    <div class="text-sm text-gray-500">${new Date(tx.date).toLocaleDateString('th-TH')}</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="font-bold text-lg">${tx.amount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท</div>
+                <div class="text-xs text-gray-400 mt-1">(มูลค่าปัจจุบัน: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
+            </div>`;
+        listEl.appendChild(itemDiv);
+    });
+
+    const totalBalance = totalIncome - totalExpense;
+    incomeEl.textContent = `${totalIncome.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
+    expenseEl.textContent = `${totalExpense.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
+    balanceEl.textContent = `${totalBalance.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
+}
+
+/**
+ * เริ่มการดักฟังข้อมูลธุรกรรมแบบ Real-time
+ */
+function startTransactionListener() {
+    if (unsubscribeFromTransactions) unsubscribeFromTransactions(); // หยุดการดักฟังของเก่า (ถ้ามี)
+
+    if (auth.currentUser) {
+        const transactionsRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
+        const q = query(transactionsRef, orderBy('date', 'desc')); // เรียงข้อมูลจากใหม่ไปเก่า
+
+        unsubscribeFromTransactions = onSnapshot(q, (snapshot) => {
+            const transactionsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderTransactionsUI(transactionsData);
+        });
+    } else {
+        renderTransactionsUI([]); // ถ้าไม่มีผู้ใช้ ให้ล้างหน้าจอ
     }
 }
 
-// --- Page Specific Logic ---
+// --- Page Initialization Functions ---
 
 function initHomePage() {
     const transactionForm = document.getElementById('transaction-form');
-    if (!transactionForm) return;
-
     const inflationRateInput = document.getElementById('inflation-rate');
-    let transactions = []; // ตัวแปรสำหรับเก็บข้อมูลรายการทั้งหมด
 
-    // *** 1. ฟังก์ชันนี้จะ "ดักฟัง" การเปลี่ยนแปลงข้อมูลใน Firestore แบบ Real-time ***
-    function listenForTransactions() {
-        if (!auth.currentUser) {
-            transactions = [];
-            renderTransactions(); // เคลียร์หน้าจอหากผู้ใช้ออกจากระบบ
-            return;
-        }
-        const transactionsCollectionRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
+    transactionForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!auth.currentUser) return showModal("ข้อผิดพลาด", "โปรดเข้าสู่ระบบก่อนบันทึกรายการ");
         
-        // onSnapshot คือหัวใจสำคัญ: จะทำงานทุกครั้งที่มีข้อมูลใหม่เข้ามา
-        onSnapshot(query(transactionsCollectionRef), (snapshot) => {
-            transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderTransactions(); // เมื่อข้อมูลเปลี่ยน ให้วาดหน้าจอใหม่
-        });
-    }
-
-    // *** 2. ฟังก์ชันนี้จะ "วาดหน้าจอใหม่" ทุกครั้งที่มีข้อมูลอัปเดต ***
-    function renderTransactions() {
-        const transactionsList = document.getElementById('transactions-list');
-        const totalIncomeEl = document.getElementById('total-income');
-        const totalExpenseEl = document.getElementById('total-expense');
-        const totalBalanceEl = document.getElementById('total-balance');
-
-        if (!transactionsList || !totalIncomeEl || !totalExpenseEl || !totalBalanceEl) return;
-
-        transactionsList.innerHTML = ''; // ล้างรายการเก่าทิ้งก่อน
-        let totalIncome = 0, totalExpense = 0;
-        const inflationRate = parseFloat(inflationRateInput.value) / 100 || 0;
-        const currentDate = new Date();
-
-        // เรียงลำดับรายการตามวันที่ล่าสุดก่อนแสดงผล
-        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        // วนลูปเพื่อสร้าง HTML ของแต่ละรายการ และคำนวณยอดรวม
-        transactions.forEach(transaction => {
-            const transactionDate = new Date(transaction.date);
-            const diffTime = Math.abs(currentDate - transactionDate);
-            const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
-            const adjustedAmount = transaction.amount * Math.pow(1 + inflationRate, diffYears);
-
-            // เพิ่มยอดเงินเข้าไปในตัวแปรรวมรายรับ-รายจ่าย
-            if (transaction.type === 'income') totalIncome += adjustedAmount;
-            else totalExpense += adjustedAmount;
-
-            const typeClass = transaction.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-            const sign = transaction.type === 'income' ? '+' : '-';
-
-            // สร้าง HTML element ของรายการ
-            const itemDiv = document.createElement('div');
-            itemDiv.className = `flex justify-between items-center p-4 rounded-xl shadow-sm mb-2 ${typeClass}`;
-            itemDiv.innerHTML = `
-                <div class="flex items-center space-x-4">
-                    <span class="text-xl font-bold">${sign}</span>
-                    <div>
-                        <div class="text-lg font-semibold">${transaction.category}</div>
-                        <div class="text-sm text-gray-500">${new Date(transaction.date).toLocaleDateString('th-TH')}</div>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="font-bold text-lg">${transaction.amount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท</div>
-                    <div class="text-xs text-gray-400 mt-1">(มูลค่าปัจจุบัน: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
-                </div>`;
-            transactionsList.appendChild(itemDiv); // นำไปแปะในประวัติ
-        });
-
-        // คำนวณยอดคงเหลือ
-        const totalBalance = totalIncome - totalExpense;
-
-        // อัปเดตตัวเลขสรุปบนหน้าจอ
-        totalIncomeEl.textContent = `${totalIncome.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
-        totalExpenseEl.textContent = `${totalExpense.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
-        totalBalanceEl.textContent = `${totalBalance.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
-    }
-    
-    // *** 3. ฟังก์ชันนี้จะทำงานเมื่อกดปุ่ม "บันทึกรายการ" ***
-    transactionForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        if (!auth.currentUser) {
-            showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกรายการได้ โปรดเข้าสู่ระบบก่อน");
-            return;
-        }
-
-        const newTransaction = {
-            date: document.getElementById('date').value,
-            type: document.getElementById('type').value,
-            category: document.getElementById('category').value,
-            amount: parseFloat(document.getElementById('amount').value),
-            createdAt: serverTimestamp()
-        };
-
         try {
-            // ส่งข้อมูลไปที่ Firestore
-            const transactionsCollectionRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
-            await addDoc(transactionsCollectionRef, newTransaction);
-            showModal("สำเร็จ", "บันทึกรายการสำเร็จ!");
+            const transactionsRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
+            await addDoc(transactionsRef, {
+                date: document.getElementById('date').value,
+                type: document.getElementById('type').value,
+                category: document.getElementById('category').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                createdAt: serverTimestamp()
+            });
+            showModal("สำเร็จ", "บันทึกรายการเรียบร้อยแล้ว");
             transactionForm.reset();
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];
-        } catch (e) {
-            console.error("Error adding document: ", e);
-            showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกรายการได้ โปรดลองอีกครั้ง");
+            document.getElementById('date').valueAsDate = new Date();
+        } catch (error) {
+            showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกรายการได้");
         }
     });
 
-    inflationRateInput.addEventListener('input', renderTransactions);
-    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    inflationRateInput?.addEventListener('input', () => startTransactionListener());
     
-    // เริ่ม "ดักฟัง" ข้อมูลทันทีที่หน้าแรกถูกโหลด
-    listenForTransactions();
+    // ตั้งค่าวันที่เริ่มต้น
+    const dateInput = document.getElementById('date');
+    if (dateInput) dateInput.valueAsDate = new Date();
+
+    // เริ่มดักฟังข้อมูล
+    startTransactionListener();
 }
 
 function initLoginPage() {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
-    if (!loginForm || !registerForm) return;
-
     const showLoginBtn = document.getElementById('show-login-btn');
     const showRegisterBtn = document.getElementById('show-register-btn');
     const loginContainer = document.getElementById('login-container');
     const registerContainer = document.getElementById('register-container');
 
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
             await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
         } catch (error) {
-            showModal("ข้อผิดพลาดในการเข้าสู่ระบบ", "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+            showModal("เข้าสู่ระบบล้มเหลว", "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
         }
     });
 
-    registerForm.addEventListener('submit', async (e) => {
+    registerForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const username = document.getElementById('register-username').value;
         try {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const username = document.getElementById('register-username').value;
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
+            const userDocRef = doc(db, 'artifacts', appId, 'users', userCredential.user.uid);
             await setDoc(userDocRef, { username, email, createdAt: serverTimestamp() });
-            showModal("สำเร็จ", "สมัครสมาชิกเรียบร้อยแล้ว โปรดเข้าสู่ระบบ");
+            showModal("สำเร็จ", "สมัครสมาชิกเรียบร้อยแล้ว กรุณาเข้าสู่ระบบ");
             loginContainer.classList.remove('hidden');
             registerContainer.classList.add('hidden');
         } catch (error) {
-            showModal("ข้อผิดพลาดในการสมัครสมาชิก", "ไม่สามารถสมัครสมาชิกได้ โปรดลองใหม่อีกครั้ง");
+            showModal("สมัครสมาชิกล้มเหลว", "อีเมลนี้อาจถูกใช้ไปแล้ว หรือรหัสผ่านสั้นเกินไป");
         }
     });
 
-    showLoginBtn.addEventListener('click', (e) => { e.preventDefault(); loginContainer.classList.remove('hidden'); registerContainer.classList.add('hidden'); });
-    showRegisterBtn.addEventListener('click', (e) => { e.preventDefault(); registerContainer.classList.remove('hidden'); loginContainer.classList.add('hidden'); });
+    showLoginBtn?.addEventListener('click', (e) => { e.preventDefault(); loginContainer.classList.remove('hidden'); registerContainer.classList.add('hidden'); });
+    showRegisterBtn?.addEventListener('click', (e) => { e.preventDefault(); registerContainer.classList.remove('hidden'); loginContainer.classList.add('hidden'); });
 }
 
 function initAboutPage() {
-    const logoutBtn = document.getElementById('logout-btn');
-    if (!logoutBtn) return;
-    logoutBtn.addEventListener('click', async () => {
-        try {
-            await signOut(auth);
-        } catch (error) {
-            showModal("ข้อผิดพลาด", "ไม่สามารถออกจากระบบได้ โปรดลองอีกครั้ง");
-        }
-    });
+    document.getElementById('logout-btn')?.addEventListener('click', () => signOut(auth));
 }
 
-// --- Main App Logic & Auth Handling ---
-
-function setActiveNav() {
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    document.getElementById('nav-home')?.classList.toggle('active-nav', currentPage === 'index.html');
-    document.getElementById('nav-invest')?.classList.toggle('active-nav', currentPage === 'invest.html');
-    document.getElementById('nav-about')?.classList.toggle('active-nav', currentPage === 'about.html');
-}
+// --- Main Controller & Auth Observer ---
 
 onAuthStateChanged(auth, async (user) => {
-    const protectedPages = ['index.html', 'about.html', 'invest.html', '']; // '' for root
+    const protectedPages = ['', 'index.html', 'about.html', 'invest.html'];
     const loginPage = 'login.html';
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
+    let currentPage = window.location.pathname.split("/").pop();
 
     if (user) {
+        // ถ้าผู้ใช้ล็อกอินแล้ว แต่ยังอยู่หน้า login ให้ redirect
         if (currentPage === loginPage) {
             window.location.replace('index.html');
             return;
         }
-        const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
+        
+        // อัปเดตข้อมูลผู้ใช้บนหน้า about
+        const userDoc = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
             const userGreeting = document.getElementById('user-greeting');
             const userIdDisplay = document.getElementById('user-id-display');
             if (userGreeting) userGreeting.textContent = userData.username || user.email;
             if (userIdDisplay) userIdDisplay.textContent = user.uid;
         }
-    } else {
+
+        // ถ้าอยู่หน้า Home ให้เริ่มดักฟังข้อมูล
         if (protectedPages.includes(currentPage)) {
+            startTransactionListener();
+        }
+
+    } else {
+        // ถ้าผู้ใช้ไม่ได้ล็อกอิน และพยายามเข้าหน้าป้องกัน ให้ redirect
+        if (protectedPages.includes(currentPage)) {
+            if (unsubscribeFromTransactions) unsubscribeFromTransactions(); // หยุดดักฟัง
+            renderTransactionsUI([]); // เคลียร์หน้าจอ
             window.location.replace(loginPage);
         }
     }
 });
 
-// --- Initialize Page ---
+// --- Entry Point ---
 document.addEventListener('DOMContentLoaded', () => {
-    if (!auth) return;
-    setActiveNav();
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    if (currentPage === 'index.html' || currentPage === '') initHomePage();
+    let currentPage = window.location.pathname.split("/").pop();
+    
+    // ตั้งค่า Active Nav
+    document.querySelectorAll('nav a').forEach(link => {
+        const linkPage = link.getAttribute('href').split('/').pop();
+        if (linkPage === currentPage || (currentPage === '' && linkPage === 'index.html')) {
+            link.classList.add('active-nav');
+        }
+    });
+
+    // เรียกใช้ฟังก์ชัน init สำหรับหน้านั้นๆ
+    if (currentPage === '' || currentPage === 'index.html') initHomePage();
     else if (currentPage === 'login.html') initLoginPage();
     else if (currentPage === 'about.html') initAboutPage();
 });
