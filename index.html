@@ -3,48 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แอปรายรับ-รายจ่าย</title>
-    <!-- Tailwind CSS CDN for styling -->
+    <title>หน้าหลัก | แอปรายรับ-รายจ่าย</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        /* Custom scrollbar for transaction history */
-        #transactions-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        #transactions-list::-webkit-scrollbar-track {
-            background: #e5e7eb;
-            border-radius: 10px;
-        }
-        #transactions-list::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 10px;
-        }
-        #transactions-list::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <!-- Modal for messages -->
     <div id="message-modal" class="modal">
         <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
             <h3 id="modal-title" class="text-xl font-semibold mb-4 text-gray-800"></h3>
@@ -53,518 +17,65 @@
         </div>
     </div>
 
-    <!-- Main Container -->
     <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-4xl min-h-[700px] flex flex-col">
-
-        <!-- Navigation Links -->
         <nav class="flex justify-between md:justify-around p-2 mb-6 bg-gray-100 rounded-xl shadow-inner">
-            <button onclick="showPage('home')" id="nav-home" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">หน้าหลัก</button>
-            <button onclick="showPage('about')" id="nav-about" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">เกี่ยวกับฉัน</button>
-            <button onclick="showPage('invest')" id="nav-invest" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">แนะนำการลงทุน</button>
+            <a href="index.html" id="nav-home" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">หน้าหลัก</a>
+            <a href="about.html" id="nav-about" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">เกี่ยวกับฉัน</a>
+            <a href="invest.html" id="nav-invest" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">แนะนำการลงทุน</a>
         </nav>
 
-        <!-- Dynamic Content Section -->
         <div id="content-container" class="flex-1 flex flex-col">
-            <!-- Content will be injected here by JavaScript -->
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">แอปรายรับ-รายจ่าย</h1>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-green-100 p-4 rounded-xl shadow-md text-center">
+                    <h2 class="text-lg font-semibold text-green-700">รายรับทั้งหมด</h2>
+                    <p id="total-income" class="text-2xl font-bold text-green-900 mt-2">0.00 บาท</p>
+                </div>
+                <div class="bg-red-100 p-4 rounded-xl shadow-md text-center">
+                    <h2 class="text-lg font-semibold text-red-700">รายจ่ายทั้งหมด</h2>
+                    <p id="total-expense" class="text-2xl font-bold text-red-900 mt-2">0.00 บาท</p>
+                </div>
+                <div class="bg-blue-100 p-4 rounded-xl shadow-md text-center">
+                    <h2 class="text-lg font-semibold text-blue-700">ยอดเงินคงเหลือ</h2>
+                    <p id="total-balance" class="text-2xl font-bold text-blue-900 mt-2">0.00 บาท</p>
+                </div>
+            </div>
+            <div class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
+                <label for="inflation-rate" class="block text-sm font-medium text-gray-700 mb-2">อัตราเงินเฟ้อ (%)</label>
+                <input type="number" id="inflation-rate" value="3.0" step="0.1" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300">
+            </div>
+            <form id="transaction-form" class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
+                        <input type="date" id="date" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
+                    </div>
+                    <div>
+                        <label for="type" class="block text-sm font-medium text-gray-700 mb-1">ประเภท</label>
+                        <select id="type" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            <option value="income">รายรับ</option>
+                            <option value="expense">รายจ่าย</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label>
+                    <input type="text" id="category" placeholder="เช่น เงินเดือน, ค่าอาหาร" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
+                </div>
+                <div class="mt-4">
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงิน (บาท)</label>
+                    <input type="number" id="amount" placeholder="จำนวนเงิน" min="0" step="0.01" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors mt-6">บันทึกรายการ</button>
+            </form>
+            <div class="flex-1 overflow-y-auto pr-2" id="transactions-list-container">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">ประวัติการทำรายการ</h2>
+                <div id="transactions-list">
+                    </div>
+            </div>
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global Firebase variables
-        let app, db, auth, userId, appId;
-
-        // Message Modal elements
-        const messageModal = document.getElementById('message-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-
-        // Function to show custom modal instead of alert()
-        function showModal(title, message) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            messageModal.style.display = 'flex';
-        }
-
-        // Function to hide custom modal
-        function hideModal() {
-            messageModal.style.display = 'none';
-        }
-        
-        // App's state
-        let transactions = [];
-
-        // App Pages HTML Content
-        const pages = {
-            home: `
-                <!-- Home Page Content -->
-                <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">แอปรายรับ-รายจ่าย</h1>
-
-                <!-- Balance and Summary -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-green-100 p-4 rounded-xl shadow-md text-center">
-                        <h2 class="text-lg font-semibold text-green-700">รายรับทั้งหมด</h2>
-                        <p id="total-income" class="text-2xl font-bold text-green-900 mt-2">0.00 บาท</p>
-                    </div>
-                    <div class="bg-red-100 p-4 rounded-xl shadow-md text-center">
-                        <h2 class="text-lg font-semibold text-red-700">รายจ่ายทั้งหมด</h2>
-                        <p id="total-expense" class="text-2xl font-bold text-red-900 mt-2">0.00 บาท</p>
-                    </div>
-                    <div class="bg-blue-100 p-4 rounded-xl shadow-md text-center">
-                        <h2 class="text-lg font-semibold text-blue-700">ยอดเงินคงเหลือ</h2>
-                        <p id="total-balance" class="text-2xl font-bold text-blue-900 mt-2">0.00 บาท</p>
-                    </div>
-                </div>
-
-                <!-- Inflation Rate -->
-                <div class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
-                    <label for="inflation-rate" class="block text-sm font-medium text-gray-700 mb-2">อัตราเงินเฟ้อ (%)</label>
-                    <input type="number" id="inflation-rate" value="3.0" step="0.1" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300">
-                </div>
-
-                <!-- Transaction Form -->
-                <form id="transaction-form" class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="date" class="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
-                            <input type="date" id="date" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
-                        </div>
-                        <div>
-                            <label for="type" class="block text-sm font-medium text-gray-700 mb-1">ประเภท</label>
-                            <select id="type" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                <option value="income">รายรับ</option>
-                                <option value="expense">รายจ่าย</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label>
-                        <input type="text" id="category" placeholder="เช่น เงินเดือน, ค่าอาหาร" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
-                    </div>
-                    <div class="mt-4">
-                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงิน (บาท)</label>
-                        <input type="number" id="amount" placeholder="จำนวนเงิน" min="0" step="0.01" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors mt-6">บันทึกรายการ</button>
-                </form>
-
-                <!-- Transaction History -->
-                <div class="flex-1 overflow-y-auto pr-2" id="transactions-list-container">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">ประวัติการทำรายการ</h2>
-                    <div id="transactions-list">
-                        <!-- Transactions will be dynamically inserted here -->
-                    </div>
-                </div>
-            `,
-            about: `
-                <!-- About Page Content -->
-                <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">เกี่ยวกับฉัน</h1>
-                <div id="auth-section" class="flex flex-col items-center">
-                    <div id="login-container" class="bg-gray-100 p-6 rounded-xl shadow-md w-full max-w-sm mb-4">
-                        <h2 class="text-xl font-semibold mb-4 text-center">เข้าสู่ระบบ</h2>
-                        <form id="login-form">
-                            <div class="mb-4">
-                                <label for="login-email" class="block text-sm font-medium text-gray-700">อีเมล</label>
-                                <input type="email" id="login-email" class="w-full px-4 py-2 border rounded-xl" required>
-                            </div>
-                            <div class="mb-4">
-                                <label for="login-password" class="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
-                                <input type="password" id="login-password" class="w-full px-4 py-2 border rounded-xl" required>
-                            </div>
-                            <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors">เข้าสู่ระบบ</button>
-                        </form>
-                        <p class="mt-4 text-center text-sm">
-                            ยังไม่มีบัญชี? 
-                            <a href="#" id="show-register-btn" class="text-blue-500 hover:underline">สมัครสมาชิก</a>
-                        </p>
-                    </div>
-
-                    <div id="register-container" class="bg-gray-100 p-6 rounded-xl shadow-md w-full max-w-sm hidden">
-                        <h2 class="text-xl font-semibold mb-4 text-center">สมัครสมาชิก</h2>
-                        <form id="register-form">
-                            <div class="mb-4">
-                                <label for="register-email" class="block text-sm font-medium text-gray-700">อีเมล</label>
-                                <input type="email" id="register-email" class="w-full px-4 py-2 border rounded-xl" required>
-                            </div>
-                            <div class="mb-4">
-                                <label for="register-password" class="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
-                                <input type="password" id="register-password" class="w-full px-4 py-2 border rounded-xl" required>
-                            </div>
-                            <div class="mb-4">
-                                <label for="register-username" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้</label>
-                                <input type="text" id="register-username" class="w-full px-4 py-2 border rounded-xl" required>
-                            </div>
-                            <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600 transition-colors">สมัครสมาชิก</button>
-                        </form>
-                        <p class="mt-4 text-center text-sm">
-                            มีบัญชีแล้ว? 
-                            <a href="#" id="show-login-btn" class="text-blue-500 hover:underline">เข้าสู่ระบบ</a>
-                        </p>
-                    </div>
-                </div>
-
-                <div id="user-section" class="flex flex-col items-center hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">สวัสดี, <span id="user-greeting">ผู้ใช้งาน</span> 👋</h2>
-                    <p class="text-sm text-gray-500 mb-4">User ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span></p>
-                    <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-red-600 transition-colors">ออกจากระบบ</button>
-                </div>
-            `,
-            invest: `
-                <!-- Investment Guide Page Content -->
-                <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">แนะนำการลงทุน</h1>
-                <div class="flex-1 overflow-y-auto pr-2">
-                    <p class="text-gray-600 mb-4">
-                        การวางแผนการเงินที่ดีไม่ใช่แค่การบันทึกรายรับ-รายจ่าย แต่คือการทำความเข้าใจภาพรวมทั้งหมด
-                        เพื่อสร้างอนาคตที่มั่นคงและเติบโต
-                    </p>
-                    <h3 class="text-xl font-bold text-gray-700 mt-6">ทำไมต้องลงทุน?</h3>
-                    <p class="text-gray-600 mt-2">
-                        การลงทุนคือการนำเงินไปสร้างการเติบโต เพื่อให้เงินของคุณเอาชนะเงินเฟ้อได้
-                        เมื่อเงินเฟ้อทำให้มูลค่าเงินลดลง การลงทุนจะช่วยให้คุณสร้างผลตอบแทนที่สูงกว่าอัตราเงินเฟ้อ ทำให้เงินของคุณยังคงมี "อำนาจซื้อ" อยู่
-                    </p>
-                    <p class="text-gray-600 mt-4">
-                        <strong>ตัวอย่างง่ายๆ:</strong>
-                        <ul class="list-disc list-inside mt-2 ml-4 text-gray-600">
-                            <li><span class="font-semibold text-gray-800">การฝากธนาคาร:</span> ผลตอบแทนมักจะต่ำกว่าอัตราเงินเฟ้อ ทำให้มูลค่าเงินลดลงอย่างช้าๆ</li>
-                            <li><span class="font-semibold text-gray-800">การลงทุนในหุ้นหรือกองทุนรวม:</span> สามารถสร้างผลตอบแทนที่สูงกว่าเงินเฟ้อในระยะยาวได้</li>
-                        </ul>
-                    </p>
-                    <h3 class="text-xl font-bold text-gray-700 mt-6">เริ่มต้นอย่างไร?</h3>
-                    <p class="text-gray-600 mt-2">
-                        การลงทุนที่ดีที่สุดคือการเริ่มต้นตั้งแต่วันนี้ ด้วยความรู้และความเข้าใจ
-                        คุณไม่จำเป็นต้องมีเงินก้อนใหญ่ เริ่มต้นจากการออมและนำเงินส่วนหนึ่งไปลงทุนอย่างสม่ำเสมอในสินทรัพย์ที่คุณเข้าใจ
-                    </p>
-                    <p class="text-gray-600 mt-4">
-                        แอปพลิเคชันนี้เป็นเครื่องมือที่ดีในการบันทึกและติดตามการเงินส่วนบุคคลของคุณ เมื่อคุณมีข้อมูลที่ครบถ้วนแล้ว
-                        จะช่วยให้คุณตัดสินใจได้ดีขึ้นว่าควรนำเงินไปลงทุนเพื่อสร้างอนาคตการเงินที่ดีได้อย่างไร
-                    </p>
-                </div>
-            `
-        };
-
-        // Function to render the correct page
-        function showPage(pageId) {
-            const container = document.getElementById('content-container');
-            container.innerHTML = pages[pageId];
-            
-            // Re-bind events for the newly rendered page
-            if (pageId === 'home') {
-                bindHomePageEvents();
-            } else if (pageId === 'about') {
-                bindAboutPageEvents();
-            }
-        }
-
-        // --- Firebase Setup ---
-        // Global variables provided by the Canvas environment
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // Initialize Firebase
-        if (Object.keys(firebaseConfig).length > 0) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            console.log("Firebase initialized successfully.");
-        } else {
-            showModal("ข้อผิดพลาด", "Firebase ไม่ได้ถูกตั้งค่า. โปรดตรวจสอบการตั้งค่าแอปพลิเคชัน.");
-        }
-
-        // Asynchronously sign in the user
-        async function signInUser() {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("Signed in with custom token.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Signed in anonymously.");
-                }
-            } catch (error) {
-                console.error("Authentication error:", error);
-                showModal("ข้อผิดพลาดในการยืนยันตัวตน", "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง");
-            }
-        }
-
-        // --- Event Binding Functions ---
-
-        // Function to bind events for the Home page
-        function bindHomePageEvents() {
-            const transactionForm = document.getElementById('transaction-form');
-            const inflationRateInput = document.getElementById('inflation-rate');
-
-            if (!transactionForm || !inflationRateInput) return;
-
-            // Function to listen for real-time transaction updates from Firestore
-            function listenForTransactions() {
-                if (!auth.currentUser) {
-                    transactions = [];
-                    renderTransactions();
-                    return;
-                }
-                const transactionsCollectionRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
-                
-                onSnapshot(query(transactionsCollectionRef), (snapshot) => {
-                    transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderTransactions();
-                });
-            }
-
-            // Function to render transactions and summary
-            function renderTransactions() {
-                const transactionsList = document.getElementById('transactions-list');
-                const totalIncomeEl = document.getElementById('total-income');
-                const totalExpenseEl = document.getElementById('total-expense');
-                const totalBalanceEl = document.getElementById('total-balance');
-
-                if (!transactionsList || !totalIncomeEl || !totalExpenseEl || !totalBalanceEl) return;
-
-                transactionsList.innerHTML = '';
-                
-                let totalIncome = 0;
-                let totalExpense = 0;
-                
-                const inflationRate = parseFloat(inflationRateInput.value) / 100 || 0;
-                const currentDate = new Date();
-
-                // Sort transactions by date in descending order
-                transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                transactions.forEach(transaction => {
-                    const transactionDate = new Date(transaction.date);
-                    const diffTime = Math.abs(currentDate - transactionDate);
-                    const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
-                    const adjustedAmount = transaction.amount * Math.pow(1 + inflationRate, diffYears);
-
-                    if (transaction.type === 'income') {
-                        totalIncome += adjustedAmount;
-                    } else {
-                        totalExpense += adjustedAmount;
-                    }
-
-                    const typeClass = transaction.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                    const sign = transaction.type === 'income' ? '+' : '-';
-
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = `flex justify-between items-center p-4 rounded-xl shadow-sm mb-2 ${typeClass}`;
-                    itemDiv.innerHTML = `
-                        <div class="flex items-center space-x-4">
-                            <span class="text-xl font-bold">${sign}</span>
-                            <div>
-                                <div class="text-lg font-semibold">${transaction.category}</div>
-                                <div class="text-sm text-gray-500">${new Date(transaction.date).toLocaleDateString('th-TH')}</div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-bold text-lg">${transaction.amount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท</div>
-                            <div class="text-xs text-gray-400 mt-1">
-                                (มูลค่าปัจจุบัน: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)
-                            </div>
-                        </div>
-                    `;
-                    transactionsList.appendChild(itemDiv);
-                });
-
-                const totalBalance = totalIncome - totalExpense;
-                totalIncomeEl.textContent = `${totalIncome.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
-                totalExpenseEl.textContent = `${totalExpense.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
-                totalBalanceEl.textContent = `${totalBalance.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
-            }
-
-            // Function to handle form submission
-            transactionForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                if (!auth.currentUser) {
-                    showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกรายการได้ โปรดเข้าสู่ระบบก่อน");
-                    return;
-                }
-
-                const dateInput = document.getElementById('date');
-                const typeSelect = document.getElementById('type');
-                const categoryInput = document.getElementById('category');
-                const amountInput = document.getElementById('amount');
-
-                const newTransaction = {
-                    date: dateInput.value,
-                    type: typeSelect.value,
-                    category: categoryInput.value,
-                    amount: parseFloat(amountInput.value),
-                    createdAt: serverTimestamp()
-                };
-
-                try {
-                    const transactionsCollectionRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
-                    await addDoc(transactionsCollectionRef, newTransaction);
-                    showModal("สำเร็จ", "บันทึกรายการสำเร็จ!");
-                    
-                    // Reset form fields
-                    dateInput.value = new Date().toISOString().split('T')[0];
-                    categoryInput.value = '';
-                    amountInput.value = '';
-                    typeSelect.value = 'income';
-
-                } catch (e) {
-                    console.error("Error adding document: ", e);
-                    showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกรายการได้ โปรดลองอีกครั้ง");
-                }
-            });
-
-            // Re-render when inflation rate changes
-            inflationRateInput.addEventListener('input', () => {
-                if (auth.currentUser) {
-                    renderTransactions(); 
-                }
-            });
-
-            // Set today's date on the date input
-            const dateInput = document.getElementById('date');
-            dateInput.value = new Date().toISOString().split('T')[0];
-            
-            // Initial render
-            listenForTransactions();
-        }
-
-        // Function to bind events for the About page
-        function bindAboutPageEvents() {
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            const logoutBtn = document.getElementById('logout-btn');
-            const showLoginBtn = document.getElementById('show-login-btn');
-            const showRegisterBtn = document.getElementById('show-register-btn');
-            const loginContainer = document.getElementById('login-container');
-            const registerContainer = document.getElementById('register-container');
-            const authSection = document.getElementById('auth-section');
-            const userSection = document.getElementById('user-section');
-
-            if (!loginForm || !registerForm || !logoutBtn || !showLoginBtn || !showRegisterBtn || !loginContainer || !registerContainer || !authSection || !userSection) return;
-
-            // Handle login form submission
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    showModal("สำเร็จ", "เข้าสู่ระบบเรียบร้อยแล้ว");
-                } catch (error) {
-                    console.error("Login error:", error);
-                    showModal("ข้อผิดพลาดในการเข้าสู่ระบบ", "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-                }
-            });
-
-            // Handle register form submission
-            registerForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('register-email').value;
-                const password = document.getElementById('register-password').value;
-                const username = document.getElementById('register-username').value;
-                try {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    const user = userCredential.user;
-
-                    const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
-                    await setDoc(userDocRef, {
-                        username: username,
-                        email: email,
-                        createdAt: serverTimestamp()
-                    });
-                    showModal("สำเร็จ", "สมัครสมาชิกเรียบร้อยแล้ว โปรดเข้าสู่ระบบ");
-                    loginContainer.classList.remove('hidden');
-                    registerContainer.classList.add('hidden');
-                } catch (error) {
-                    console.error("Registration error:", error);
-                    showModal("ข้อผิดพลาดในการสมัครสมาชิก", "ไม่สามารถสมัครสมาชิกได้ โปรดลองใหม่อีกครั้ง");
-                }
-            });
-
-            // Handle logout button click
-            logoutBtn.addEventListener('click', async () => {
-                try {
-                    await signOut(auth);
-                    showModal("ออกจากระบบ", "คุณได้ออกจากระบบแล้ว");
-                    showPage('about');
-                } catch (error) {
-                    console.error("Logout error:", error);
-                    showModal("ข้อผิดพลาด", "ไม่สามารถออกจากระบบได้ โปรดลองอีกครั้ง");
-                }
-            });
-
-            // Toggle between login and register forms
-            showLoginBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                loginContainer.classList.remove('hidden');
-                registerContainer.classList.add('hidden');
-            });
-
-            showRegisterBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                registerContainer.classList.remove('hidden');
-                loginContainer.classList.add('hidden');
-            });
-        }
-
-        // --- Main App Logic ---
-        
-        // Listen for authentication state changes
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // User is signed in
-                const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                
-                if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    const userGreeting = document.getElementById('user-greeting');
-                    const userIdDisplay = document.getElementById('user-id-display');
-                    const authSection = document.getElementById('auth-section');
-                    const userSection = document.getElementById('user-section');
-
-                    if (userGreeting && userIdDisplay && authSection && userSection) {
-                        userGreeting.textContent = userData.username || user.email;
-                        userIdDisplay.textContent = user.uid;
-                        authSection.classList.add('hidden');
-                        userSection.classList.remove('hidden');
-                    }
-                } else {
-                    // This is a new user from custom auth token, show registration form
-                    const authSection = document.getElementById('auth-section');
-                    const userSection = document.getElementById('user-section');
-                    const registerContainer = document.getElementById('register-container');
-                    const loginContainer = document.getElementById('login-container');
-
-                    if (authSection && userSection && registerContainer && loginContainer) {
-                        authSection.classList.remove('hidden');
-                        userSection.classList.add('hidden');
-                        registerContainer.classList.remove('hidden');
-                        loginContainer.classList.add('hidden');
-                    }
-                }
-            } else {
-                // User is signed out
-                const authSection = document.getElementById('auth-section');
-                const userSection = document.getElementById('user-section');
-                const registerContainer = document.getElementById('register-container');
-                const loginContainer = document.getElementById('login-container');
-                if (authSection && userSection && registerContainer && loginContainer) {
-                    authSection.classList.remove('hidden');
-                    userSection.classList.add('hidden');
-                    loginContainer.classList.remove('hidden');
-                    registerContainer.classList.add('hidden');
-                }
-            }
-        });
-
-        // Start the app by signing in the user and showing the home page
-        signInUser();
-        showPage('home');
-    </script>
-
+    <script type="module" src="app.js"></script>
 </body>
 </html>
