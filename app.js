@@ -59,9 +59,60 @@ function hideConfirmationModal() {
     }
 }
 
-/**
- * ตั้งค่าอัตราเงินเฟ้อโดยใช้ข้อมูลอ้างอิงล่าสุดที่เชื่อถือได้
- */
+// --- Investment News Data (Curated List) ---
+const investmentNews = [
+    {
+        title: "“เงินบาท” แข็งค่า จับตาตัวเลขเงินเฟ้อสหรัฐฯ-ทิศทางดอกเบี้ยเฟด",
+        imageUrl: "https://placehold.co/600x400/16A34A/FFFFFF?text=เงินบาท",
+        linkUrl: "https://www.thansettakij.com/finance/exchange/595308",
+        source: "ฐานเศรษฐกิจ"
+    },
+    {
+        title: "ราคาทองวันนี้ ปรับลง 50 บาท รีบตัดสินใจ \"ควรซื้อหรือขาย\"",
+        imageUrl: "https://placehold.co/600x400/FACC15/000000?text=ราคาทอง",
+        linkUrl: "https://www.thairath.co.th/money/investment/golds/2791888",
+        source: "Thairath Money"
+    },
+    {
+        title: "เจาะ 5 หุ้นลิสซิ่ง กำไรฟื้นเด่นน่าลงทุน",
+        imageUrl: "https://placehold.co/600x400/2563EB/FFFFFF?text=หุ้นลิสซิ่ง",
+        linkUrl: "https://www.bangkokbiznews.com/finance/investment/1131189",
+        source: "กรุงเทพธุรกิจ"
+    },
+    {
+        title: "รู้จัก 5 เรื่องต้องระวัง ลงทุน 'หุ้นกู้' อย่างไรไม่ให้พลาด",
+        imageUrl: "https://placehold.co/600x400/9333EA/FFFFFF?text=หุ้นกู้",
+        linkUrl: "https://www.thairath.co.th/money/investment/stocks/2791928",
+        source: "Thairath Money"
+    },
+    {
+        title: "Bitcoin Halving คืออะไร? ทำไมนักลงทุนทั่วโลกจับตา",
+        imageUrl: "https://placehold.co/600x400/F97316/FFFFFF?text=Bitcoin",
+        linkUrl: "https://brandinside.asia/what-is-bitcoin-halving-why-investor-watch/",
+        source: "Brand Inside"
+    },
+    {
+        title: "ทิศทางตลาดอสังหาฯ ครึ่งปีหลัง คอนโดฯ กลางเมืองยังน่าสน",
+        imageUrl: "https://placehold.co/600x400/0891B2/FFFFFF?text=คอนโด",
+        linkUrl: "https://www.bangkokbiznews.com/property/1109968",
+        source: "กรุงเทพธุรกิจ"
+    },
+    {
+        title: "มือใหม่เริ่มลงทุนกองทุนรวมอย่างไร? รวมขั้นตอนง่ายๆ",
+        imageUrl: "https://placehold.co/600x400/65A30D/FFFFFF?text=มือใหม่ลงทุน",
+        linkUrl: "https://www.moneybuffalo.in.th/investment/how-to-start-invest-in-mutual-fund",
+        source: "Money Buffalo"
+    },
+    {
+        title: "ต่างชาติแห่ลงทุน EEC ยอดทะลุเป้าหมาย โอกาสโตต่อเนื่อง",
+        imageUrl: "https://placehold.co/600x400/BE185D/FFFFFF?text=EEC",
+        linkUrl: "https://www.prachachat.net/economy/news-1533036",
+        source: "ประชาชาติธุรกิจ"
+    }
+];
+
+
+// --- Core App Functions ---
 async function setInflationRate() {
     const inflationInput = document.getElementById('inflation-rate');
     const inflationStatus = document.getElementById('inflation-status');
@@ -71,11 +122,8 @@ async function setInflationRate() {
     inflationStatus.textContent = 'กำลังโหลดข้อมูล...';
 
     try {
-        // จำลองการโหลดสั้นๆ เพื่อให้ผู้ใช้เห็นว่ามีการอัปเดต
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // ใช้ข้อมูลอัตราเงินเฟ้อล่าสุดของไทยที่ตรวจสอบแล้ว (ข้อมูลปี 2023)
-        // วิธีนี้เสถียรกว่าการเรียก API โดยตรงซึ่งอาจถูกบล็อกได้
         const recentInflationRate = 1.23;
         const dataYear = 2023;
 
@@ -85,15 +133,11 @@ async function setInflationRate() {
     } catch (error) {
         console.error('Error setting inflation rate:', error);
         inflationStatus.textContent = 'เกิดข้อผิดพลาด';
-        inflationInput.value = '3.0'; // ใช้ค่าเริ่มต้นหากเกิดปัญหา
+        inflationInput.value = '3.0'; 
     } finally {
-        // คำนวณหน้าจอใหม่อีกครั้งด้วยค่าเงินเฟ้อที่ได้
         startTransactionListener();
     }
 }
-
-
-// --- Core App Functions ---
 async function handleDeleteTransaction(transactionId) {
     if (!auth.currentUser || !transactionId) return;
     try {
@@ -105,7 +149,6 @@ async function handleDeleteTransaction(transactionId) {
         showModal("ข้อผิดพลาด", "ไม่สามารถลบรายการได้");
     }
 }
-
 function renderTransactionsUI(transactions = []) {
     const listEl = document.getElementById('transactions-list');
     const incomeEl = document.getElementById('total-income');
@@ -153,7 +196,6 @@ function renderTransactionsUI(transactions = []) {
     expenseEl.textContent = `${totalExpense.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
     balanceEl.textContent = `${totalBalance.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
 }
-
 
 function startTransactionListener() {
     if (unsubscribeFromTransactions) unsubscribeFromTransactions();
@@ -290,6 +332,34 @@ function initAboutPage() {
     });
 }
 
+// *** แก้ไขฟังก์ชันนี้ ให้ใช้ข้อมูลข่าวที่เตรียมไว้ ***
+function initInvestPage() {
+    const newsGrid = document.getElementById('news-grid');
+    if (!newsGrid) return;
+
+    newsGrid.innerHTML = ''; // Clear any previous message
+
+    investmentNews.forEach(news => {
+        const card = document.createElement('a');
+        card.href = news.linkUrl;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
+        card.className = "block bg-white rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden group";
+
+        card.innerHTML = `
+            <div class="relative">
+                <img src="${news.imageUrl}" alt="${news.title}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                <div class="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-2 text-xs">${news.source}</div>
+            </div>
+            <div class="p-4">
+                <h3 class="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition-colors duration-300">${news.title}</h3>
+            </div>
+        `;
+        newsGrid.appendChild(card);
+    });
+}
+
+
 // --- Main Controller & Auth Observer ---
 onAuthStateChanged(auth, async (user) => {
     const protectedPages = ['', 'index.html', 'about.html', 'invest.html'];
@@ -341,9 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.add('active-nav');
         }
     });
-
+    
     if (currentPage === '' || currentPage === 'index.html') initHomePage();
     else if (currentPage === 'login.html') initLoginPage();
     else if (currentPage === 'about.html') initAboutPage();
+    else if (currentPage === 'invest.html') initInvestPage();
 });
 
