@@ -126,7 +126,7 @@
             const inflationRate = parseFloat(inflationRateInput.value) || 0;
 
             if (sortedTransactions.length === 0) {
-                transactionsList.innerHTML = '<p class="text-center text-gray-400 p-4">No transactions yet.</p>';
+                transactionsList.innerHTML = '<p class="text-center text-gray-400 p-4">ไม่มีรายการ</p>';
                 return;
             }
 
@@ -148,7 +148,7 @@
                             ${sign}${transaction.amount.toLocaleString()} บาท
                         </div>
                         <div class="text-xs text-gray-400 mt-1">
-                            (Current Value: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)
+                            (มูลค่าปัจจุบัน: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)
                         </div>
                     </div>
                 `;
