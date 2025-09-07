@@ -1,31 +1,64 @@
-let transactions = [
-  { amount: 1151515 },
-  { amount: 10 },
-  { amount: -30000 },
-  { amount: -1000000 },
-  { amount: 5000 },
-  { amount: 2000 },
-  { amount: 555555555 },
-  { amount: 5555 },
-  { amount: 55 },
-  { amount: 55 },
-  { amount: 5 },
-  { amount: 5 },
-  { amount: 555555 }
-];
+// Mock user data (สามารถเชื่อมกับ localStorage หรือ backend ได้ในอนาคต)
+const users = {
+  "test@example.com": "1234"
+};
 
-let totalIncome = transactions
-  .filter(t => t.amount > 0)
-  .reduce((sum, t) => sum + t.amount, 0);
+// Login
+function loginUser() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-let totalExpense = transactions
-  .filter(t => t.amount < 0)
-  .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  if (users[email] && users[email] === password) {
+    sessionStorage.setItem("userEmail", email);
+    alert("เข้าสู่ระบบสำเร็จ!");
+    window.location.href = "about.html";
+  } else {
+    alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+  }
+}
 
-let balance = totalIncome - totalExpense;
+// Register
+function registerUser() {
+  const email = document.getElementById("regEmail").value;
+  const password = document.getElementById("regPassword").value;
 
-document.getElementById("summary").innerHTML = `
-  <p>💰 รายรับทั้งหมด: ${totalIncome.toLocaleString()} บาท</p>
-  <p>📉 รายจ่ายทั้งหมด: ${totalExpense.toLocaleString()} บาท</p>
-  <p>🧮 ยอดคงเหลือ: ${balance.toLocaleString()} บาท</p>
-`;
+  users[email] = password;
+  alert("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ");
+  window.location.href = "login.html";
+}
+
+// Session check
+function checkSession() {
+  const email = sessionStorage.getItem("userEmail");
+  if (!email) {
+    window.location.href = "login.html";
+  } else {
+    const hour = new Date().getHours();
+    let timeGreeting = "สวัสดี";
+    if (hour < 12) timeGreeting = "สวัสดีตอนเช้า";
+    else if (hour < 18) timeGreeting = "สวัสดีตอนบ่าย";
+    else timeGreeting = "สวัสดีตอนเย็น";
+
+    document.getElementById("greeting").innerText = `${timeGreeting}, คุณ ${email} 👋`;
+  }
+}
+
+// Logout
+function logoutUser() {
+  sessionStorage.removeItem("userEmail");
+  alert("ออกจากระบบแล้ว");
+  window.location.href = "login.html";
+}
+
+function loginUser() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const storedPassword = localStorage.getItem(email);
+  if (storedPassword && storedPassword === password) {
+    sessionStorage.setItem("userEmail", email);
+    window.location.href = "about.html";
+  } else {
+    alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+  }
+}
