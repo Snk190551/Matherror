@@ -7,28 +7,31 @@ import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, quer
 
 // --- Global Variables & Firebase Setup ---
 let app, db, auth;
-// !!! สำคัญ: กรุณากรอกข้อมูล Firebase ของคุณที่นี่ !!!
+
+// ใช้ Firebase Config ที่คุณหามาได้
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyC6d1_FmSvfrnhpqFxdKrg-bleCVC5XkUM",
+  authDomain: "app-math-465713.firebaseapp.com",
+  projectId: "app-math-465713",
+  storageBucket: "app-math-465713.firebasestorage.app",
+  messagingSenderId: "896330929514",
+  appId: "1:896330929514:web:f2aa9442ab19a3f7574113",
+  measurementId: "G-8H400D8BHL"
 };
-const appId = firebaseConfig.projectId || 'default-app-id'; // ใช้ projectId เป็น appId
+
+// ใช้ projectId เป็น appId สำหรับการอ้างอิง collection
+const appId = firebaseConfig.projectId;
 
 // Initialize Firebase
 try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
+    console.log("Firebase initialized successfully.");
 } catch (error) {
     console.error("Firebase initialization failed:", error);
-    // แสดงข้อความบนหน้าจอหาก Firebase ตั้งค่าไม่ถูกต้อง
-    document.body.innerHTML = `<div class="text-red-500 text-center p-8">Firebase configuration is missing or invalid. Please check your app.js file.</div>`;
+    showModal("ข้อผิดพลาด", "Firebase ไม่ได้ถูกตั้งค่า. โปรดตรวจสอบการตั้งค่าแอปพลิเคชัน.");
 }
-
 
 // --- Modal Functions ---
 const messageModal = document.getElementById('message-modal');
@@ -51,7 +54,6 @@ window.hideModal = function() {
 
 // --- Page Specific Logic ---
 
-// Function to handle Home page logic
 function initHomePage() {
     const transactionForm = document.getElementById('transaction-form');
     if (!transactionForm) return;
@@ -60,7 +62,11 @@ function initHomePage() {
     let transactions = [];
 
     function listenForTransactions() {
-        if (!auth.currentUser) return;
+        if (!auth.currentUser) {
+            transactions = [];
+            renderTransactions(); // Clear display if logged out
+            return;
+        }
         const transactionsCollectionRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
         onSnapshot(query(transactionsCollectionRef), (snapshot) => {
             transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -69,19 +75,87 @@ function initHomePage() {
     }
 
     function renderTransactions() {
-        // ... (โค้ดส่วนนี้เหมือนเดิม) ...
-    }
+        const transactionsList = document.getElementById('transactions-list');
+        const totalIncomeEl = document.getElementById('total-income');
+        const totalExpenseEl = document.getElementById('total-expense');
+        const totalBalanceEl = document.getElementById('total-balance');
 
+        if (!transactionsList || !totalIncomeEl || !totalExpenseEl || !totalBalanceEl) return;
+
+        transactionsList.innerHTML = '';
+        let totalIncome = 0, totalExpense = 0;
+        const inflationRate = parseFloat(inflationRateInput.value) / 100 || 0;
+        const currentDate = new Date();
+
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        transactions.forEach(transaction => {
+            const transactionDate = new Date(transaction.date);
+            const diffTime = Math.abs(currentDate - transactionDate);
+            const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
+            const adjustedAmount = transaction.amount * Math.pow(1 + inflationRate, diffYears);
+
+            if (transaction.type === 'income') totalIncome += adjustedAmount;
+            else totalExpense += adjustedAmount;
+
+            const typeClass = transaction.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            const sign = transaction.type === 'income' ? '+' : '-';
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `flex justify-between items-center p-4 rounded-xl shadow-sm mb-2 ${typeClass}`;
+            itemDiv.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <span class="text-xl font-bold">${sign}</span>
+                    <div>
+                        <div class="text-lg font-semibold">${transaction.category}</div>
+                        <div class="text-sm text-gray-500">${new Date(transaction.date).toLocaleDateString('th-TH')}</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-lg">${transaction.amount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท</div>
+                    <div class="text-xs text-gray-400 mt-1">(มูลค่าปัจจุบัน: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
+                </div>`;
+            transactionsList.appendChild(itemDiv);
+        });
+
+        const totalBalance = totalIncome - totalExpense;
+        totalIncomeEl.textContent = `${totalIncome.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
+        totalExpenseEl.textContent = `${totalExpense.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
+        totalBalanceEl.textContent = `${totalBalance.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
+    }
+    
     transactionForm.addEventListener('submit', async (event) => {
-        // ... (โค้ดส่วนนี้เหมือนเดิม) ...
+        event.preventDefault();
+        if (!auth.currentUser) {
+            showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกรายการได้ โปรดเข้าสู่ระบบก่อน");
+            return;
+        }
+
+        const newTransaction = {
+            date: document.getElementById('date').value,
+            type: document.getElementById('type').value,
+            category: document.getElementById('category').value,
+            amount: parseFloat(document.getElementById('amount').value),
+            createdAt: serverTimestamp()
+        };
+
+        try {
+            const transactionsCollectionRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
+            await addDoc(transactionsCollectionRef, newTransaction);
+            showModal("สำเร็จ", "บันทึกรายการสำเร็จ!");
+            transactionForm.reset();
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        } catch (e) {
+            console.error("Error adding document: ", e);
+            showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกรายการได้ โปรดลองอีกครั้ง");
+        }
     });
 
     inflationRateInput.addEventListener('input', renderTransactions);
-    document.getElementById('date').valueAsDate = new Date();
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
     listenForTransactions();
 }
 
-// Function to handle Login/Register page logic
 function initLoginPage() {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
@@ -96,9 +170,8 @@ function initLoginPage() {
         e.preventDefault();
         try {
             await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
-            // onAuthStateChanged จะจัดการ redirect เอง
         } catch (error) {
-            showModal("เข้าสู่ระบบไม่สำเร็จ", "อีเมลหรือรหัสผ่านไม่ถูกต้อง โปรดลองอีกครั้ง");
+            showModal("ข้อผิดพลาดในการเข้าสู่ระบบ", "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
         }
     });
 
@@ -110,13 +183,13 @@ function initLoginPage() {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            await setDoc(doc(db, 'artifacts', appId, 'users', user.uid), { username, email, createdAt: serverTimestamp() });
-            showModal("สำเร็จ", "สมัครสมาชิกเรียบร้อยแล้ว! กรุณาเข้าสู่ระบบด้วยข้อมูลใหม่ของคุณ");
+            const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
+            await setDoc(userDocRef, { username, email, createdAt: serverTimestamp() });
+            showModal("สำเร็จ", "สมัครสมาชิกเรียบร้อยแล้ว โปรดเข้าสู่ระบบ");
             loginContainer.classList.remove('hidden');
             registerContainer.classList.add('hidden');
-            registerForm.reset(); // เคลียร์ฟอร์มหลังสมัคร
         } catch (error) {
-            showModal("สมัครสมาชิกล้มเหลว", "อาจเป็นเพราะอีเมลนี้ถูกใช้ไปแล้ว หรือรหัสผ่านสั้นเกินไป");
+            showModal("ข้อผิดพลาดในการสมัครสมาชิก", "ไม่สามารถสมัครสมาชิกได้ โปรดลองใหม่อีกครั้ง");
         }
     });
 
@@ -124,16 +197,14 @@ function initLoginPage() {
     showRegisterBtn.addEventListener('click', (e) => { e.preventDefault(); registerContainer.classList.remove('hidden'); loginContainer.classList.add('hidden'); });
 }
 
-// Function to handle About page logic
 function initAboutPage() {
     const logoutBtn = document.getElementById('logout-btn');
     if (!logoutBtn) return;
     logoutBtn.addEventListener('click', async () => {
         try {
             await signOut(auth);
-            // onAuthStateChanged จะจัดการ redirect ไปหน้า login
         } catch (error) {
-            showModal("เกิดข้อผิดพลาด", "ไม่สามารถออกจากระบบได้ โปรดลองอีกครั้ง");
+            showModal("ข้อผิดพลาด", "ไม่สามารถออกจากระบบได้ โปรดลองอีกครั้ง");
         }
     });
 }
@@ -153,13 +224,10 @@ onAuthStateChanged(auth, async (user) => {
     const currentPage = window.location.pathname.split("/").pop() || "index.html";
 
     if (user) {
-        // --- ผู้ใช้เข้าสู่ระบบแล้ว ---
         if (currentPage === loginPage) {
-            window.location.replace('index.html'); // ถ้าอยู่หน้า login ให้ไปหน้าแรก
+            window.location.replace('index.html');
             return;
         }
-
-        // ดึงข้อมูลผู้ใช้มาแสดงผล
         const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
@@ -170,16 +238,15 @@ onAuthStateChanged(auth, async (user) => {
             if (userIdDisplay) userIdDisplay.textContent = user.uid;
         }
     } else {
-        // --- ผู้ใช้ยังไม่ได้เข้าสู่ระบบ ---
         if (protectedPages.includes(currentPage)) {
-            window.location.replace(loginPage); // ถ้าพยายามเข้าหน้าป้องกัน ให้ไปหน้า login
+            window.location.replace(loginPage);
         }
     }
 });
 
 // --- Initialize Page ---
 document.addEventListener('DOMContentLoaded', () => {
-    if (!auth) return; // หยุดการทำงานถ้า Firebase ไม่พร้อม
+    if (!auth) return;
     setActiveNav();
     const currentPage = window.location.pathname.split("/").pop() || "index.html";
     if (currentPage === 'index.html') initHomePage();
