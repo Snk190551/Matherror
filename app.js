@@ -19,7 +19,6 @@ const firebaseConfig = {
   measurementId: "G-8H400D8BHL"
 };
 
-// ใช้ projectId เป็น appId สำหรับการอ้างอิง collection
 const appId = firebaseConfig.projectId;
 
 // Initialize Firebase
@@ -59,21 +58,25 @@ function initHomePage() {
     if (!transactionForm) return;
 
     const inflationRateInput = document.getElementById('inflation-rate');
-    let transactions = [];
+    let transactions = []; // ตัวแปรสำหรับเก็บข้อมูลรายการทั้งหมด
 
+    // *** 1. ฟังก์ชันนี้จะ "ดักฟัง" การเปลี่ยนแปลงข้อมูลใน Firestore แบบ Real-time ***
     function listenForTransactions() {
         if (!auth.currentUser) {
             transactions = [];
-            renderTransactions(); // Clear display if logged out
+            renderTransactions(); // เคลียร์หน้าจอหากผู้ใช้ออกจากระบบ
             return;
         }
         const transactionsCollectionRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
+        
+        // onSnapshot คือหัวใจสำคัญ: จะทำงานทุกครั้งที่มีข้อมูลใหม่เข้ามา
         onSnapshot(query(transactionsCollectionRef), (snapshot) => {
             transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderTransactions();
+            renderTransactions(); // เมื่อข้อมูลเปลี่ยน ให้วาดหน้าจอใหม่
         });
     }
 
+    // *** 2. ฟังก์ชันนี้จะ "วาดหน้าจอใหม่" ทุกครั้งที่มีข้อมูลอัปเดต ***
     function renderTransactions() {
         const transactionsList = document.getElementById('transactions-list');
         const totalIncomeEl = document.getElementById('total-income');
@@ -82,25 +85,29 @@ function initHomePage() {
 
         if (!transactionsList || !totalIncomeEl || !totalExpenseEl || !totalBalanceEl) return;
 
-        transactionsList.innerHTML = '';
+        transactionsList.innerHTML = ''; // ล้างรายการเก่าทิ้งก่อน
         let totalIncome = 0, totalExpense = 0;
         const inflationRate = parseFloat(inflationRateInput.value) / 100 || 0;
         const currentDate = new Date();
 
+        // เรียงลำดับรายการตามวันที่ล่าสุดก่อนแสดงผล
         transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+        // วนลูปเพื่อสร้าง HTML ของแต่ละรายการ และคำนวณยอดรวม
         transactions.forEach(transaction => {
             const transactionDate = new Date(transaction.date);
             const diffTime = Math.abs(currentDate - transactionDate);
             const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
             const adjustedAmount = transaction.amount * Math.pow(1 + inflationRate, diffYears);
 
+            // เพิ่มยอดเงินเข้าไปในตัวแปรรวมรายรับ-รายจ่าย
             if (transaction.type === 'income') totalIncome += adjustedAmount;
             else totalExpense += adjustedAmount;
 
             const typeClass = transaction.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
             const sign = transaction.type === 'income' ? '+' : '-';
 
+            // สร้าง HTML element ของรายการ
             const itemDiv = document.createElement('div');
             itemDiv.className = `flex justify-between items-center p-4 rounded-xl shadow-sm mb-2 ${typeClass}`;
             itemDiv.innerHTML = `
@@ -115,15 +122,19 @@ function initHomePage() {
                     <div class="font-bold text-lg">${transaction.amount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท</div>
                     <div class="text-xs text-gray-400 mt-1">(มูลค่าปัจจุบัน: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
                 </div>`;
-            transactionsList.appendChild(itemDiv);
+            transactionsList.appendChild(itemDiv); // นำไปแปะในประวัติ
         });
 
+        // คำนวณยอดคงเหลือ
         const totalBalance = totalIncome - totalExpense;
+
+        // อัปเดตตัวเลขสรุปบนหน้าจอ
         totalIncomeEl.textContent = `${totalIncome.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
         totalExpenseEl.textContent = `${totalExpense.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
         totalBalanceEl.textContent = `${totalBalance.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท`;
     }
     
+    // *** 3. ฟังก์ชันนี้จะทำงานเมื่อกดปุ่ม "บันทึกรายการ" ***
     transactionForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!auth.currentUser) {
@@ -140,6 +151,7 @@ function initHomePage() {
         };
 
         try {
+            // ส่งข้อมูลไปที่ Firestore
             const transactionsCollectionRef = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
             await addDoc(transactionsCollectionRef, newTransaction);
             showModal("สำเร็จ", "บันทึกรายการสำเร็จ!");
@@ -153,6 +165,8 @@ function initHomePage() {
 
     inflationRateInput.addEventListener('input', renderTransactions);
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    
+    // เริ่ม "ดักฟัง" ข้อมูลทันทีที่หน้าแรกถูกโหลด
     listenForTransactions();
 }
 
@@ -219,7 +233,7 @@ function setActiveNav() {
 }
 
 onAuthStateChanged(auth, async (user) => {
-    const protectedPages = ['index.html', 'about.html', 'invest.html'];
+    const protectedPages = ['index.html', 'about.html', 'invest.html', '']; // '' for root
     const loginPage = 'login.html';
     const currentPage = window.location.pathname.split("/").pop() || "index.html";
 
@@ -249,7 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!auth) return;
     setActiveNav();
     const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    if (currentPage === 'index.html') initHomePage();
+    if (currentPage === 'index.html' || currentPage === '') initHomePage();
     else if (currentPage === 'login.html') initLoginPage();
     else if (currentPage === 'about.html') initAboutPage();
 });
+
