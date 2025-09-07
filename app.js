@@ -60,59 +60,6 @@ function hideConfirmationModal() {
     }
 }
 
-// --- Investment News Data (Curated List) ---
-const investmentNews = [
-    {
-        title: "“เงินบาท” แข็งค่า จับตาตัวเลขเงินเฟ้อสหรัฐฯ-ทิศทางดอกเบี้ยเฟด",
-        imageUrl: "https://placehold.co/600x400/16A34A/FFFFFF?text=เงินบาท",
-        linkUrl: "https://www.thansettakij.com/finance/exchange/595308",
-        source: "ฐานเศรษฐกิจ"
-    },
-    {
-        title: "ราคาทองวันนี้ ปรับลง 50 บาท รีบตัดสินใจ \"ควรซื้อหรือขาย\"",
-        imageUrl: "https://placehold.co/600x400/FACC15/000000?text=ราคาทอง",
-        linkUrl: "https://www.thairath.co.th/money/investment/golds/2791888",
-        source: "Thairath Money"
-    },
-    {
-        title: "เจาะ 5 หุ้นลิสซิ่ง กำไรฟื้นเด่นน่าลงทุน",
-        imageUrl: "https://placehold.co/600x400/2563EB/FFFFFF?text=หุ้นลิสซิ่ง",
-        linkUrl: "https://www.bangkokbiznews.com/finance/investment/1131189",
-        source: "กรุงเทพธุรกิจ"
-    },
-    {
-        title: "รู้จัก 5 เรื่องต้องระวัง ลงทุน 'หุ้นกู้' อย่างไรไม่ให้พลาด",
-        imageUrl: "https://placehold.co/600x400/9333EA/FFFFFF?text=หุ้นกู้",
-        linkUrl: "https://www.thairath.co.th/money/investment/stocks/2791928",
-        source: "Thairath Money"
-    },
-    {
-        title: "Bitcoin Halving คืออะไร? ทำไมนักลงทุนทั่วโลกจับตา",
-        imageUrl: "https://placehold.co/600x400/F97316/FFFFFF?text=Bitcoin",
-        linkUrl: "https://brandinside.asia/what-is-bitcoin-halving-why-investor-watch/",
-        source: "Brand Inside"
-    },
-    {
-        title: "ทิศทางตลาดอสังหาฯ ครึ่งปีหลัง คอนโดฯ กลางเมืองยังน่าสน",
-        imageUrl: "https://placehold.co/600x400/0891B2/FFFFFF?text=คอนโด",
-        linkUrl: "https://www.bangkokbiznews.com/property/1109968",
-        source: "กรุงเทพธุรกิจ"
-    },
-    {
-        title: "มือใหม่เริ่มลงทุนกองทุนรวมอย่างไร? รวมขั้นตอนง่ายๆ",
-        imageUrl: "https://placehold.co/600x400/65A30D/FFFFFF?text=มือใหม่ลงทุน",
-        linkUrl: "https://www.moneybuffalo.in.th/investment/how-to-start-invest-in-mutual-fund",
-        source: "Money Buffalo"
-    },
-    {
-        title: "ต่างชาติแห่ลงทุน EEC ยอดทะลุเป้าหมาย โอกาสโตต่อเนื่อง",
-        imageUrl: "https://placehold.co/600x400/BE185D/FFFFFF?text=EEC",
-        linkUrl: "https://www.prachachat.net/economy/news-1533036",
-        source: "ประชาชาติธุรกิจ"
-    }
-];
-
-
 // --- Core App Functions ---
 async function setInflationRate() {
     const inflationInput = document.getElementById('inflation-rate');
@@ -330,48 +277,67 @@ function initAboutPage() {
     });
 }
 
-function initInvestPage() {
+async function initInvestPage() {
     const newsGrid = document.getElementById('news-grid');
     if (!newsGrid) return;
 
-    newsGrid.innerHTML = ''; // Clear any previous message
+    newsGrid.innerHTML = '<p class="text-center text-gray-500 md:col-span-2">กำลังโหลดข่าวสารล่าสุด...</p>';
 
-    investmentNews.forEach(news => {
-        const card = document.createElement('a');
-        card.href = news.linkUrl;
-        card.target = "_blank";
-        card.rel = "noopener noreferrer";
-        card.className = "block bg-white rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden group";
+    // ใช้บริการ RSS to JSON เพื่อแปลง RSS Feed ของ "ฐานเศรษฐกิจ" ให้เป็นข้อมูลที่ใช้ง่าย
+    const rssToJsonApiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.thansettakij.com%2Frss%2Ffinance.xml';
 
-        card.innerHTML = `
-            <div class="relative">
-                <img src="${news.imageUrl}" alt="${news.title}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-2 text-xs">${news.source}</div>
-            </div>
-            <div class="p-4">
-                <h3 class="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition-colors duration-300">${news.title}</h3>
-            </div>
-        `;
-        newsGrid.appendChild(card);
-    });
+    try {
+        const response = await fetch(rssToJsonApiUrl);
+        if (!response.ok) {
+            throw new Error('ไม่สามารถโหลดข้อมูลข่าวได้');
+        }
+        const data = await response.json();
+
+        newsGrid.innerHTML = ''; // ล้างข้อความ "กำลังโหลด..."
+
+        if (data.items && data.items.length > 0) {
+            data.items.slice(0, 8).forEach(news => { // แสดงสูงสุด 8 ข่าว
+                const card = document.createElement('a');
+                card.href = news.link;
+                card.target = "_blank";
+                card.rel = "noopener noreferrer";
+                card.className = "block bg-white rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden group";
+
+                // ใช้ thumbnail จาก feed ถ้ามี, ถ้าไม่มีใช้รูปภาพตัวอย่าง
+                const imageUrl = news.thumbnail || `https://placehold.co/600x400/2563EB/FFFFFF?text=${encodeURIComponent(news.title.substring(0, 20))}`;
+
+                card.innerHTML = `
+                    <div class="relative">
+                        <img src="${imageUrl}" alt="${news.title}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null;this.src='https://placehold.co/600x400/94A3B8/FFFFFF?text=Image+Error';">
+                        <div class="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-2 text-xs">${news.author || 'ฐานเศรษฐกิจ'}</div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition-colors duration-300">${news.title}</h3>
+                    </div>
+                `;
+                newsGrid.appendChild(card);
+            });
+        } else {
+             newsGrid.innerHTML = '<p class="text-center text-gray-500 md:col-span-2">ไม่พบข้อมูลข่าวสารในขณะนี้</p>';
+        }
+
+    } catch (error) {
+        console.error("Error fetching investment news:", error);
+        newsGrid.innerHTML = '<p class="text-center text-red-500 md:col-span-2">เกิดข้อผิดพลาดในการโหลดข่าวสาร</p>';
+    }
 }
 
 
 // --- Main Controller & Auth Observer ---
 onAuthStateChanged(auth, async (user) => {
-    const protectedPages = ['', 'index.html', 'about.html', 'invest.html'];
     const loginPage = 'login.html';
-    let currentPage = window.location.pathname.split("/").pop() || 'index.html';
-    if(currentPage.endsWith('.html')) {
-        currentPage = currentPage.slice(0, -5);
+    let currentPageName = window.location.pathname.split("/").pop().replace('.html', '');
+    if (currentPageName === '' || currentPageName === 'index') {
+        currentPageName = 'index';
     }
-     if (currentPage === '') {
-        currentPage = 'index';
-    }
-
 
     if (user) {
-        if (currentPage === 'login') {
+        if (currentPageName === 'login') {
             window.location.replace('index.html');
             return;
         }
@@ -386,8 +352,8 @@ onAuthStateChanged(auth, async (user) => {
         }
 
     } else {
-        const protectedPageNames = ['index', 'about', 'invest'];
-        if (protectedPageNames.includes(currentPage)) {
+        const protectedPages = ['index', 'about', 'invest'];
+        if (protectedPages.includes(currentPageName)) {
             if (unsubscribeFromTransactions) unsubscribeFromTransactions();
             renderTransactionsUI([]);
             window.location.replace('login.html');
@@ -405,35 +371,28 @@ document.addEventListener('DOMContentLoaded', () => {
         hideConfirmationModal();
     });
 
-    let currentPage = window.location.pathname.split("/").pop() || 'index';
-    if(currentPage.endsWith('.html')) {
-        currentPage = currentPage.slice(0, -5);
-    }
-     if (currentPage === '') {
-        currentPage = 'index';
+    let currentPageName = window.location.pathname.split("/").pop().replace('.html', '');
+     if (currentPageName === '') {
+        currentPageName = 'index';
     }
     
     document.querySelectorAll('nav a').forEach(link => {
-        let linkPage = link.getAttribute('href').split('/').pop() || 'index';
-        if(linkPage.endsWith('.html')) {
-            linkPage = linkPage.slice(0, -5);
+        let linkPageName = link.getAttribute('href').split('/').pop().replace('.html', '');
+        if (linkPageName === '') {
+            linkPageName = 'index';
         }
-        if (linkPage === '') {
-            linkPage = 'index';
-        }
-        
-        if (linkPage === currentPage) {
+        if (linkPageName === currentPageName) {
             link.classList.add('active-nav');
         }
     });
     
-    if (currentPage === 'index') {
+    if (currentPageName === 'index') {
         initHomePage();
-    } else if (currentPage === 'login') {
+    } else if (currentPageName === 'login') {
         initLoginPage();
-    } else if (currentPage === 'about') {
+    } else if (currentPageName === 'about') {
         initAboutPage();
-    } else if (currentPage === 'invest') {
+    } else if (currentPageName === 'invest') {
         initInvestPage();
     }
 });
