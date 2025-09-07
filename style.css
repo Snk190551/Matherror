@@ -1,4 +1,4 @@
-
+/* style.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 body {
@@ -38,6 +38,6 @@ body {
 .active-nav {
     background-color: white;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    color: #1e40af;
+    color: #1e40af; /* blue-800 */
 }
 

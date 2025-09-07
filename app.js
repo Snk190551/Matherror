@@ -211,14 +211,6 @@ function startTransactionListener() {
 
 // --- Page Initialization Functions ---
 function initHomePage() {
-    document.getElementById('confirm-cancel-btn')?.addEventListener('click', hideConfirmationModal);
-    document.getElementById('confirm-action-btn')?.addEventListener('click', () => {
-        if (typeof confirmCallback === 'function') {
-            confirmCallback();
-        }
-        hideConfirmationModal();
-    });
-
     const transactionForm = document.getElementById('transaction-form');
     const transactionsListContainer = document.getElementById('transactions-list');
 
@@ -367,12 +359,20 @@ function initInvestPage() {
 
 // --- Main Controller & Auth Observer ---
 onAuthStateChanged(auth, async (user) => {
-    const loginPage = '/login.html';
-    let path = window.location.pathname;
+    const protectedPages = ['', 'index.html', 'about.html', 'invest.html'];
+    const loginPage = 'login.html';
+    let currentPage = window.location.pathname.split("/").pop() || 'index.html';
+    if(currentPage.endsWith('.html')) {
+        currentPage = currentPage.slice(0, -5);
+    }
+     if (currentPage === '') {
+        currentPage = 'index';
+    }
+
 
     if (user) {
-        if (path.endsWith(loginPage)) {
-            window.location.replace('/');
+        if (currentPage === 'login') {
+            window.location.replace('index.html');
             return;
         }
         
@@ -386,32 +386,54 @@ onAuthStateChanged(auth, async (user) => {
         }
 
     } else {
-        const protectedPaths = ['/', '/index.html', '/about.html', '/invest.html'];
-        if (protectedPaths.includes(path)) {
-            window.location.replace(loginPage);
+        const protectedPageNames = ['index', 'about', 'invest'];
+        if (protectedPageNames.includes(currentPage)) {
+            if (unsubscribeFromTransactions) unsubscribeFromTransactions();
+            renderTransactionsUI([]);
+            window.location.replace('login.html');
         }
     }
 });
 
 // --- Entry Point ---
 document.addEventListener('DOMContentLoaded', () => {
-    let path = window.location.pathname;
+    document.getElementById('confirm-cancel-btn')?.addEventListener('click', hideConfirmationModal);
+    document.getElementById('confirm-action-btn')?.addEventListener('click', () => {
+        if (typeof confirmCallback === 'function') {
+            confirmCallback();
+        }
+        hideConfirmationModal();
+    });
+
+    let currentPage = window.location.pathname.split("/").pop() || 'index';
+    if(currentPage.endsWith('.html')) {
+        currentPage = currentPage.slice(0, -5);
+    }
+     if (currentPage === '') {
+        currentPage = 'index';
+    }
     
-    // Set active nav link
     document.querySelectorAll('nav a').forEach(link => {
-        const linkPath = new URL(link.href).pathname;
-        if (linkPath === path || (path === '/' && linkPath.endsWith('/index.html'))) {
+        let linkPage = link.getAttribute('href').split('/').pop() || 'index';
+        if(linkPage.endsWith('.html')) {
+            linkPage = linkPage.slice(0, -5);
+        }
+        if (linkPage === '') {
+            linkPage = 'index';
+        }
+        
+        if (linkPage === currentPage) {
             link.classList.add('active-nav');
         }
     });
     
-    if (path === '/' || path.endsWith('/index.html')) {
+    if (currentPage === 'index') {
         initHomePage();
-    } else if (path.endsWith('/login.html')) {
+    } else if (currentPage === 'login') {
         initLoginPage();
-    } else if (path.endsWith('/about.html')) {
+    } else if (currentPage === 'about') {
         initAboutPage();
-    } else if (path.endsWith('/invest.html')) {
+    } else if (currentPage === 'invest') {
         initInvestPage();
     }
 });
