@@ -1,68 +1,190 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เข้าสู่ระบบด้วย Google</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- นำเข้า Google Identity Services Library สำหรับ Google Sign-In -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <style>
-    /* ปรับแต่ง CSS เพื่อจัดวางกล่อง Google Sign-In ให้อยู่ตรงกลาง */
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh; /* ทำให้ body สูงเต็มหน้าจอ */
-      margin: 0;
-      padding: 20px; /* เพิ่ม padding เพื่อไม่ให้ชิดขอบจอเกินไป */
-      box-sizing: border-box; /* รวม padding ในขนาดของ element */
-    }
-
-    .google-signin-box {
-      background-color: rgba(255, 255, 255, 0.9); /* สีขาวโปร่งใส */
-      backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอ */
-      padding: 30px;
-      border-radius: 12px; /* มุมโค้งมน */
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* เงา */
-      text-align: center;
-      max-width: 350px; /* กำหนดความกว้างสูงสุด */
-      width: 100%;
-      color: #333; /* สีตัวอักษรสำหรับกล่อง Google Sign-In */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .google-signin-box h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-    /* ปรับแต่งปุ่ม Google Sign-In เพิ่มเติมหากต้องการ */
-    .g_id_signin {
-        margin-top: 20px; /* เพิ่มระยะห่างจากข้อความ */
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แอปรายรับ-รายจ่าย: หน้าหลัก</title>
+    <!-- Tailwind CSS CDN เพื่อการตกแต่งที่สวยงาม -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom scrollbar for transaction history */
+        #transactions-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        #transactions-list::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        #transactions-list::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        #transactions-list::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
 </head>
-<body onload="checkLogin()"> <!-- เรียกใช้ checkLogin เมื่อโหลดหน้า -->
-  <div class="google-signin-box">
-    <h2>เข้าสู่ระบบ</h2>
-    <p>โปรดเข้าสู่ระบบด้วยบัญชี Google ของคุณ</p>
-    <div id="g_id_onload"
-         data-client_id="896330929514-ktrmgrol8v2he3dubl591j0cap13np5p.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse"> <!-- data-client_id ของคุณ -->
-    </div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-size="large"
-         data-theme="outline"
-         data-text="signin_with"
-         data-shape="rectangular"
-         data-logo_alignment="left">
-    </div>
-  </div>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-  <script src="script.js"></script> <!-- นำเข้า JavaScript หลัก -->
+    <!-- Main Container -->
+    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-4xl min-h-[700px] flex flex-col">
+
+        <!-- Navigation Links -->
+        <nav class="flex justify-between md:justify-around p-2 mb-6 bg-gray-100 rounded-xl shadow-inner">
+            <a href="index.html" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform scale-100 hover:scale-105 active:scale-95 bg-white shadow-md">
+                ประวัติรายการ
+            </a>
+            <a href="blank.html" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform scale-100 hover:scale-105 active:scale-95">
+                แนะนำการลงทุน
+            </a>
+            <a href="about.html" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform scale-100 hover:scale-105 active:scale-95">
+                เกี่ยวกับฉัน
+            </a>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="flex-1">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">บันทึกรายรับ-รายจ่าย</h2>
+            
+            <!-- Transaction Form -->
+            <form id="transaction-form" class="bg-gray-50 p-6 rounded-xl shadow-inner mb-6 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <div class="flex-1">
+                        <label for="date-input" class="block text-gray-700 font-medium mb-1">วันที่</label>
+                        <input type="date" id="date-input" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required>
+                    </div>
+                    <div class="flex-1">
+                        <label for="type-select" class="block text-gray-700 font-medium mb-1">ประเภท</label>
+                        <select id="type-select" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required>
+                            <option value="income">รายรับ</option>
+                            <option value="expense">รายจ่าย</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <div class="flex-1">
+                        <label for="category-input" class="block text-gray-700 font-medium mb-1">หมวดหมู่</label>
+                        <input type="text" id="category-input" placeholder="เช่น ค่าอาหาร, เงินเดือน" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required>
+                    </div>
+                    <div class="flex-1">
+                        <label for="amount-input" class="block text-gray-700 font-medium mb-1">จำนวนเงิน</label>
+                        <input type="number" id="amount-input" placeholder="0" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required min="0">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-indigo-700 transition-colors duration-300 transform scale-100 hover:scale-105 active:scale-95">
+                    บันทึกรายการ
+                </button>
+            </form>
+            
+            <!-- Inflation Rate Input -->
+            <div class="bg-gray-50 p-6 rounded-xl shadow-inner mb-6">
+                <label for="inflation-rate-input" class="block text-gray-700 font-medium mb-1">อัตราเงินเฟ้อต่อปี (%)</label>
+                <input type="number" id="inflation-rate-input" value="3.5" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" step="0.1">
+            </div>
+
+            <!-- Transaction History List -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">ประวัติรายการ</h3>
+                <div id="transactions-list" class="space-y-4 overflow-y-auto max-h-[250px] p-2 -m-2">
+                    <!-- Transaction items will be dynamically added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to handle app logic -->
+    <script>
+        // Get references to DOM elements
+        const transactionForm = document.getElementById('transaction-form');
+        const transactionsList = document.getElementById('transactions-list');
+        const dateInput = document.getElementById('date-input');
+        const typeSelect = document.getElementById('type-select');
+        const categoryInput = document.getElementById('category-input');
+        const amountInput = document.getElementById('amount-input');
+        const inflationRateInput = document.getElementById('inflation-rate-input');
+        
+        // Load data from localStorage or use an empty array
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+        // Function to calculate inflation-adjusted value
+        function calculateInflationAdjustedValue(amount, transactionDate, inflationRate) {
+            const today = new Date();
+            const transactionDay = new Date(transactionDate);
+            const years = (today - transactionDay) / (1000 * 60 * 60 * 24 * 365.25);
+            return amount * Math.pow(1 + (inflationRate / 100), years);
+        }
+
+        // Function to render transactions
+        function renderTransactions() {
+            const sortedTransactions = transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            transactionsList.innerHTML = '';
+            const inflationRate = parseFloat(inflationRateInput.value) || 0;
+
+            if (sortedTransactions.length === 0) {
+                transactionsList.innerHTML = '<p class="text-center text-gray-400 p-4">No transactions yet.</p>';
+                return;
+            }
+
+            sortedTransactions.forEach(transaction => {
+                const isIncome = transaction.type === 'income';
+                const sign = isIncome ? '+' : '-';
+                const color = isIncome ? 'text-green-600' : 'text-red-600';
+                const adjustedAmount = calculateInflationAdjustedValue(transaction.amount, transaction.date, inflationRate);
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-sm';
+                itemDiv.innerHTML = `
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-800">${transaction.category}</div>
+                        <div class="text-xs text-gray-500">${transaction.date}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold ${color}">
+                            ${sign}${transaction.amount.toLocaleString()} บาท
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">
+                            (Current Value: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)
+                        </div>
+                    </div>
+                `;
+                transactionsList.appendChild(itemDiv);
+            });
+        }
+
+        // Function to handle form submission
+        function addTransaction(event) {
+            event.preventDefault();
+
+            const newTransaction = {
+                date: dateInput.value,
+                type: typeSelect.value,
+                category: categoryInput.value,
+                amount: parseFloat(amountInput.value),
+            };
+
+            transactions.push(newTransaction);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+
+            dateInput.value = '';
+            categoryInput.value = '';
+            amountInput.value = '';
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+            renderTransactions();
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+
+        transactionForm.addEventListener('submit', addTransaction);
+        inflationRateInput.addEventListener('input', renderTransactions);
+
+        renderTransactions();
+    </script>
 </body>
 </html>
