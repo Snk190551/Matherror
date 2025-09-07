@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แอปรายรับ-รายจ่าย: เกี่ยวกับฉัน</title>
-    <!-- Tailwind CSS CDN for styling -->
+    <!-- Tailwind CSS CDN เพื่อการตกแต่งที่สวยงาม -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -12,9 +12,30 @@
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <!-- Modal for messages -->
+    <div id="message-modal" class="modal">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center">
+            <p id="modal-message" class="text-gray-800 font-semibold mb-4"></p>
+            <button id="modal-close-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">ตกลง</button>
+        </div>
+    </div>
 
     <!-- Main Container -->
     <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-4xl min-h-[700px] flex flex-col">
@@ -32,110 +53,96 @@
             </a>
         </nav>
 
-        <!-- Page Content -->
-        <div class="flex-1 flex flex-col items-center justify-center text-center">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">เกี่ยวกับฉัน</h2>
-            
-            <!-- Registration and Login Section -->
-            <div id="auth-section" class="w-full max-w-sm space-y-6">
-                
-                <!-- Registration Form -->
-                <div id="register-form-container">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4">สร้างบัญชีใหม่</h3>
-                    <form id="registration-form" class="space-y-4">
-                        <div>
-                            <input type="text" id="reg-username-input" placeholder="ชื่อผู้ใช้" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required>
-                        </div>
-                        <div>
-                            <input type="email" id="reg-email-input" placeholder="อีเมล" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required>
-                        </div>
-                        <div>
-                            <input type="password" id="reg-password-input" placeholder="รหัสผ่าน" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required>
-                        </div>
-                        <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-green-700 transition-colors duration-300 transform scale-100 hover:scale-105 active:scale-95">
-                            ลงทะเบียน
-                        </button>
-                    </form>
-                    <p class="text-center mt-4 text-sm text-gray-600">
-                        มีบัญชีแล้ว? <a href="#" id="show-login" class="text-indigo-600 font-semibold hover:underline">เข้าสู่ระบบที่นี่</a>
-                    </p>
-                </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-indigo-700 mb-6 text-center">เกี่ยวกับฉัน</h1>
 
-                <!-- Login Form -->
-                <div id="login-form-container" class="hidden">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4">เข้าสู่ระบบ</h3>
-                    <form id="login-form" class="space-y-4">
-                        <div>
-                            <input type="email" id="login-email-input" placeholder="อีเมล" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required>
-                        </div>
-                        <div>
-                            <input type="password" id="login-password-input" placeholder="รหัสผ่าน" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-colors duration-200" required>
-                        </div>
-                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-indigo-700 transition-colors duration-300 transform scale-100 hover:scale-105 active:scale-95">
-                            เข้าสู่ระบบ
-                        </button>
-                    </form>
-                    <p class="text-center mt-4 text-sm text-gray-600">
-                        ยังไม่มีบัญชี? <a href="#" id="show-register" class="text-green-600 font-semibold hover:underline">ลงทะเบียนที่นี่</a>
-                    </p>
-                </div>
-
-                <div id="message-box" class="mt-4 p-3 rounded-md hidden"></div>
-            </div>
+        <!-- Authentication and Profile Section -->
+        <div id="auth-section" class="flex flex-col items-center justify-center space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">เข้าสู่ระบบ / ลงทะเบียน</h2>
             
-            <!-- User Info Section (hidden by default) -->
-            <div id="user-info-section" class="hidden w-full max-w-sm">
-                <p class="text-lg text-gray-600 mb-4">
-                    สวัสดีครับ! คุณเข้าสู่ระบบในฐานะ: <br>
-                    <span id="user-display-name" class="font-bold text-xl text-gray-800 break-all"></span>
+            <!-- Login Form -->
+            <div id="login-container" class="w-full max-w-sm p-6 bg-gray-50 rounded-xl shadow-inner hidden">
+                <form id="login-form" class="space-y-4">
+                    <input type="email" id="email-login" placeholder="อีเมล" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500" required>
+                    <input type="password" id="password-login" placeholder="รหัสผ่าน" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500" required>
+                    <button type="submit" class="w-full p-3 rounded-md bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">เข้าสู่ระบบ</button>
+                </form>
+                <p class="text-center text-sm mt-4 text-gray-600">
+                    ยังไม่มีบัญชี? <a href="#" id="show-register" class="text-indigo-600 font-semibold hover:underline">สร้างบัญชี</a>
                 </p>
-                <button id="logout-button" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-red-700 transition-colors duration-300 transform scale-100 hover:scale-105 active:scale-95">
-                    ออกจากระบบ
-                </button>
             </div>
+
+            <!-- Registration Form -->
+            <div id="register-container" class="w-full max-w-sm p-6 bg-gray-50 rounded-xl shadow-inner">
+                <form id="register-form" class="space-y-4">
+                    <input type="text" id="username-register" placeholder="ชื่อผู้ใช้" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500" required>
+                    <input type="email" id="email-register" placeholder="อีเมล" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500" required>
+                    <input type="password" id="password-register" placeholder="รหัสผ่าน" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-indigo-500" required>
+                    <button type="submit" class="w-full p-3 rounded-md bg-green-600 text-white font-bold hover:bg-green-700 transition-colors">ลงทะเบียน</button>
+                </form>
+                <p class="text-center text-sm mt-4 text-gray-600">
+                    มีบัญชีอยู่แล้ว? <a href="#" id="show-login" class="text-indigo-600 font-semibold hover:underline">เข้าสู่ระบบ</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- User Profile Section -->
+        <div id="user-section" class="flex flex-col items-center space-y-6 hidden">
+            <h2 class="text-3xl font-bold text-gray-800">ข้อมูลผู้ใช้</h2>
+            <div class="text-center p-6 bg-gray-50 rounded-xl shadow-inner w-full max-w-md">
+                <p class="text-sm text-gray-500 mb-2">สวัสดี,</p>
+                <p id="user-greeting" class="text-3xl font-extrabold text-indigo-700 mb-4"></p>
+                <p class="text-sm font-semibold text-gray-600">
+                    User ID: <span id="user-id" class="break-words text-gray-800"></span>
+                </p>
+            </div>
+            <button id="logout-btn" class="px-6 py-3 rounded-xl bg-red-500 text-white font-bold shadow-lg hover:bg-red-600 transition-colors">
+                ออกจากระบบ
+            </button>
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
+    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global variables provided by the Canvas environment
+        // Firebase Global Variables (MUST BE USED)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
+
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+        setLogLevel('debug'); // For debugging purposes
 
-        // Get references to DOM elements
         const authSection = document.getElementById('auth-section');
-        const userSection = document.getElementById('user-info-section');
-        const userDisplayName = document.getElementById('user-display-name');
-        const logoutButton = document.getElementById('logout-button');
-        const messageBox = document.getElementById('message-box');
-
-        const regForm = document.getElementById('registration-form');
-        const regUsernameInput = document.getElementById('reg-username-input');
-        const regEmailInput = document.getElementById('reg-email-input');
-        const regPasswordInput = document.getElementById('reg-password-input');
-
-        const loginForm = document.getElementById('login-form');
-        const loginEmailInput = document.getElementById('login-email-input');
-        const loginPasswordInput = document.getElementById('login-password-input');
-
+        const userSection = document.getElementById('user-section');
+        const loginContainer = document.getElementById('login-container');
+        const registerContainer = document.getElementById('register-container');
         const showLoginBtn = document.getElementById('show-login');
         const showRegisterBtn = document.getElementById('show-register');
-        const regContainer = document.getElementById('register-form-container');
-        const loginContainer = document.getElementById('login-form-container');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const userGreeting = document.getElementById('user-greeting');
+        const userIdDisplay = document.getElementById('user-id');
+        const logoutBtn = document.getElementById('logout-btn');
 
-        /**
-         * Signs in the user using the provided custom token or anonymously.
-         */
+        const modal = document.getElementById('message-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        function showModal(message) {
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
+        }
+
+        modalCloseBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
         async function signInUser() {
             try {
                 if (initialAuthToken) {
@@ -143,173 +150,90 @@
                 } else {
                     await signInAnonymously(auth);
                 }
-                console.log("Firebase sign-in successful.");
             } catch (error) {
-                console.error("Error signing in:", error);
-                showMessage('เกิดข้อผิดพลาดในการเข้าสู่ระบบ', 'error');
+                console.error("Error during initial sign-in:", error);
+                showModal("เกิดข้อผิดพลาดในการลงชื่อเข้าใช้เริ่มต้น");
             }
         }
 
-        /**
-         * Displays a message to the user in a styled box.
-         * @param {string} message The message to display.
-         * @param {string} type The type of message ('success', 'error', 'info').
-         */
-        function showMessage(message, type) {
-            messageBox.textContent = message;
-            messageBox.className = 'mt-4 p-3 rounded-md text-sm text-center';
-            messageBox.classList.remove('hidden');
-            switch (type) {
-                case 'success':
-                    messageBox.classList.add('bg-green-100', 'text-green-800');
-                    break;
-                case 'error':
-                    messageBox.classList.add('bg-red-100', 'text-red-800');
-                    break;
-                case 'info':
-                    messageBox.classList.add('bg-blue-100', 'text-blue-800');
-                    break;
-            }
-            setTimeout(() => {
-                messageBox.classList.add('hidden');
-            }, 5000);
-        }
-
-        /**
-         * Handles user registration.
-         * @param {Event} event The form submission event.
-         */
-        async function handleRegistration(event) {
-            event.preventDefault();
-            const username = regUsernameInput.value.trim();
-            const email = regEmailInput.value.trim();
-            const password = regPasswordInput.value.trim();
-
-            if (!username || !email || !password) {
-                showMessage('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
-                return;
-            }
-
-            showMessage('กำลังสร้างบัญชี...', 'info');
-
-            try {
-                // Check if username is already taken by another user
-                const takenDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'usernames', username.toLowerCase());
-                const takenDocSnap = await getDoc(takenDocRef);
-                
-                if (takenDocSnap.exists()) {
-                    showMessage('ชื่อผู้ใช้นี้มีคนใช้แล้ว กรุณาเลือกชื่ออื่น', 'error');
-                    return;
-                }
-
-                // Create user with email and password
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                // Store username and create a public record
-                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid), {
-                    username: username,
-                    email: email,
-                    createdAt: new Date()
-                });
-
-                await setDoc(takenDocRef, { userId: user.uid });
-                showMessage('ลงทะเบียนสำเร็จ! กำลังเข้าสู่ระบบ...', 'success');
-
-            } catch (error) {
-                console.error("Error during registration:", error);
-                let errorMessage = 'เกิดข้อผิดพลาดในการลงทะเบียน ลองใหม่อีกครั้ง';
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = 'อีเมลนี้ถูกใช้ไปแล้ว';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = 'รหัสผ่านควรมีอย่างน้อย 6 ตัวอักษร';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
-                }
-                showMessage(errorMessage, 'error');
-            }
-        }
-
-        /**
-         * Handles user login.
-         * @param {Event} event The form submission event.
-         */
-        async function handleLogin(event) {
-            event.preventDefault();
-            const email = loginEmailInput.value.trim();
-            const password = loginPasswordInput.value.trim();
-
-            if (!email || !password) {
-                showMessage('กรุณากรอกอีเมลและรหัสผ่าน', 'error');
-                return;
-            }
-
-            showMessage('กำลังเข้าสู่ระบบ...', 'info');
-
+        // Handle login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-login').value;
+            const password = document.getElementById('password-login').value;
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                showMessage('เข้าสู่ระบบสำเร็จ!', 'success');
+                showModal("เข้าสู่ระบบสำเร็จ!");
             } catch (error) {
-                console.error("Error during login:", error);
-                let errorMessage = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    errorMessage = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
-                }
-                showMessage(errorMessage, 'error');
+                console.error("Login error:", error);
+                showModal("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
             }
-        }
-
-        /**
-         * Handles user logout.
-         */
-        async function handleLogout() {
-            await signOut(auth);
-            showMessage('ออกจากระบบแล้ว', 'success');
-        }
-
-        // Add event listeners
-        regForm.addEventListener('submit', handleRegistration);
-        loginForm.addEventListener('submit', handleLogin);
-        logoutButton.addEventListener('click', handleLogout);
-
-        showLoginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            regContainer.classList.add('hidden');
-            loginContainer.classList.remove('hidden');
         });
 
-        showRegisterBtn.addEventListener('click', (e) => {
+        // Handle registration form submission
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            loginContainer.classList.add('hidden');
-            regContainer.classList.remove('hidden');
+            const username = document.getElementById('username-register').value;
+            const email = document.getElementById('email-register').value;
+            const password = document.getElementById('password-register').value;
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const userDocRef = doc(db, 'artifacts', appId, 'users', userCredential.user.uid);
+                await setDoc(userDocRef, { username: username, email: email, created: new Date() });
+                showModal("ลงทะเบียนสำเร็จแล้ว! กำลังเข้าสู่ระบบ...");
+            } catch (error) {
+                console.error("Registration error:", error);
+                showModal("เกิดข้อผิดพลาดในการลงทะเบียน: " + error.message);
+            }
+        });
+
+        // Handle logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                showModal("ออกจากระบบแล้ว");
+            } catch (error) {
+                console.error("Logout error:", error);
+                showModal("เกิดข้อผิดพลาดในการออกจากระบบ: " + error.message);
+            }
         });
 
         // Listen for authentication state changes
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // User is signed in
                 const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
                 const userDocSnap = await getDoc(userDocRef);
                 
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
-                    userDisplayName.textContent = userData.username || user.email;
+                    userGreeting.textContent = userData.username || user.email;
+                    userIdDisplay.textContent = user.uid;
                     authSection.classList.add('hidden');
                     userSection.classList.remove('hidden');
                 } else {
-                    // This is a new user from custom auth token, show registration form
                     authSection.classList.remove('hidden');
                     userSection.classList.add('hidden');
-                    regContainer.classList.remove('hidden');
+                    registerContainer.classList.remove('hidden');
                     loginContainer.classList.add('hidden');
                 }
             } else {
-                // User is signed out
                 authSection.classList.remove('hidden');
                 userSection.classList.add('hidden');
-                regContainer.classList.remove('hidden');
                 loginContainer.classList.add('hidden');
+                registerContainer.classList.remove('hidden');
             }
+        });
+
+        showLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginContainer.classList.remove('hidden');
+            registerContainer.classList.add('hidden');
+        });
+
+        showRegisterBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerContainer.classList.remove('hidden');
+            loginContainer.classList.add('hidden');
         });
 
         // Start the app by signing in the user
