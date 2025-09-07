@@ -378,8 +378,6 @@ onAuthStateChanged(auth, async (user) => {
             if (userIdDisplay) userIdDisplay.textContent = user.uid;
         }
 
-        // We only need to listen for transactions on the home page
-        // so this check can be removed from here.
     } else {
         if (protectedPages.includes(currentPage)) {
             if (unsubscribeFromTransactions) unsubscribeFromTransactions();
@@ -408,9 +406,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    if (currentPage === '' || currentPage === 'index.html') initHomePage();
-    else if (currentPage === 'login.html') initLoginPage();
-    else if (currentPage === 'about.html') initAboutPage();
-    else if (currentPage === 'invest.html') initInvestPage();
+    // This is the corrected routing logic
+    if (currentPage === '' || currentPage === 'index.html' || currentPage.toLowerCase() === 'index.html') {
+        initHomePage();
+    } else if (currentPage.toLowerCase() === 'login.html') {
+        initLoginPage();
+    } else if (currentPage.toLowerCase() === 'about.html') {
+        initAboutPage();
+    } else if (currentPage.toLowerCase() === 'invest.html') {
+        initInvestPage();
+    }
 });
 
