@@ -371,7 +371,7 @@ onAuthStateChanged(auth, async (user) => {
     let path = window.location.pathname;
 
     if (user) {
-        if (path === loginPage) {
+        if (path.endsWith(loginPage)) {
             window.location.replace('/');
             return;
         }
@@ -397,19 +397,21 @@ onAuthStateChanged(auth, async (user) => {
 document.addEventListener('DOMContentLoaded', () => {
     let path = window.location.pathname;
     
+    // Set active nav link
     document.querySelectorAll('nav a').forEach(link => {
-        if (link.getAttribute('href') === path) {
+        const linkPath = new URL(link.href).pathname;
+        if (linkPath === path || (path === '/' && linkPath === '/index.html')) {
             link.classList.add('active-nav');
         }
     });
     
-    if (path === '/' || path === '/index.html') {
+    if (path === '/' || path.endsWith('/index.html')) {
         initHomePage();
-    } else if (path === '/login.html') {
+    } else if (path.endsWith('/login.html')) {
         initLoginPage();
-    } else if (path === '/about.html') {
+    } else if (path.endsWith('/about.html')) {
         initAboutPage();
-    } else if (path === '/invest.html') {
+    } else if (path.endsWith('/invest.html')) {
         initInvestPage();
     }
 });
