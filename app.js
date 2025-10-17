@@ -124,7 +124,7 @@ async function setInflationRate() {
 
     try {
         await new Promise(resolve => setTimeout(resolve, 500));
-        const recentInflationRate = 100.0;
+        const recentInflationRate = -0.72;
         const dataYear = 2024;
         inflationInput.value = recentInflationRate.toFixed(2);
         inflationStatus.textContent = `ข้อมูลอ้างอิงปี ${dataYear}`;
@@ -158,7 +158,7 @@ function renderTransactionsUI(transactions = []) {
 
     listEl.innerHTML = '';
     let totalIncome = 0, totalExpense = 0;
-    const inflationRate = parseFloat(inflationRateInput?.value ||100.0) / 100;
+    const inflationRate = parseFloat(inflationRateInput?.value ||-0.72) / 100;
     const currentDate = new Date();
 
     transactions.forEach(tx => {
