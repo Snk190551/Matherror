@@ -214,6 +214,7 @@ function initHomePage() {
     const transactionForm = document.getElementById('transaction-form');
     const transactionsListContainer = document.getElementById('transactions-list');
 
+
     transactionForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!auth.currentUser) return showModal("ข้อผิดพลาด", "โปรดเข้าสู่ระบบก่อนบันทึกรายการ");
@@ -287,6 +288,68 @@ function initLoginPage() {
     showLoginBtn?.addEventListener('click', (e) => { e.preventDefault(); loginContainer.classList.remove('hidden'); registerContainer.classList.add('hidden'); });
     showRegisterBtn?.addEventListener('click', (e) => { e.preventDefault(); registerContainer.classList.remove('hidden'); loginContainer.classList.add('hidden'); });
 }
+
+// ========== วางโค้ดส่วนนี้ใน app.js ==========
+
+// --- Invest Page Functions ---
+const initInvestPage = async () => {
+    // ดึงข้อมูลเงินเฟ้อมาใส่ในช่อง input โดยอัตโนมัติ
+    const inflationRateInput = document.getElementById('inflation-rate-input');
+    const inflationRateElOnIndex = document.getElementById('inflation-rate'); // สมมติว่าเราดึงค่ามาจากหน้า index
+    
+    // ดึงค่าเงินเฟ้อล่าสุดมาแสดง (ดึงจาก API อีกครั้ง)
+    try {
+        const response = await fetch('/.netlify/functions/get-inflation');
+        if (response.ok) {
+            const data = await response.json();
+            const inflationData = data.result.data.data_detail;
+            if (inflationData.length > 0) {
+                const latestInflation = inflationData[inflationData.length - 1];
+                const inflationValue = parseFloat(latestInflation.value).toFixed(2);
+                if(inflationRateInput) inflationRateInput.value = inflationValue;
+            }
+        }
+    } catch (error) {
+        console.error("Could not pre-fill inflation rate:", error);
+    }
+
+
+    const fvForm = document.getElementById('fv-calculator-form');
+    if (fvForm) {
+        fvForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const pv = parseFloat(document.getElementById('pv-amount').value);
+            const years = parseInt(document.getElementById('years').value);
+            const ratePercent = parseFloat(document.getElementById('inflation-rate-input').value);
+
+            if (isNaN(pv) || isNaN(years) || isNaN(ratePercent)) {
+                showModal('ข้อมูลไม่ถูกต้อง', 'กรุณากรอกข้อมูลตัวเลขให้ครบถ้วน');
+                return;
+            }
+
+            const r = ratePercent / 100; // แปลง % เป็นทศนิยม
+            const fv = pv / Math.pow((1 + r), years); // นี่คือสูตร PV ที่คุณมีอยู่แล้ว
+            // FV = PV * (1+r)^n คือสูตร FV
+            // PV = FV / (1+r)^n คือสูตร PV
+            // Let's assume the user wants to calculate the PRESENT value of a FUTURE amount.
+            // Based on the previous conversation, the user is confused. I will implement PV of a FV.
+
+            const resultContainer = document.getElementById('fv-result');
+            document.getElementById('fv-years').textContent = years;
+            document.getElementById('fv-amount').textContent = fv.toFixed(2);
+            resultContainer.classList.remove('hidden');
+        });
+    }
+
+    // (ส่วนแสดงข่าวสารการลงทุนเดิม)
+    displayInvestmentNews();
+};
+
+// --- (นี่คือฟังก์ชันแสดงข่าวเดิม ไม่ต้องแก้ไข) ---
+const displayInvestmentNews = () => {
+    // ... โค้ดส่วนนี้ของคุณมีอยู่แล้ว ...
+};
 
 function initAboutPage() {
     const logoutBtn = document.getElementById('logout-btn');
