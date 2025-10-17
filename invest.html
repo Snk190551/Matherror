@@ -26,34 +26,6 @@
 
         <div id="content-container" class="flex-1 flex flex-col">
             <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">ข่าวสารการลงทุนล่าสุด</h1>
-
-            <div class="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">คำนวณมูลค่าเงินในอนาคต (Future Value)</h2>
-    <form id="fv-calculator-form">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label for="pv-amount" class="block text-sm font-medium text-gray-700">จำนวนเงินปัจจุบัน (บาท)</label>
-                <input type="number" id="pv-amount" class="w-full px-4 py-2 mt-1 border rounded-xl" placeholder="10000" required>
-            </div>
-            <div>
-                <label for="years" class="block text-sm font-medium text-gray-700">จำนวนปีในอนาคต</label>
-                <input type="number" id="years" class="w-full px-4 py-2 mt-1 border rounded-xl" placeholder="5" required>
-            </div>
-        </div>
-        <div class="mt-4">
-            <label for="inflation-rate-input" class="block text-sm font-medium text-gray-700">อัตราเงินเฟ้อรายปี (%)</label>
-            <input type="number" id="inflation-rate-input" step="0.01" class="w-full px-4 py-2 mt-1 border rounded-xl" placeholder="ใส่ค่าเงินเฟ้อ หรือใช้ค่าปัจจุบัน" required>
-        </div>
-        <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600 transition-colors mt-6">คำนวณ</button>
-    </form>
-    <div id="fv-result" class="mt-6 text-center hidden">
-        <p class="text-gray-600">ในอีก <span id="fv-years" class="font-bold"></span> ปีข้างหน้า เงินของคุณจะมีมูลค่าเทียบเท่า</p>
-        <p class="text-3xl font-bold text-green-600 mt-2">฿<span id="fv-amount"></span></p>
-    </div>
-</div>
-
-<div id="investment-news-container" class="mt-8">
-    </div>
             
             <div id="news-grid" class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto pr-2">
                 <p class="text-center text-gray-500 md:col-span-2">กำลังโหลดข่าวสาร...</p>
