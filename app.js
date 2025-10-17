@@ -124,8 +124,8 @@ async function setInflationRate() {
 
     try {
         await new Promise(resolve => setTimeout(resolve, 500));
-        const recentInflationRate = 1.23;
-        const dataYear = 2023;
+        const recentInflationRate = -0.72;
+        const dataYear = 2024;
         inflationInput.value = recentInflationRate.toFixed(2);
         inflationStatus.textContent = `ข้อมูลอ้างอิงปี ${dataYear}`;
     } catch (error) {
