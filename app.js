@@ -380,9 +380,7 @@ onAuthStateChanged(auth, async (user) => {
         if (userDoc.exists()) {
             const userData = userDoc.data();
             const userGreeting = document.getElementById('user-greeting');
-            const userIdDisplay = document.getElementById('user-id-display');
             if (userGreeting) userGreeting.textContent = userData.username || user.email;
-            if (userIdDisplay) userIdDisplay.textContent = user.uid;
         }
 
     } else {
