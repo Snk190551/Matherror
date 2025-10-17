@@ -158,7 +158,7 @@ function renderTransactionsUI(transactions = []) {
 
     listEl.innerHTML = '';
     let totalIncome = 0, totalExpense = 0;
-    const inflationRate = parseFloat(inflationRateInput?.value || 1.23) / 100;
+    const inflationRate = parseFloat(inflationRateInput?.value ||-0.72) / 100;
     const currentDate = new Date();
 
     transactions.forEach(tx => {
