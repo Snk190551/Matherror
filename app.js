@@ -113,29 +113,50 @@ const investmentNews = [
 ];
 
 
-// --- Core App Functions ---
-async function setInflationRate() {
-    const inflationInput = document.getElementById('inflation-rate');
-    const inflationStatus = document.getElementById('inflation-status');
+// // --- Inflation Rate Function (Updated with NEW BOT API) ---
+const setInflationRate = async () => {
+    // API Key ของคุณ (ถูกต้องแล้ว)
+    const BOT_API_KEY = 'eyJvcmciOiI2NzM1NzgwZWM4YzFlYjAwMDEyYTM3NzEiLCJpZCI6ImE4ZWU3N2U2YzIzNTQ2OWM4NmIxZTY4Yzg3NTE4MzY3IiwiaCI6Im11cm11cjEyOCJ9'; 
 
-    if (!inflationInput || !inflationStatus) return;
+    // Endpoint ใหม่สำหรับ API ระบบใหม่
+    const apiUrl = 'https://api.bot.or.th/v2/financial-markets/headline-inflation';
 
-    inflationStatus.textContent = 'กำลังโหลดข้อมูล...';
+    const inflationRateEl = document.getElementById('inflation-rate');
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const recentInflationRate = 1.23;
-        const dataYear = 2023;
-        inflationInput.value = recentInflationRate.toFixed(2);
-        inflationStatus.textContent = `ข้อมูลอ้างอิงปี ${dataYear}`;
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                // Header สำหรับ API ระบบใหม่
+                'X-Client-Id': BOT_API_KEY, 
+                'accept': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        
+        // การเข้าถึงข้อมูลของ API ระบบใหม่
+        const inflationData = data.result.data.data_detail;
+        if (inflationData.length > 0) {
+            const latestInflation = inflationData[inflationData.length - 1];
+            const inflationValue = parseFloat(latestInflation.value).toFixed(2);
+            
+            inflationRateEl.textContent = `${inflationValue}%`;
+        } else {
+            inflationRateEl.textContent = 'N/A';
+        }
+
     } catch (error) {
-        console.error('Error setting inflation rate:', error);
-        inflationStatus.textContent = 'เกิดข้อผิดพลาด';
-        inflationInput.value = '3.0';
-    } finally {
-        startTransactionListener();
+        console.error('Failed to fetch inflation data:', error);
+        inflationRateEl.textContent = 'ไม่สามารถโหลดได้';
+        showModal('เกิดข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลอัตราเงินเฟ้อได้ในขณะนี้');
     }
-}
+};
+
 async function handleDeleteTransaction(transactionId) {
     if (!auth.currentUser || !transactionId) return;
     try {
