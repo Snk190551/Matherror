@@ -184,7 +184,7 @@ function renderTransactionsUI(transactions = []) {
             </div>
             <div class="text-right">
                 <div class="font-bold text-lg">${tx.amount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท</div>
-                <div class="text-xs text-gray-400 mt-1">(มูลค่าปัจจุบัน: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
+               <div class="text-xs text-gray-400 mt-1">(มูลค่าเงินใน1ปีข้างหน้า: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
             </div>`;
         listEl.appendChild(itemDiv);
     });
