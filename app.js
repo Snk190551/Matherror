@@ -63,10 +63,10 @@ function hideConfirmationModal() {
 // --- Investment News Data (Curated List) ---
 const investmentNews = [
     {
-        title: "“เงินบาท” แข็งค่า จับตาตัวเลขเงินเฟ้อสหรัฐฯ-ทิศทางดอกเบี้ยเฟด",
-        imageUrl: "https://placehold.co/600x400/16A34A/FFFFFF?text=เงินบาท",
-        linkUrl: "https://www.thansettakij.com/finance/exchange/595308",
-        source: "ฐานเศรษฐกิจ"
+        title: "ช่วงคืน 3 ส.ค. 68 เกิด “ลูกไฟสีเขียวใหญ่บนฟ้า” หลายพื้นที่ในไทย อาจเป็น “ดาวตกชนิดระเบิด”",
+        imageUrl: "https://d3dyak49qszsk5.cloudfront.net/040868_738c0b412a.jpg",
+        linkUrl: "https://www.thaipbs.or.th/now/content/2984",
+        source: "ข่าว"
     },
     {
         title: "ราคาทองวันนี้ ปรับลง 50 บาท รีบตัดสินใจ \"ควรซื้อหรือขาย\"",
