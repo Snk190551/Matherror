@@ -324,17 +324,18 @@ function renderGoalUI(goal) {
 }
 
 function startGoalListener() {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser) return;
 
-    // Listen to the specific goal document under the 'goals' collection
-    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goals', GOAL_DOC_ID);
-    onSnapshot(goalRef, (docSnap) => {
-        if (docSnap.exists()) {
-            renderGoalUI({ id: docSnap.id, ...docSnap.data() });
-        } else {
-            renderGoalUI(null);
-        }
-    });
+    // <--- แก้ไขบรรทัดนี้: เปลี่ยน 'goals' เป็น 'goal' --->
+    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goal', GOAL_DOC_ID);
+    
+    onSnapshot(goalRef, (docSnap) => {
+        if (docSnap.exists()) {
+            renderGoalUI({ id: docSnap.id, ...docSnap.data() });
+        } else {
+            renderGoalUI(null);
+        }
+    });
 }
 
 // ฟังก์ชันสำหรับบันทึก/แก้ไขเป้าหมาย
