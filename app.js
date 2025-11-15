@@ -341,76 +341,53 @@ function startGoalListener() {
 // ฟังก์ชันสำหรับบันทึก/แก้ไขเป้าหมาย
 async function handleGoalFormSubmit(e) {
     e.preventDefault();
-    if (!auth.currentUser) return showModal("ข้อผิดพลาด", "โปรดเข้าสู่ระบบก่อนบันทึกเป้าหมาย");
+    
+    // **การตรวจสอบที่เข้มงวด (แก้ปัญหา permissions):**
+    const user = auth.currentUser;
+    if (!user) {
+        // หากไม่มีผู้ใช้ จะแจ้งให้ล็อกอิน
+        showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อบันทึกเป้าหมาย (เซสชันการล็อกอินอาจหมดอายุ)');
+        setTimeout(() => {
+            window.location.replace('login.html');
+        }, 2000); 
+        return;
+    }
 
-    const isEditing = document.getElementById('goal-id').value;
-    const goalName = document.getElementById('goal-name').value.trim();
+    const goalName = document.getElementById('goal-name').value;
     const targetAmount = parseFloat(document.getElementById('target-amount').value);
     const currentAmount = parseFloat(document.getElementById('current-amount').value);
+    const docId = document.getElementById('goal-form').dataset.docId || GOAL_DOC_ID; 
 
-    if (targetAmount < 0.01 || currentAmount < 0) return showModal("ข้อผิดพลาด", "ยอดเงินเป้าหมายต้องมากกว่า 0.01 และยอดเงินเริ่มต้นต้องไม่ติดลบ");
-
-    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goals', GOAL_DOC_ID);
-    
-    try {
-        if (isEditing) {
-            // Editing existing goal (update)
-            // ใช้ updateDoc เพื่ออัปเดตเฉพาะ field ที่เปลี่ยนแปลง
-            await updateDoc(goalRef, { 
-                name: goalName,
-                targetAmount: targetAmount,
-                currentAmount: currentAmount,
-                updatedAt: serverTimestamp() // อัปเดต timestamp
-            });
-            showModal("สำเร็จ", "แก้ไขเป้าหมายเรียบร้อยแล้ว");
-        } else {
-            // Creating new goal (set)
-            await setDoc(goalRef, {
-                name: goalName,
-                targetAmount: targetAmount,
-                currentAmount: currentAmount,
-                initialAmount: currentAmount, // initialAmount is the amount when the goal was first set
-                createdAt: serverTimestamp()
-            });
-            showModal("สำเร็จ", "สร้างเป้าหมายเรียบร้อยแล้ว");
-        }
-    } catch (error) {
-        console.error("Error saving goal: ", error);
-        showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกเป้าหมายได้");
+    if (targetAmount <= 0) {
+        showModal('ข้อผิดพลาด', 'ยอดเงินเป้าหมายต้องมากกว่า 0');
+        return;
     }
-}
+    if (currentAmount < 0) {
+        showModal('ข้อผิดพลาด', 'ยอดเงินเริ่มต้นต้องไม่เป็นค่าติดลบ');
+        return;
+    }
 
-// ฟังก์ชันสำหรับบันทึกเงินออมเพิ่มเติม
-async function handleSaveMoney(e) {
-    e.preventDefault();
-    if (!auth.currentUser) return showModal("ข้อผิดพลาด", "โปรดเข้าสู่ระบบก่อนบันทึกเงินออม");
-    
-    const saveAmountInput = document.getElementById('save-amount');
-    const saveAmount = parseFloat(saveAmountInput.value);
-
-    if (saveAmount <= 0 || isNaN(saveAmount)) return showModal("ข้อผิดพลาด", "โปรดระบุจำนวนเงินออมที่ถูกต้อง");
-
-    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goals', GOAL_DOC_ID);
     try {
-        const goalDoc = await getDoc(goalRef);
-        if (!goalDoc.exists()) {
-            saveAmountInput.value = '';
-            return showModal("ข้อผิดพลาด", "คุณยังไม่ได้สร้างเป้าหมาย");
-        }
-        
-        const currentAmount = goalDoc.data().currentAmount || 0;
-        const newAmount = currentAmount + saveAmount;
+        // **Path ที่ถูกต้อง (Collection 'goal' เอกพจน์):**
+        const goalRef = doc(db, 'artifacts', firebaseConfig.appId, 'users', user.uid, 'goal', docId);
 
-        await updateDoc(goalRef, {
-            currentAmount: newAmount,
+        const goalData = {
+            name: goalName,
+            targetAmount: targetAmount,
+            currentAmount: currentAmount,
             updatedAt: serverTimestamp()
-        });
+        };
 
-        showModal("สำเร็จ", `บันทึกเงินออม ${saveAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาทเรียบร้อยแล้ว`);
-        saveAmountInput.value = '';
+        await setDoc(goalRef, goalData, { merge: true }); 
+
+        showModal('สำเร็จ', docId === GOAL_DOC_ID ? 'สร้างเป้าหมายทางการเงินเรียบร้อยแล้ว' : 'บันทึกการแก้ไขเป้าหมายเรียบร้อยแล้ว');
+        
+        document.getElementById('goal-form').reset();
+        document.getElementById('goal-form-container').classList.add('hidden');
+
     } catch (error) {
-        console.error("Error saving money: ", error);
-        showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกเงินออมได้");
+        console.error('Error saving goal:', error);
+        showModal('ข้อผิดพลาด', `ไม่สามารถบันทึกเป้าหมายได้: ${error.message}`);
     }
 }
 
