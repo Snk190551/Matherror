@@ -324,9 +324,10 @@ function renderGoalUI(goal) {
 }
 
 function startGoalListener() {
-    if (!auth.currentUser) return;
+    // ต้องมีโค้ดตรวจสอบการล็อกอินก่อนทำงาน
+    if (!auth.currentUser) return; 
 
-    // แก้ไขตรงนี้: เปลี่ยน Collection จาก 'goals' เป็น 'goal' (เอกพจน์)
+    // Path การดึงข้อมูลที่ถูกต้อง (Collection 'goal')
     const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goal', GOAL_DOC_ID);
     
     onSnapshot(goalRef, (docSnap) => {
@@ -342,10 +343,9 @@ function startGoalListener() {
 async function handleGoalFormSubmit(e) {
     e.preventDefault();
     
-    // **การตรวจสอบที่เข้มงวด (แก้ปัญหา permissions):**
+    // **ส่วนที่เพิ่มเพื่อจัดการปัญหา Permissions/Session หลุด**
     const user = auth.currentUser;
     if (!user) {
-        // หากไม่มีผู้ใช้ จะแจ้งให้ล็อกอิน
         showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อบันทึกเป้าหมาย (เซสชันการล็อกอินอาจหมดอายุ)');
         setTimeout(() => {
             window.location.replace('login.html');
@@ -368,7 +368,7 @@ async function handleGoalFormSubmit(e) {
     }
 
     try {
-        // **Path ที่ถูกต้อง (Collection 'goal' เอกพจน์):**
+        // Path การบันทึกที่ถูกต้อง (Collection 'goal')
         const goalRef = doc(db, 'artifacts', firebaseConfig.appId, 'users', user.uid, 'goal', docId);
 
         const goalData = {
