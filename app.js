@@ -223,7 +223,8 @@ function startTransactionListener() {
 function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalSaved) {
     if (targetAmount <= initialAmount) return { arithmetic: "บรรลุเป้าหมายแล้ว!", geometric: "บรรลุเป้าหมายแล้ว!", avgDaily: 0 };
     
-    const remainingAmount = targetAmount - initialAmount;
+    // Note: totalSaved here is currentAmount - initialAmount
+    const remainingAmountToSave = targetAmount - initialAmount;
     let avgDailySaving = 0;
     let attainmentDate = { arithmetic: 'คำนวณไม่ได้', geometric: 'คำนวณไม่ได้', avgDaily: 0 };
     
@@ -232,6 +233,7 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
         attainmentDate.avgDaily = avgDailySaving;
 
         // 1. Arithmetic Progression (Fixed saving per day)
+        // Days to complete remaining balance from NOW: (Target - Current) / AvgDaily
         const daysToComplete = (targetAmount - (initialAmount + totalSaved)) / avgDailySaving;
         const completionDate = new Date();
         completionDate.setDate(completionDate.getDate() + Math.ceil(daysToComplete));
@@ -268,6 +270,7 @@ function renderGoalUI(goal) {
         formContainer.classList.remove('hidden');
         goalForm.reset();
         delete goalForm.dataset.docId; // ลบ docId ทิ้งเพื่อให้เป็นการสร้างใหม่
+        delete goalForm.dataset.isEdit; // ลบสถานะการแก้ไข
         document.getElementById('goal-submit-btn').textContent = 'สร้างเป้าหมาย';
         return;
     }
@@ -289,6 +292,39 @@ function renderGoalUI(goal) {
     // คำนวณยอดเงินคงเหลือ
     const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
     document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    
+    // --- START: New Attainment Calculation and Display Logic ---
+    const dateCreated = goal.createdAt ? new Date(goal.createdAt.toDate()) : null;
+    const initialAmount = goal.initialAmount || 0;
+    const totalSaved = goal.currentAmount - initialAmount;
+    
+    let attainment = { arithmetic: 'คำนวณไม่ได้', geometric: 'คำนวณไม่ได้', avgDaily: 0 };
+    
+    if (dateCreated) {
+        const daysPassed = (new Date() - dateCreated) / (1000 * 60 * 60 * 24);
+        
+        if (daysPassed > 0.01) { // Check if more than a negligible time has passed
+            attainment = calculateAttainmentDate(initialAmount, goal.targetAmount, daysPassed, totalSaved);
+        } else {
+            attainment.arithmetic = "เริ่มการคำนวณในวันถัดไป";
+            attainment.geometric = "เริ่มการคำนวณในวันถัดไป";
+        }
+    } else {
+        // Handle legacy or incomplete goal data
+        attainment.arithmetic = "ไม่พบวันที่เริ่มต้น/ยอดเริ่มต้น";
+        attainment.geometric = "ไม่พบวันที่เริ่มต้น/ยอดเริ่มต้น";
+    }
+
+    // Update UI elements for attainment
+    const avgDailyEl = document.getElementById('display-avg-daily');
+    const resultArithmeticEl = document.getElementById('result-arithmetic');
+    const resultGeometricEl = document.getElementById('result-geometric');
+    
+    if (avgDailyEl) avgDailyEl.textContent = attainment.avgDaily.toLocaleString('th-TH', { maximumFractionDigits: 2 });
+    if (resultArithmeticEl) resultArithmeticEl.textContent = attainment.arithmetic;
+    if (resultGeometricEl) resultGeometricEl.textContent = attainment.geometric;
+    // --- END: New Attainment Calculation and Display Logic ---
+
 
     // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
     const editBtn = document.getElementById('edit-goal-btn');
@@ -353,8 +389,9 @@ async function handleGoalFormSubmit(e) {
     const goalName = document.getElementById('goal-name').value;
     const targetAmount = parseFloat(document.getElementById('target-amount').value);
     const currentAmount = parseFloat(document.getElementById('current-amount').value);
-    const docId = document.getElementById('goal-form').dataset.docId || GOAL_DOC_ID; 
-
+    const goalForm = document.getElementById('goal-form'); // Get form element
+    const docId = goalForm.dataset.docId || GOAL_DOC_ID;
+    
     if (targetAmount <= 0) {
         showModal('ข้อผิดพลาด', 'ยอดเงินเป้าหมายต้องมากกว่า 0');
         return;
@@ -363,24 +400,36 @@ async function handleGoalFormSubmit(e) {
         showModal('ข้อผิดพลาด', 'ยอดเงินเริ่มต้นต้องไม่เป็นค่าติดลบ');
         return;
     }
+    
+    // Check if we are creating a new goal (not editing)
+    const isCreatingNew = docId === GOAL_DOC_ID && !goalForm.dataset.isEdit;
 
     try {
         // Path การบันทึกที่ถูกต้อง (Collection 'goal')
         const goalRef = doc(db, 'artifacts', firebaseConfig.appId, 'users', user.uid, 'goal', docId);
 
-        const goalData = {
+        let goalData = {
             name: goalName,
             targetAmount: targetAmount,
             currentAmount: currentAmount,
             updatedAt: serverTimestamp()
         };
+        
+        // **Logic ใหม่:** ตั้งค่า initialAmount และ createdAt เฉพาะเมื่อเป็นการสร้างใหม่เท่านั้น
+        if (isCreatingNew) {
+            goalData.initialAmount = currentAmount;
+            goalData.createdAt = serverTimestamp();
+        }
 
         await setDoc(goalRef, goalData, { merge: true }); 
 
-        showModal('สำเร็จ', docId === GOAL_DOC_ID ? 'สร้างเป้าหมายทางการเงินเรียบร้อยแล้ว' : 'บันทึกการแก้ไขเป้าหมายเรียบร้อยแล้ว');
+        showModal('สำเร็จ', isCreatingNew ? 'สร้างเป้าหมายทางการเงินเรียบร้อยแล้ว' : 'บันทึกการแก้ไขเป้าหมายเรียบร้อยแล้ว');
         
         document.getElementById('goal-form').reset();
         document.getElementById('goal-form-container').classList.add('hidden');
+        
+        // After successful save/edit, clear the isEdit flag
+        delete goalForm.dataset.isEdit; 
 
     } catch (error) {
         console.error('Error saving goal:', error);
@@ -399,8 +448,9 @@ function editGoal(goalData) {
     document.getElementById('target-amount').value = goalData.targetAmount;
     document.getElementById('current-amount').value = goalData.currentAmount;
 
-    // 2. กำหนด docId เพื่อให้ฟังก์ชัน handleGoalFormSubmit ทราบว่าเป็น "การแก้ไข" ไม่ใช่ "การสร้างใหม่"
+    // 2. กำหนด docId และ isEdit flag เพื่อให้ฟังก์ชัน handleGoalFormSubmit ทราบว่าเป็น "การแก้ไข"
     goalForm.dataset.docId = goalData.id;
+    goalForm.dataset.isEdit = 'true';
 
     // 3. เปลี่ยนข้อความปุ่ม
     document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
@@ -409,6 +459,56 @@ function editGoal(goalData) {
     displayContainer.classList.add('hidden');
     formContainer.classList.remove('hidden');
 }
+
+// New function for handling money saving in about.html
+async function handleSaveMoney(e) {
+    e.preventDefault();
+    
+    const user = auth.currentUser;
+    if (!user) {
+        showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อบันทึกเงินออม');
+        return;
+    }
+
+    const saveAmountInput = document.getElementById('save-amount');
+    let saveAmount = parseFloat(saveAmountInput.value);
+
+    // *** ส่วนที่เพิ่มเพื่อบังคับปัดเศษทศนิยมไม่เกิน 2 ตำแหน่ง ***
+    if (isNaN(saveAmount) || saveAmount <= 0) {
+        showModal('ข้อผิดพลาด', 'จำนวนเงินที่ออมต้องเป็นตัวเลขและมากกว่า 0');
+        return;
+    }
+    
+    // ปัดเศษตัวเลขให้เหลือทศนิยม 2 ตำแหน่ง
+    saveAmount = Math.round(saveAmount * 100) / 100;
+    // *************************************************************
+
+    try {
+        const goalRef = doc(db, 'artifacts', appId, 'users', user.uid, 'goal', GOAL_DOC_ID);
+        const docSnap = await getDoc(goalRef);
+        
+        if (!docSnap.exists()) {
+            showModal('ข้อผิดพลาด', 'ไม่พบเป้าหมายทางการเงิน กรุณาสร้างเป้าหมายก่อน');
+            return;
+        }
+
+        const goalData = docSnap.data();
+        const newCurrentAmount = (goalData.currentAmount || 0) + saveAmount;
+
+        await updateDoc(goalRef, {
+            currentAmount: newCurrentAmount,
+            updatedAt: serverTimestamp()
+        });
+
+        showModal('สำเร็จ', `บันทึกเงินออม ${saveAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท เรียบร้อยแล้ว`);
+        saveAmountInput.value = ''; // ล้างค่าในช่องกรอก
+        
+    } catch (error) {
+        console.error('Error saving money:', error);
+        showModal('ข้อผิดพลาด', `ไม่สามารถบันทึกเงินออมได้: ${error.message}`);
+    }
+}
+
 
 // --- Page Initialization Functions ---
 function initHomePage() {
@@ -501,10 +601,12 @@ function initAboutPage() {
 
     // Goal Management
     goalForm?.addEventListener('submit', handleGoalFormSubmit);
-    saveMoneyForm?.addEventListener('submit', handleSaveMoney);
+    saveMoneyForm?.addEventListener('submit', handleSaveMoney); // Binding to the new function
 
-    // Edit Goal Button
+    // Edit Goal Button (This is only for initial click before data is loaded, editGoal(goal) is used after data loads)
     editGoalBtn?.addEventListener('click', () => {
+        // This button click should be handled by the editGoal function bound in renderGoalUI
+        // but this code is kept for legacy/safety if renderGoalUI fails to bind
         document.getElementById('goal-status-container')?.classList.add('hidden');
         document.getElementById('goal-form-container')?.classList.remove('hidden');
         document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
@@ -515,8 +617,8 @@ function initAboutPage() {
     resetGoalBtn?.addEventListener('click', () => {
         showConfirmationModal('ยืนยันการลบเป้าหมาย', 'คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้? (ข้อมูลจะหายไปทั้งหมด)', async () => {
             if (!auth.currentUser) return;
-            // Delete the goal document
-            const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goals', GOAL_DOC_ID);
+            // The path must be consistent with goalRef in startGoalListener
+            const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goal', GOAL_DOC_ID);
             try {
                 await deleteDoc(goalRef);
                 showModal("สำเร็จ", "ลบเป้าหมายเรียบร้อยแล้ว");
