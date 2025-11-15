@@ -263,6 +263,7 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
 function renderGoalUI(goal) {
     const goalStatusContainer = document.getElementById('goal-status-container');
     const goalFormContainer = document.getElementById('goal-form-container');
+    const saveMoneyContainer = document.getElementById('save-money-container'); 
 
     if (!goal) {
         // No goal exists: Show form, hide status
@@ -271,33 +272,40 @@ function renderGoalUI(goal) {
         document.getElementById('goal-form-title').textContent = 'สร้างเป้าหมายใหม่';
         document.getElementById('goal-submit-btn').textContent = 'บันทึกเป้าหมาย';
         document.getElementById('goal-id').value = '';
-        document.getElementById('goal-form').reset();
-        document.getElementById('save-money-form')?.classList.add('hidden');
+        document.getElementById('goal-form')?.reset();
+        saveMoneyContainer?.classList.add('hidden'); 
         return;
     }
     
     // Goal exists: Hide form, show status
     goalFormContainer?.classList.add('hidden');
     goalStatusContainer?.classList.remove('hidden');
-    document.getElementById('save-money-form')?.classList.remove('hidden');
+    saveMoneyContainer?.classList.remove('hidden'); 
 
     const target = goal.targetAmount || 0;
-    const current = goal.currentAmount || 0;
+    let current = goal.currentAmount || 0;
+
+    // Check if the current amount is greater than the target amount (goal reached)
+    if (current > target) {
+        current = target; // Ensure progress bar doesn't exceed 100% easily
+    }
     
     // Handle date calculation for prediction
     const createdDate = goal.createdAt?.toDate ? goal.createdAt.toDate() : new Date();
     // Calculate days passed since creation until now
-    const daysPassed = Math.max(1, Math.ceil((new Date() - createdDate) / (1000 * 60 * 60 * 24)));
-    const totalSaved = current - (goal.initialAmount || 0);
+    const now = new Date();
+    // Calculate days passed, must be at least 1 day if goal exists, or 0 if same day
+    const daysPassed = Math.max(0, Math.ceil((now - createdDate) / (1000 * 60 * 60 * 24)));
+    const totalSaved = (goal.currentAmount || 0) - (goal.initialAmount || 0);
 
-    const remaining = Math.max(0, target - current);
-    const percent = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+    const remaining = Math.max(0, target - (goal.currentAmount || 0));
+    const percent = target > 0 ? Math.min(100, (goal.currentAmount / target) * 100) : 0;
     const attainment = calculateAttainmentDate(goal.initialAmount || 0, target, daysPassed, totalSaved);
 
     // Update Display Elements
     document.getElementById('display-goal-name').textContent = goal.name || 'ไม่มีชื่อเป้าหมาย';
     document.getElementById('display-target-amount').textContent = target.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
-    document.getElementById('display-current-amount').textContent = current.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
+    document.getElementById('display-current-amount').textContent = (goal.currentAmount || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
     document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
     document.getElementById('display-progress-percent').textContent = percent.toFixed(2) + '%';
     const progressBar = document.getElementById('progress-bar');
@@ -312,7 +320,7 @@ function renderGoalUI(goal) {
     document.getElementById('goal-id').value = GOAL_DOC_ID; 
     document.getElementById('goal-name').value = goal.name || '';
     document.getElementById('target-amount').value = target.toFixed(2);
-    document.getElementById('current-amount').value = current.toFixed(2);
+    document.getElementById('current-amount').value = (goal.currentAmount || 0).toFixed(2);
 }
 
 function startGoalListener() {
@@ -329,11 +337,11 @@ function startGoalListener() {
     });
 }
 
+// ฟังก์ชันสำหรับบันทึก/แก้ไขเป้าหมาย
 async function handleGoalFormSubmit(e) {
     e.preventDefault();
     if (!auth.currentUser) return showModal("ข้อผิดพลาด", "โปรดเข้าสู่ระบบก่อนบันทึกเป้าหมาย");
 
-    const form = document.getElementById('goal-form');
     const isEditing = document.getElementById('goal-id').value;
     const goalName = document.getElementById('goal-name').value.trim();
     const targetAmount = parseFloat(document.getElementById('target-amount').value);
@@ -346,17 +354,12 @@ async function handleGoalFormSubmit(e) {
     try {
         if (isEditing) {
             // Editing existing goal (update)
-            const existingDoc = await getDoc(goalRef);
-            const originalGoal = existingDoc.data();
-            
-            await setDoc(goalRef, {
+            // ใช้ updateDoc เพื่ออัปเดตเฉพาะ field ที่เปลี่ยนแปลง
+            await updateDoc(goalRef, { 
                 name: goalName,
                 targetAmount: targetAmount,
                 currentAmount: currentAmount,
-                // Keep original creation date and initial amount for accurate calculation
-                createdAt: originalGoal?.createdAt || serverTimestamp(), 
-                initialAmount: originalGoal?.initialAmount || 0,
-                updatedAt: serverTimestamp()
+                updatedAt: serverTimestamp() // อัปเดต timestamp
             });
             showModal("สำเร็จ", "แก้ไขเป้าหมายเรียบร้อยแล้ว");
         } else {
@@ -376,6 +379,7 @@ async function handleGoalFormSubmit(e) {
     }
 }
 
+// ฟังก์ชันสำหรับบันทึกเงินออมเพิ่มเติม
 async function handleSaveMoney(e) {
     e.preventDefault();
     if (!auth.currentUser) return showModal("ข้อผิดพลาด", "โปรดเข้าสู่ระบบก่อนบันทึกเงินออม");
