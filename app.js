@@ -323,6 +323,26 @@ function renderGoalUI(goal) {
     document.getElementById('current-amount').value = (goal.currentAmount || 0).toFixed(2);
 }
 
+// ฟังก์ชันสำหรับสลับการแสดงผลจากสถานะเป้าหมายไปเป็นฟอร์มแก้ไข
+function showGoalEditForm(goalData) {
+    const goalStatusContainer = document.getElementById('goal-status-container');
+    const goalFormContainer = document.getElementById('goal-form-container');
+    const saveMoneyContainer = document.getElementById('save-money-container');
+
+    // 1. สลับ UI: ซ่อนสถานะ, แสดงฟอร์ม
+    goalStatusContainer?.classList.add('hidden');
+    saveMoneyContainer?.classList.add('hidden');
+    goalFormContainer?.classList.remove('hidden');
+
+    // 2. ตั้งชื่อฟอร์ม/ปุ่มให้เป็น "แก้ไข"
+    document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
+    document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
+    
+    // (ข้อมูลในฟอร์มถูก Pre-fill แล้วโดย renderGoalUI)
+    // แต่เพื่อความปลอดภัย ให้แน่ใจว่า ID ถูกตั้งค่าใน input field
+    document.getElementById('goal-id').value = goalData.id; 
+}
+
 function startGoalListener() {
     // ต้องมีโค้ดตรวจสอบการล็อกอินก่อนทำงาน
     if (!auth.currentUser) return; 
@@ -391,6 +411,27 @@ async function handleGoalFormSubmit(e) {
     }
 }
 
+// ฟังก์ชันสำหรับเปิดฟอร์มพร้อมข้อมูลเดิมเพื่อแก้ไข
+function editGoal(goalData) {
+    const formContainer = document.getElementById('goal-form-container');
+    const displayContainer = document.getElementById('goal-display-container');
+    const goalForm = document.getElementById('goal-form');
+
+    // 1. นำข้อมูลที่มีอยู่มาใส่ในช่องกรอก
+    document.getElementById('goal-name').value = goalData.name;
+    document.getElementById('target-amount').value = goalData.targetAmount;
+    document.getElementById('current-amount').value = goalData.currentAmount;
+
+    // 2. กำหนด docId เพื่อให้ฟังก์ชัน handleGoalFormSubmit ทราบว่าเป็น "การแก้ไข" ไม่ใช่ "การสร้างใหม่"
+    goalForm.dataset.docId = goalData.id;
+
+    // 3. เปลี่ยนข้อความปุ่ม
+    document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
+
+    // 4. แสดงฟอร์มและซ่อนส่วนแสดงผลเป้าหมาย
+    displayContainer.classList.add('hidden');
+    formContainer.classList.remove('hidden');
+}
 
 // --- Page Initialization Functions ---
 function initHomePage() {
