@@ -293,7 +293,7 @@ function renderGoalUI(goal) {
     const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
     document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { minimumFractionDigits: 2 });
     
-    // --- START: New Attainment Calculation and Display Logic ---
+    // --- START: Attainment Calculation and Display Logic ---
     const dateCreated = goal.createdAt ? new Date(goal.createdAt.toDate()) : null;
     const initialAmount = goal.initialAmount || 0;
     const totalSaved = goal.currentAmount - initialAmount;
@@ -323,8 +323,7 @@ function renderGoalUI(goal) {
     if (avgDailyEl) avgDailyEl.textContent = attainment.avgDaily.toLocaleString('th-TH', { maximumFractionDigits: 2 });
     if (resultArithmeticEl) resultArithmeticEl.textContent = attainment.arithmetic;
     if (resultGeometricEl) resultGeometricEl.textContent = attainment.geometric;
-    // --- END: New Attainment Calculation and Display Logic ---
-
+    // --- END: Attainment Calculation and Display Logic ---
 
     // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
     const editBtn = document.getElementById('edit-goal-btn');
@@ -376,7 +375,6 @@ function startGoalListener() {
 async function handleGoalFormSubmit(e) {
     e.preventDefault();
     
-    // **ส่วนที่เพิ่มเพื่อจัดการปัญหา Permissions/Session หลุด**
     const user = auth.currentUser;
     if (!user) {
         showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อบันทึกเป้าหมาย (เซสชันการล็อกอินอาจหมดอายุ)');
@@ -389,8 +387,8 @@ async function handleGoalFormSubmit(e) {
     const goalName = document.getElementById('goal-name').value;
     const targetAmount = parseFloat(document.getElementById('target-amount').value);
     const currentAmount = parseFloat(document.getElementById('current-amount').value);
-    const goalForm = document.getElementById('goal-form'); // Get form element
-    const docId = goalForm.dataset.docId || GOAL_DOC_ID;
+    const goalForm = document.getElementById('goal-form');
+    const docId = goalForm.dataset.docId || GOAL_DOC_ID; 
     
     if (targetAmount <= 0) {
         showModal('ข้อผิดพลาด', 'ยอดเงินเป้าหมายต้องมากกว่า 0');
@@ -400,8 +398,8 @@ async function handleGoalFormSubmit(e) {
         showModal('ข้อผิดพลาด', 'ยอดเงินเริ่มต้นต้องไม่เป็นค่าติดลบ');
         return;
     }
-    
-    // Check if we are creating a new goal (not editing)
+
+    // Determine if it is a new creation (to set initialAmount/createdAt)
     const isCreatingNew = docId === GOAL_DOC_ID && !goalForm.dataset.isEdit;
 
     try {
@@ -414,8 +412,8 @@ async function handleGoalFormSubmit(e) {
             currentAmount: currentAmount,
             updatedAt: serverTimestamp()
         };
-        
-        // **Logic ใหม่:** ตั้งค่า initialAmount และ createdAt เฉพาะเมื่อเป็นการสร้างใหม่เท่านั้น
+
+        // **Logic เพิ่มเติม: บันทึก initialAmount และ createdAt เมื่อสร้างใหม่เท่านั้น**
         if (isCreatingNew) {
             goalData.initialAmount = currentAmount;
             goalData.createdAt = serverTimestamp();
@@ -428,12 +426,14 @@ async function handleGoalFormSubmit(e) {
         document.getElementById('goal-form').reset();
         document.getElementById('goal-form-container').classList.add('hidden');
         
-        // After successful save/edit, clear the isEdit flag
+        // Clear isEdit flag after successful save/edit
         delete goalForm.dataset.isEdit; 
 
     } catch (error) {
         console.error('Error saving goal:', error);
-        showModal('ข้อผิดพลาด', `ไม่สามารถบันทึกเป้าหมายได้: ${error.message}`);
+        // **โค้ดแก้ไข: แสดง error code หรือ message เพื่อช่วย Debug**
+        const errorMessage = error.code ? `${error.code}: ${error.message}` : error.message;
+        showModal('ข้อผิดพลาด', `ไม่สามารถบันทึกเป้าหมายได้: ${errorMessage}`);
     }
 }
 
@@ -448,7 +448,7 @@ function editGoal(goalData) {
     document.getElementById('target-amount').value = goalData.targetAmount;
     document.getElementById('current-amount').value = goalData.currentAmount;
 
-    // 2. กำหนด docId และ isEdit flag เพื่อให้ฟังก์ชัน handleGoalFormSubmit ทราบว่าเป็น "การแก้ไข"
+    // 2. กำหนด docId และ isEdit flag เพื่อให้ฟังก์ชัน handleGoalFormSubmit ทราบว่าเป็น "การแก้ไข" 
     goalForm.dataset.docId = goalData.id;
     goalForm.dataset.isEdit = 'true';
 
@@ -505,7 +505,9 @@ async function handleSaveMoney(e) {
         
     } catch (error) {
         console.error('Error saving money:', error);
-        showModal('ข้อผิดพลาด', `ไม่สามารถบันทึกเงินออมได้: ${error.message}`);
+        // **โค้ดแก้ไข: แสดง error code หรือ message เพื่อช่วย Debug**
+        const errorMessage = error.code ? `${error.code}: ${error.message}` : error.message;
+        showModal('ข้อผิดพลาด', `ไม่สามารถบันทึกเงินออมได้: ${errorMessage}`);
     }
 }
 
@@ -601,12 +603,10 @@ function initAboutPage() {
 
     // Goal Management
     goalForm?.addEventListener('submit', handleGoalFormSubmit);
-    saveMoneyForm?.addEventListener('submit', handleSaveMoney); // Binding to the new function
+    saveMoneyForm?.addEventListener('submit', handleSaveMoney);
 
-    // Edit Goal Button (This is only for initial click before data is loaded, editGoal(goal) is used after data loads)
+    // Edit Goal Button
     editGoalBtn?.addEventListener('click', () => {
-        // This button click should be handled by the editGoal function bound in renderGoalUI
-        // but this code is kept for legacy/safety if renderGoalUI fails to bind
         document.getElementById('goal-status-container')?.classList.add('hidden');
         document.getElementById('goal-form-container')?.classList.remove('hidden');
         document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
@@ -617,7 +617,8 @@ function initAboutPage() {
     resetGoalBtn?.addEventListener('click', () => {
         showConfirmationModal('ยืนยันการลบเป้าหมาย', 'คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้? (ข้อมูลจะหายไปทั้งหมด)', async () => {
             if (!auth.currentUser) return;
-            // The path must be consistent with goalRef in startGoalListener
+            // Delete the goal document
+            // *** FIX: Changed 'goals' to 'goal' collection path ***
             const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goal', GOAL_DOC_ID);
             try {
                 await deleteDoc(goalRef);
