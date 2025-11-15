@@ -256,71 +256,48 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
     return attainmentDate;
 }
 
-/**
- * Renders the goal status or the creation form based on the goal data.
- * @param {object|null} goal - The goal object from Firestore, or null if no goal exists.
- */
+// ฟังก์ชันสำหรับจัดการการแสดงผล UI ของเป้าหมาย
 function renderGoalUI(goal) {
-    const goalStatusContainer = document.getElementById('goal-status-container');
-    const goalFormContainer = document.getElementById('goal-form-container');
-    const saveMoneyContainer = document.getElementById('save-money-container'); 
+    const displayContainer = document.getElementById('goal-display-container');
+    const formContainer = document.getElementById('goal-form-container');
+    const goalForm = document.getElementById('goal-form');
 
     if (!goal) {
-        // No goal exists: Show form, hide status
-        goalStatusContainer?.classList.add('hidden');
-        goalFormContainer?.classList.remove('hidden');
-        document.getElementById('goal-form-title').textContent = 'สร้างเป้าหมายใหม่';
-        document.getElementById('goal-submit-btn').textContent = 'บันทึกเป้าหมาย';
-        document.getElementById('goal-id').value = '';
-        document.getElementById('goal-form')?.reset();
-        saveMoneyContainer?.classList.add('hidden'); 
+        // ไม่มีเป้าหมาย, แสดงฟอร์มสร้างเป้าหมาย
+        displayContainer.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+        goalForm.reset();
+        delete goalForm.dataset.docId; // ลบ docId ทิ้งเพื่อให้เป็นการสร้างใหม่
+        document.getElementById('goal-submit-btn').textContent = 'สร้างเป้าหมาย';
         return;
     }
+
+    // มีเป้าหมาย, แสดงรายละเอียด
+    displayContainer.classList.remove('hidden');
+    formContainer.classList.add('hidden');
     
-    // Goal exists: Hide form, show status
-    goalFormContainer?.classList.add('hidden');
-    goalStatusContainer?.classList.remove('hidden');
-    saveMoneyContainer?.classList.remove('hidden'); 
+    document.getElementById('display-goal-name').textContent = goal.name;
+    document.getElementById('display-target-amount').textContent = goal.targetAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    document.getElementById('display-current-amount').textContent = goal.currentAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
 
-    const target = goal.targetAmount || 0;
-    let current = goal.currentAmount || 0;
+    const progress = (goal.currentAmount / goal.targetAmount) * 100;
+    const progressBar = document.getElementById('goal-progress-bar');
+    progressBar.style.width = `${Math.min(progress, 100)}%`;
+    progressBar.textContent = `${Math.min(progress, 100).toFixed(0)}%`;
+    progressBar.setAttribute('aria-valuenow', Math.min(progress, 100).toFixed(0));
 
-    // Check if the current amount is greater than the target amount (goal reached)
-    if (current > target) {
-        current = target; // Ensure progress bar doesn't exceed 100% easily
+    // คำนวณยอดเงินคงเหลือ
+    const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
+    document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+
+    // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
+    const editBtn = document.getElementById('edit-goal-btn');
+    if (editBtn) {
+        // ล้าง Listener เดิมออกก่อน (ป้องกันการเรียกซ้ำ)
+        editBtn.onclick = null; 
+        // ผูกฟังก์ชัน editGoal โดยส่งข้อมูล goal ปัจจุบันเข้าไป
+        editBtn.onclick = () => editGoal(goal); 
     }
-    
-    // Handle date calculation for prediction
-    const createdDate = goal.createdAt?.toDate ? goal.createdAt.toDate() : new Date();
-    // Calculate days passed since creation until now
-    const now = new Date();
-    // Calculate days passed, must be at least 1 day if goal exists, or 0 if same day
-    const daysPassed = Math.max(0, Math.ceil((now - createdDate) / (1000 * 60 * 60 * 24)));
-    const totalSaved = (goal.currentAmount || 0) - (goal.initialAmount || 0);
-
-    const remaining = Math.max(0, target - (goal.currentAmount || 0));
-    const percent = target > 0 ? Math.min(100, (goal.currentAmount / target) * 100) : 0;
-    const attainment = calculateAttainmentDate(goal.initialAmount || 0, target, daysPassed, totalSaved);
-
-    // Update Display Elements
-    document.getElementById('display-goal-name').textContent = goal.name || 'ไม่มีชื่อเป้าหมาย';
-    document.getElementById('display-target-amount').textContent = target.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
-    document.getElementById('display-current-amount').textContent = (goal.currentAmount || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
-    document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
-    document.getElementById('display-progress-percent').textContent = percent.toFixed(2) + '%';
-    const progressBar = document.getElementById('progress-bar');
-    if (progressBar) progressBar.style.width = `${percent}%`;
-
-    // Update Prediction Results
-    document.getElementById('display-avg-daily').textContent = attainment.avgDaily.toLocaleString('th-TH', { maximumFractionDigits: 2 });
-    document.getElementById('result-arithmetic').textContent = attainment.arithmetic;
-    document.getElementById('result-geometric').textContent = attainment.geometric;
-
-    // Pre-fill form for editing (hidden state)
-    document.getElementById('goal-id').value = GOAL_DOC_ID; 
-    document.getElementById('goal-name').value = goal.name || '';
-    document.getElementById('target-amount').value = target.toFixed(2);
-    document.getElementById('current-amount').value = (goal.currentAmount || 0).toFixed(2);
 }
 
 // ฟังก์ชันสำหรับสลับการแสดงผลจากสถานะเป้าหมายไปเป็นฟอร์มแก้ไข
