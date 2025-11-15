@@ -10,6 +10,8 @@ let app, db, auth;
 let unsubscribeFromTransactions = null;
 let confirmCallback = null;
 
+const GOAL_DOC_ID = 'user_goal'; // Document ID for the single goal per user
+
 const firebaseConfig = {
   apiKey: "AIzaSyC6d1_FmSvfrnhpqFxdKrg-bleCVC5XkUM",
   authDomain: "app-math-465713.firebaseapp.com",
@@ -209,6 +211,205 @@ function startTransactionListener() {
     }
 }
 
+// --- Goal Functions for about.html ---
+
+/**
+ * Calculates the predicted goal attainment date based on average daily savings.
+ * @param {number} initialAmount - The starting amount when the goal was created.
+ * @param {number} targetAmount - The final target amount.
+ * @param {number} daysPassed - The number of days since the goal was created.
+ * @param {number} totalSaved - The total amount saved since the goal was created (current - initial).
+ */
+function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalSaved) {
+    if (targetAmount <= initialAmount) return { arithmetic: "บรรลุเป้าหมายแล้ว!", geometric: "บรรลุเป้าหมายแล้ว!", avgDaily: 0 };
+    
+    const remainingAmount = targetAmount - initialAmount;
+    let avgDailySaving = 0;
+    let attainmentDate = { arithmetic: 'คำนวณไม่ได้', geometric: 'คำนวณไม่ได้', avgDaily: 0 };
+    
+    if (daysPassed > 0 && totalSaved > 0) {
+        avgDailySaving = totalSaved / daysPassed;
+        attainmentDate.avgDaily = avgDailySaving;
+
+        // 1. Arithmetic Progression (Fixed saving per day)
+        const daysToComplete = (targetAmount - (initialAmount + totalSaved)) / avgDailySaving;
+        const completionDate = new Date();
+        completionDate.setDate(completionDate.getDate() + Math.ceil(daysToComplete));
+        attainmentDate.arithmetic = completionDate.toLocaleDateString('th-TH', { dateStyle: 'long' });
+        
+        // 2. Geometric Approximation (Assume 5% faster due to compound/growth effect for simple display)
+        const daysGeometric = daysToComplete / 1.05; 
+        const completionDateGeometric = new Date();
+        completionDateGeometric.setDate(completionDateGeometric.getDate() + Math.ceil(daysGeometric));
+        attainmentDate.geometric = completionDateGeometric.toLocaleDateString('th-TH', { dateStyle: 'long' });
+
+    } else if (daysPassed > 0 && totalSaved === 0) {
+        attainmentDate.avgDaily = 0;
+        attainmentDate.arithmetic = "ยังไม่มีการบันทึกเงินออม";
+        attainmentDate.geometric = "ยังไม่มีการบันทึกเงินออม";
+    } else {
+        attainmentDate.avgDaily = 0;
+        attainmentDate.arithmetic = "ยังไม่มีการบันทึกเงินออม";
+        attainmentDate.geometric = "ยังไม่มีการบันทึกเงินออม";
+    }
+    
+    return attainmentDate;
+}
+
+/**
+ * Renders the goal status or the creation form based on the goal data.
+ * @param {object|null} goal - The goal object from Firestore, or null if no goal exists.
+ */
+function renderGoalUI(goal) {
+    const goalStatusContainer = document.getElementById('goal-status-container');
+    const goalFormContainer = document.getElementById('goal-form-container');
+
+    if (!goal) {
+        // No goal exists: Show form, hide status
+        goalStatusContainer?.classList.add('hidden');
+        goalFormContainer?.classList.remove('hidden');
+        document.getElementById('goal-form-title').textContent = 'สร้างเป้าหมายใหม่';
+        document.getElementById('goal-submit-btn').textContent = 'บันทึกเป้าหมาย';
+        document.getElementById('goal-id').value = '';
+        document.getElementById('goal-form').reset();
+        document.getElementById('save-money-form')?.classList.add('hidden');
+        return;
+    }
+    
+    // Goal exists: Hide form, show status
+    goalFormContainer?.classList.add('hidden');
+    goalStatusContainer?.classList.remove('hidden');
+    document.getElementById('save-money-form')?.classList.remove('hidden');
+
+    const target = goal.targetAmount || 0;
+    const current = goal.currentAmount || 0;
+    
+    // Handle date calculation for prediction
+    const createdDate = goal.createdAt?.toDate ? goal.createdAt.toDate() : new Date();
+    // Calculate days passed since creation until now
+    const daysPassed = Math.max(1, Math.ceil((new Date() - createdDate) / (1000 * 60 * 60 * 24)));
+    const totalSaved = current - (goal.initialAmount || 0);
+
+    const remaining = Math.max(0, target - current);
+    const percent = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+    const attainment = calculateAttainmentDate(goal.initialAmount || 0, target, daysPassed, totalSaved);
+
+    // Update Display Elements
+    document.getElementById('display-goal-name').textContent = goal.name || 'ไม่มีชื่อเป้าหมาย';
+    document.getElementById('display-target-amount').textContent = target.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
+    document.getElementById('display-current-amount').textContent = current.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
+    document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท';
+    document.getElementById('display-progress-percent').textContent = percent.toFixed(2) + '%';
+    const progressBar = document.getElementById('progress-bar');
+    if (progressBar) progressBar.style.width = `${percent}%`;
+
+    // Update Prediction Results
+    document.getElementById('display-avg-daily').textContent = attainment.avgDaily.toLocaleString('th-TH', { maximumFractionDigits: 2 });
+    document.getElementById('result-arithmetic').textContent = attainment.arithmetic;
+    document.getElementById('result-geometric').textContent = attainment.geometric;
+
+    // Pre-fill form for editing (hidden state)
+    document.getElementById('goal-id').value = GOAL_DOC_ID; 
+    document.getElementById('goal-name').value = goal.name || '';
+    document.getElementById('target-amount').value = target.toFixed(2);
+    document.getElementById('current-amount').value = current.toFixed(2);
+}
+
+function startGoalListener() {
+    if (!auth.currentUser) return;
+
+    // Listen to the specific goal document under the 'goals' collection
+    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goals', GOAL_DOC_ID);
+    onSnapshot(goalRef, (docSnap) => {
+        if (docSnap.exists()) {
+            renderGoalUI({ id: docSnap.id, ...docSnap.data() });
+        } else {
+            renderGoalUI(null);
+        }
+    });
+}
+
+async function handleGoalFormSubmit(e) {
+    e.preventDefault();
+    if (!auth.currentUser) return showModal("ข้อผิดพลาด", "โปรดเข้าสู่ระบบก่อนบันทึกเป้าหมาย");
+
+    const form = document.getElementById('goal-form');
+    const isEditing = document.getElementById('goal-id').value;
+    const goalName = document.getElementById('goal-name').value.trim();
+    const targetAmount = parseFloat(document.getElementById('target-amount').value);
+    const currentAmount = parseFloat(document.getElementById('current-amount').value);
+
+    if (targetAmount < 0.01 || currentAmount < 0) return showModal("ข้อผิดพลาด", "ยอดเงินเป้าหมายต้องมากกว่า 0.01 และยอดเงินเริ่มต้นต้องไม่ติดลบ");
+
+    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goals', GOAL_DOC_ID);
+    
+    try {
+        if (isEditing) {
+            // Editing existing goal (update)
+            const existingDoc = await getDoc(goalRef);
+            const originalGoal = existingDoc.data();
+            
+            await setDoc(goalRef, {
+                name: goalName,
+                targetAmount: targetAmount,
+                currentAmount: currentAmount,
+                // Keep original creation date and initial amount for accurate calculation
+                createdAt: originalGoal?.createdAt || serverTimestamp(), 
+                initialAmount: originalGoal?.initialAmount || 0,
+                updatedAt: serverTimestamp()
+            });
+            showModal("สำเร็จ", "แก้ไขเป้าหมายเรียบร้อยแล้ว");
+        } else {
+            // Creating new goal (set)
+            await setDoc(goalRef, {
+                name: goalName,
+                targetAmount: targetAmount,
+                currentAmount: currentAmount,
+                initialAmount: currentAmount, // initialAmount is the amount when the goal was first set
+                createdAt: serverTimestamp()
+            });
+            showModal("สำเร็จ", "สร้างเป้าหมายเรียบร้อยแล้ว");
+        }
+    } catch (error) {
+        console.error("Error saving goal: ", error);
+        showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกเป้าหมายได้");
+    }
+}
+
+async function handleSaveMoney(e) {
+    e.preventDefault();
+    if (!auth.currentUser) return showModal("ข้อผิดพลาด", "โปรดเข้าสู่ระบบก่อนบันทึกเงินออม");
+    
+    const saveAmountInput = document.getElementById('save-amount');
+    const saveAmount = parseFloat(saveAmountInput.value);
+
+    if (saveAmount <= 0 || isNaN(saveAmount)) return showModal("ข้อผิดพลาด", "โปรดระบุจำนวนเงินออมที่ถูกต้อง");
+
+    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goals', GOAL_DOC_ID);
+    try {
+        const goalDoc = await getDoc(goalRef);
+        if (!goalDoc.exists()) {
+            saveAmountInput.value = '';
+            return showModal("ข้อผิดพลาด", "คุณยังไม่ได้สร้างเป้าหมาย");
+        }
+        
+        const currentAmount = goalDoc.data().currentAmount || 0;
+        const newAmount = currentAmount + saveAmount;
+
+        await updateDoc(goalRef, {
+            currentAmount: newAmount,
+            updatedAt: serverTimestamp()
+        });
+
+        showModal("สำเร็จ", `บันทึกเงินออม ${saveAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาทเรียบร้อยแล้ว`);
+        saveAmountInput.value = '';
+    } catch (error) {
+        console.error("Error saving money: ", error);
+        showModal("ข้อผิดพลาด", "ไม่สามารถบันทึกเงินออมได้");
+    }
+}
+
+
 // --- Page Initialization Functions ---
 function initHomePage() {
     const transactionForm = document.getElementById('transaction-form');
@@ -290,45 +491,47 @@ function initLoginPage() {
 
 function initAboutPage() {
     const logoutBtn = document.getElementById('logout-btn');
-    const editProfileBtn = document.getElementById('edit-profile-btn');
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
-    const editUserForm = document.getElementById('edit-user-form');
-    
-    const userSection = document.getElementById('user-section');
-    const editUserSection = document.getElementById('edit-user-section');
+    const goalForm = document.getElementById('goal-form');
+    const saveMoneyForm = document.getElementById('save-money-form');
+    const editGoalBtn = document.getElementById('edit-goal-btn');
+    const resetGoalBtn = document.getElementById('reset-goal-btn');
 
+    // Authentication & Logout
     logoutBtn?.addEventListener('click', () => signOut(auth));
 
-    editProfileBtn?.addEventListener('click', () => {
-        userSection.classList.add('hidden');
-        editUserSection.classList.remove('hidden');
-        const currentUsername = document.getElementById('user-greeting').textContent;
-        document.getElementById('edit-username').value = currentUsername;
+    // Goal Management
+    goalForm?.addEventListener('submit', handleGoalFormSubmit);
+    saveMoneyForm?.addEventListener('submit', handleSaveMoney);
+
+    // Edit Goal Button
+    editGoalBtn?.addEventListener('click', () => {
+        document.getElementById('goal-status-container')?.classList.add('hidden');
+        document.getElementById('goal-form-container')?.classList.remove('hidden');
+        document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
+        document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
     });
 
-    cancelEditBtn?.addEventListener('click', () => {
-        editUserSection.classList.add('hidden');
-        userSection.classList.remove('hidden');
-    });
-
-    editUserForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const newUsername = document.getElementById('edit-username').value.trim();
-        if (newUsername && auth.currentUser) {
-            const userDocRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid);
+    // Reset/Delete Goal Button
+    resetGoalBtn?.addEventListener('click', () => {
+        showConfirmationModal('ยืนยันการลบเป้าหมาย', 'คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้? (ข้อมูลจะหายไปทั้งหมด)', async () => {
+            if (!auth.currentUser) return;
+            // Delete the goal document
+            const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goals', GOAL_DOC_ID);
             try {
-                await updateDoc(userDocRef, { username: newUsername });
-                showModal("สำเร็จ", "อัปเดตชื่อผู้ใช้เรียบร้อยแล้ว");
-                document.getElementById('user-greeting').textContent = newUsername;
-                editUserSection.classList.add('hidden');
-                userSection.classList.remove('hidden');
+                await deleteDoc(goalRef);
+                showModal("สำเร็จ", "ลบเป้าหมายเรียบร้อยแล้ว");
+                // The onSnapshot listener will catch the deletion and call renderGoalUI(null)
             } catch (error) {
-                console.error("Error updating username: ", error);
-                showModal("ข้อผิดพลาด", "ไม่สามารถอัปเดตชื่อผู้ใช้ได้");
+                console.error("Error deleting goal: ", error);
+                showModal("ข้อผิดพลาด", "ไม่สามารถลบเป้าหมายได้");
             }
-        }
+        });
     });
+
+    // Start listening for real-time goal updates
+    startGoalListener();
 }
+
 
 function initInvestPage() {
     const newsGrid = document.getElementById('news-grid');
@@ -430,9 +633,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (currentPage === 'login') {
         initLoginPage();
     } else if (currentPage === 'about') {
-        initAboutPage();
+        initAboutPage(); // This is the updated function for goal management
     } else if (currentPage === 'invest') {
         initInvestPage();
     }
 });
-
