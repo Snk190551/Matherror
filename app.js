@@ -45,7 +45,7 @@ const firebaseConfig = {
   projectId: "app-math-465713",
   storageBucket: "app-math-465713.firebasestorage.app",
   messagingSenderId: "896330929514",
-  appId: "1:896330929514:web:f2aa9442ab19ac405c93c1"
+  appId: "1:896330929514:web:f2aa9442ab19a3f7574113"
 };
 
 // Initialize Firebase App, Auth, and Firestore
