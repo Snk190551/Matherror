@@ -635,6 +635,62 @@ function initAboutPage() {
     startGoalListener();
 }
 
+async function initAboutPage() {
+    // === 1. การตรวจสอบและโหลดข้อมูลเป้าหมาย (สำคัญที่สุด) ===
+    if (!auth.currentUser) {
+        // หากยังไม่ได้ล็อกอิน ให้เปลี่ยนไปหน้า login
+        window.location.replace('login.html');
+        return;
+    }
+    
+    // โหลดข้อมูลเป้าหมายครั้งแรก (ถ้าคุณมีฟังก์ชันสำหรับโหลดและ render)
+    // *** ถ้าคุณใช้ onSnapshot ใน startGoalListener อยู่แล้ว ส่วนนี้อาจจะไม่จำเป็น ***
+    // *** แต่การเรียก startGoalListener() ด้านล่างก็เพียงพอแล้ว ***
+
+    // ==========================================================
+
+    const logoutBtn = document.getElementById('logout-btn');
+    const goalForm = document.getElementById('goal-form');
+    const saveMoneyForm = document.getElementById('save-money-form');
+    // ... (elements อื่นๆ)
+
+    // ... (ส่วน Event Listeners เดิมของคุณ)
+    // ...
+
+    // Start listening for real-time goal updates
+    startGoalListener();
+}
+
+// ใน app.js (ให้วางไว้ใกล้ๆ กับ initAboutPage)
+
+function updateGoalUI(goalData) {
+    const statusContainer = document.getElementById('goal-status-container');
+    const formContainer = document.getElementById('goal-form-container');
+
+    if (!statusContainer || !formContainer) {
+        console.error("Goal containers not found in about.html");
+        return;
+    }
+
+    if (goalData) {
+        // 1. มีเป้าหมายแล้ว: แสดงสถานะเป้าหมาย, ซ่อนฟอร์ม
+        statusContainer.classList.remove('hidden');
+        formContainer.classList.add('hidden');
+        
+        // 2. อัพเดทข้อมูลในหน้าสถานะ (คุณต้องมีฟังก์ชันนี้)
+        displayGoalDetails(goalData);
+        
+    } else {
+        // 3. ไม่มีเป้าหมาย: ซ่อนสถานะเป้าหมาย, แสดงฟอร์มสร้าง
+        statusContainer.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+        
+        // กำหนดให้เป็นโหมดสร้างเป้าหมายใหม่
+        document.getElementById('goal-form-title').textContent = 'สร้างเป้าหมายใหม่';
+        document.getElementById('goal-submit-btn').textContent = 'บันทึกเป้าหมาย';
+        document.getElementById('goal-form').reset();
+    }
+}
 
 function initInvestPage() {
     const newsGrid = document.getElementById('news-grid');
