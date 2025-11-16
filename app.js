@@ -396,6 +396,12 @@ async function handleGoalFormSubmit(e) {
         currentAmount: currentAmount,
         updatedAt: serverTimestamp()
     };
+
+if (!isEdit) {
+        dataToSave.createdAt = serverTimestamp(); // <-- เพิ่มวันที่สร้าง
+        dataToSave.initialAmount = currentAmount; // <-- เพิ่มยอดเริ่มต้น (คือยอดปัจจุบันตอนที่สร้าง)
+    }
+
     // สร้าง docRef ไว้ใช้ซ้ำ
     const goalRef = doc(db, "users", user.uid, "goal", docId);
 
