@@ -465,15 +465,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // --- Save New Goal ---
+        // --- Save New Goal ---
         if (addGoalForm) {
             addGoalForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (!auth.currentUser) return;
 
-                // --- หา ID ที่ถูกต้องตาม about.html ---
                 const goalName = document.getElementById('goalName').value;
-                const targetAmount = parseFloat(document.getElementById('targetAmount').value); // แก้ไข
-                const initialAmount = parseFloat(document.getElementById('initialAmount').value); // แก้ไข
+                const targetAmount = parseFloat(document.getElementById('targetAmount').value);
+                const initialAmount = parseFloat(document.getElementById('initialAmount').value);
 
                 if (targetAmount <= initialAmount) {
                     alert("จำนวนเงินเป้าหมายต้องมากกว่าเงินออมเริ่มต้น");
@@ -481,17 +481,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 try {
-                    const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                    //
+                    // V V V V V V V V V V V V V V V V V V
+                    //
+                    //     จุดที่แก้ไข: ลบ import บรรทัดนี้ทิ้งไป
+                    //     เพราะเรา import ไว้ที่ต้นไฟล์แล้ว
+                    //
+                    // ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
+                    //
 
+                    // ใช้ addDoc, collection, serverTimestamp จากที่ import ไว้ด้านบน
                     await addDoc(collection(db, 'goals'), {
                         userId: auth.currentUser.uid,
                         name: goalName,
                         target: targetAmount,
                         current: initialAmount,
-                        createdAt: serverTimestamp()
+                        createdAt: serverTimestamp() // <--- ใช้งานได้เลย
                     });
+                    
                     addGoalForm.reset();
                     closeModal(addGoalModal);
+
                 } catch (error) {
                     console.error("Error adding goal: ", error);
                     alert("เกิดข้อผิดพลาดในการบันทึกเป้าหมาย");
