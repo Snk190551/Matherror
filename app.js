@@ -262,6 +262,9 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
 // app.js
 // แทนที่ฟังก์ชัน renderGoalUI เก่าทั้งก้อนด้วยอันนี้
 
+// app.js
+// แทนที่ฟังก์ชัน renderGoalUI เก่าทั้งก้อนด้วยอันนี้
+
 function renderGoalUI(goal) {
     const displayContainer = document.getElementById('goal-display-container');
     const formContainer = document.getElementById('goal-form-container');
@@ -288,11 +291,10 @@ function renderGoalUI(goal) {
     }
 
     // มีเป้าหมาย, แสดงรายละเอียด
-    // [การแก้ไข] สั่งแสดง/ซ่อนให้ครบทุกส่วน
-if (goalStatusContainer) goalStatusContainer.classList.remove('hidden'); // แสดงกรอบหลัก
-if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden'); // แสดงส่วนออมเงิน
-displayContainer.classList.remove('hidden'); // แสดงส่วนแสดงผล
-formContainer.classList.add('hidden'); // ซ่อนฟอร์ม
+    if (goalStatusContainer) goalStatusContainer.classList.remove('hidden'); // แสดงกรอบหลัก
+    if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden'); // แสดงส่วนออมเงิน
+    displayContainer.classList.remove('hidden'); // แสดงส่วนแสดงผล
+    formContainer.classList.add('hidden'); // ซ่อนฟอร์ม
     
     // --- (ส่วนที่เหลือคือโค้ดเดิมของคุณ ทำงานถูกต้องอยู่แล้ว) ---
     document.getElementById('display-goal-name').textContent = goal.name;
