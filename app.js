@@ -431,15 +431,6 @@ if (!isEdit) {
             // (ใช้ setDoc กับ merge: true จะปลอดภัยกว่า)
             await setDoc(goalRef, dataToSave, { merge: true });
         }
-    
-        // 1. บันทึกเสร็จแล้ว? ไปดึงข้อมูลใหม่เดี๋ยวนี้เลย!
-        const updatedDocSnap = await getDoc(goalRef);
-        
-        // 2. สั่งวาดหน้าจอใหม่ (Re-render) ด้วยข้อมูลที่เพิ่งดึงมา
-        if (updatedDocSnap.exists()) {
-            renderGoalUI({ id: updatedDocSnap.id, ...updatedDocSnap.data() });
-        }
-        // -------------------------
 
         // 3. ค่อยแสดง Modal
         showModal("สำเร็จ!", isEdit ? "อัปเดตเป้าหมายเรียบร้อยแล้ว" : "สร้างเป้าหมายใหม่สำเร็จ!");
