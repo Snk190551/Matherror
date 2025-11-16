@@ -260,11 +260,17 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
 
 // ฟังก์ชันสำหรับจัดการการแสดงผล UI ของเป้าหมาย
 function renderGoalUI(goal) {
+    // ดึง Element หลัก (ควรมีอยู่ใน about.html)
     const displayContainer = document.getElementById('goal-status-container');
     const formContainer = document.getElementById('goal-form-container');
     const goalForm = document.getElementById('goal-form');
-    // *** 1. เพิ่มการอ้างอิงส่วนบันทึกเงินเพิ่ม ***
     const saveMoneyContainer = document.getElementById('save-money-container');
+
+    if (!displayContainer || !formContainer || !goalForm) {
+         console.error("Critical goal UI containers are missing.");
+         // ถ้า Element หลักหายไป หน้าอาจขาวเพราะไม่มีที่ให้แสดงเนื้อหา
+         return; 
+    }
 
     if (!goal) {
         // ไม่มีเป้าหมาย, แสดงฟอร์มสร้างเป้าหมาย
@@ -285,6 +291,10 @@ function renderGoalUI(goal) {
     // *** 2. แสดงส่วนบันทึกเงินเพิ่มเมื่อมีเป้าหมาย ***
     if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden');
     
+// *** เพิ่มการตรวจสอบ 'if (Element)' ก่อนเข้าถึง properties ***
+    const goalNameEl = document.getElementById('display-goal-name');
+    if (goalNameEl) goalNameEl.textContent = goal.name;
+
     document.getElementById('display-goal-name').textContent = goal.name;
     document.getElementById('display-target-amount').textContent = goal.targetAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
     document.getElementById('display-current-amount').textContent = goal.currentAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
@@ -339,32 +349,158 @@ function renderGoalUI(goal) {
     }
 }
 
+// app.js
+
+// ... (ส่วน Global Variables & Firebase Setup) ...
+// ... (ส่วน Helper Functions เช่น showModal, hideModal, showConfirmationModal) ...
+
+// --- START: Goal Management Functions ---
+
+// ฟังก์ชันสำหรับจัดการการแสดงผล UI ของเป้าหมาย
+function renderGoalUI(goal) {
+    const displayContainer = document.getElementById('goal-status-container');
+    const formContainer = document.getElementById('goal-form-container');
+    const goalForm = document.getElementById('goal-form');
+    const saveMoneyContainer = document.getElementById('save-money-container');
+    const goalSubmitBtn = document.getElementById('goal-submit-btn');
+    const deleteBtn = document.getElementById('delete-goal-btn');
+
+    if (!displayContainer || !formContainer || !goalForm) {
+         console.error("Critical goal UI containers are missing.");
+         return; 
+    }
+    
+    // ตั้งค่าปุ่มลบ (หากมีเป้าหมายเท่านั้นถึงจะแสดง)
+    if (deleteBtn) {
+         deleteBtn.onclick = null; 
+         deleteBtn.onclick = confirmDeleteGoal; // ผูก Event
+         deleteBtn.classList.add('hidden'); // ซ่อนไว้ก่อน
+    }
+
+
+    if (!goal) {
+        // ไม่มีเป้าหมาย, แสดงฟอร์มสร้างเป้าหมาย
+        displayContainer.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+        if (saveMoneyContainer) saveMoneyContainer.classList.add('hidden');
+
+        goalForm.reset();
+        delete goalForm.dataset.docId; 
+        delete goalForm.dataset.isEdit; 
+        if (goalSubmitBtn) goalSubmitBtn.textContent = 'สร้างเป้าหมาย';
+        document.getElementById('goal-form-title')?.textContent = 'สร้างเป้าหมายทางการเงิน';
+        return;
+    }
+
+    // มีเป้าหมาย, แสดงรายละเอียด
+    displayContainer.classList.remove('hidden');
+    formContainer.classList.add('hidden');
+    if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden');
+    if (deleteBtn) deleteBtn.classList.remove('hidden'); // แสดงปุ่มลบ
+
+    // --- อัปเดตรายละเอียดเป้าหมาย ---
+    document.getElementById('display-goal-name')?.textContent = goal.name;
+    document.getElementById('display-target-amount')?.textContent = goal.targetAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    document.getElementById('display-current-amount')?.textContent = goal.currentAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+
+    const progress = (goal.currentAmount / goal.targetAmount) * 100;
+    const progressBar = document.getElementById('goal-progress-bar');
+    if (progressBar) { 
+        const safeProgress = Math.min(progress, 100);
+        
+        progressBar.style.width = `${safeProgress}%`;
+        progressBar.textContent = `${safeProgress.toFixed(0)}%`;
+        progressBar.setAttribute('aria-valuenow', safeProgress.toFixed(0));
+    }
+
+    // คำนวณยอดเงินคงเหลือ
+    const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
+    document.getElementById('display-remaining-amount')?.textContent = remaining.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    
+    // --- START: Attainment Calculation and Display Logic ---
+    const dateCreated = goal.createdAt ? new Date(goal.createdAt.toDate()) : null;
+    const initialAmount = goal.initialAmount || 0;
+    const totalSaved = goal.currentAmount - initialAmount;
+    
+    let attainmentText = 'คำนวณไม่ได้';
+    let avgDaily = 0;
+    
+    if (dateCreated) {
+        const daysPassed = (new Date() - dateCreated) / (1000 * 60 * 60 * 24);
+        
+        if (daysPassed > 0.01) { 
+             avgDaily = totalSaved / daysPassed;
+             // Logic for remaining days calculation (using simple arithmetic)
+             const remainingDays = remaining / avgDaily; 
+             if (remainingDays > 0) {
+                 const targetDate = new Date();
+                 targetDate.setDate(targetDate.getDate() + remainingDays);
+                 const formatter = new Intl.DateTimeFormat('th-TH', { dateStyle: 'full' });
+                 attainmentText = formatter.format(targetDate);
+             } else if (remainingDays <= 0 && remaining === 0) {
+                 attainmentText = 'บรรลุเป้าหมายแล้ว! 🎉';
+             } else {
+                 attainmentText = 'คำนวณวันบรรลุผลไม่ได้';
+             }
+        } else {
+             attainmentText = "เริ่มการคำนวณในวันถัดไป";
+        }
+    } else {
+        attainmentText = "ไม่พบวันที่เริ่มต้น/ยอดเริ่มต้น";
+    }
+
+    // Update UI elements for attainment
+    document.getElementById('display-avg-daily')?.textContent = avgDaily.toLocaleString('th-TH', { maximumFractionDigits: 2 });
+    // ใช้ result-arithmetic เป็นตัวแสดงผลวันที่
+    document.getElementById('result-arithmetic')?.textContent = attainmentText; 
+    // หากมี result-geometric ให้ใช้ตัวเดียวกันเพื่อให้แสดงผล
+    document.getElementById('result-geometric')?.textContent = attainmentText;
+    // --- END: Attainment Calculation and Display Logic ---
+
+    // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
+    const editBtn = document.getElementById('edit-goal-btn');
+    if (editBtn) {
+        editBtn.onclick = null; 
+        editBtn.onclick = () => editGoal(goal); 
+    }
+}
+
 // ฟังก์ชันสำหรับสลับการแสดงผลจากสถานะเป้าหมายไปเป็นฟอร์มแก้ไข
-function showGoalEditForm(goalData) {
+function editGoal(goalData) {
     const goalStatusContainer = document.getElementById('goal-status-container');
     const goalFormContainer = document.getElementById('goal-form-container');
     const saveMoneyContainer = document.getElementById('save-money-container');
+    const goalForm = document.getElementById('goal-form'); 
+    const deleteBtn = document.getElementById('delete-goal-btn');
 
     // 1. สลับ UI: ซ่อนสถานะ, แสดงฟอร์ม
     goalStatusContainer?.classList.add('hidden');
     saveMoneyContainer?.classList.add('hidden');
     goalFormContainer?.classList.remove('hidden');
+    if (deleteBtn) deleteBtn.classList.add('hidden');
 
-    // 2. ตั้งชื่อฟอร์ม/ปุ่มให้เป็น "แก้ไข"
-    document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
-    document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
+    // 2. ตั้งค่า Form Data และ Pre-fill
+    if (goalForm) {
+        goalForm.dataset.docId = GOAL_DOC_ID; 
+        goalForm.dataset.isEdit = 'true'; 
+    }
     
-    // (ข้อมูลในฟอร์มถูก Pre-fill แล้วโดย renderGoalUI)
-    // แต่เพื่อความปลอดภัย ให้แน่ใจว่า ID ถูกตั้งค่าใน input field
-    document.getElementById('goal-id').value = goalData.id; 
+    // ตั้งชื่อฟอร์ม/ปุ่มให้เป็น "แก้ไข"
+    document.getElementById('goal-form-title')?.textContent = 'แก้ไขเป้าหมาย';
+    document.getElementById('goal-submit-btn')?.textContent = 'บันทึกการแก้ไข';
+    
+    // Pre-fill fields
+    document.getElementById('goal-name').value = goalData.name || ''; 
+    document.getElementById('target-amount').value = goalData.targetAmount || 0;
+    document.getElementById('current-amount').value = goalData.currentAmount || 0; 
 }
 
+
 function startGoalListener() {
-    // ต้องมีโค้ดตรวจสอบการล็อกอินก่อนทำงาน
     if (!auth.currentUser) return; 
 
-    // Path การดึงข้อมูลที่ถูกต้อง (Collection 'goal')
-    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goal', GOAL_DOC_ID);
+    // Path การดึงข้อมูลที่ถูกต้อง (Single document 'user_goal')
+    const goalRef = doc(db, 'artifacts', firebaseConfig.appId, 'users', auth.currentUser.uid, 'goal', GOAL_DOC_ID);
     
     onSnapshot(goalRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -381,10 +517,7 @@ async function handleGoalFormSubmit(e) {
     
     const user = auth.currentUser;
     if (!user) {
-        showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อบันทึกเป้าหมาย (เซสชันการล็อกอินอาจหมดอายุ)');
-        setTimeout(() => {
-            window.location.replace('login.html');
-        }, 2000); 
+        showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อบันทึกเป้าหมาย');
         return;
     }
 
@@ -392,24 +525,24 @@ async function handleGoalFormSubmit(e) {
     const targetAmount = parseFloat(document.getElementById('target-amount').value);
     const currentAmount = parseFloat(document.getElementById('current-amount').value);
     const goalForm = document.getElementById('goal-form');
-    const docId = goalForm.dataset.docId || GOAL_DOC_ID; 
-    
+    const docId = GOAL_DOC_ID; 
+
     if (targetAmount <= 0) {
         showModal('ข้อผิดพลาด', 'ยอดเงินเป้าหมายต้องมากกว่า 0');
         return;
     }
     if (currentAmount < 0) {
-        showModal('ข้อผิดพลาด', 'ยอดเงินเริ่มต้นต้องไม่เป็นค่าติดลบ');
+        showModal('ข้อผิดพลาด', 'ยอดเงินเริ่มต้น/ปัจจุบันต้องไม่เป็นค่าติดลบ');
         return;
     }
 
-    // Determine if it is a new creation (to set initialAmount/createdAt)
-    const isCreatingNew = docId === GOAL_DOC_ID && !goalForm.dataset.isEdit;
-
     try {
-        // Path การบันทึกที่ถูกต้อง (Collection 'goal')
         const goalRef = doc(db, 'artifacts', firebaseConfig.appId, 'users', user.uid, 'goal', docId);
-
+        const docSnap = await getDoc(goalRef);
+        const existingGoal = docSnap.exists() ? docSnap.data() : null;
+        
+        const isCreatingNew = !existingGoal; 
+        
         let goalData = {
             name: goalName,
             targetAmount: targetAmount,
@@ -417,7 +550,6 @@ async function handleGoalFormSubmit(e) {
             updatedAt: serverTimestamp()
         };
 
-        // **Logic เพิ่มเติม: บันทึก initialAmount และ createdAt เมื่อสร้างใหม่เท่านั้น**
         if (isCreatingNew) {
             goalData.initialAmount = currentAmount;
             goalData.createdAt = serverTimestamp();
@@ -427,20 +559,91 @@ async function handleGoalFormSubmit(e) {
 
         showModal('สำเร็จ', isCreatingNew ? 'สร้างเป้าหมายทางการเงินเรียบร้อยแล้ว' : 'บันทึกการแก้ไขเป้าหมายเรียบร้อยแล้ว');
         
-        document.getElementById('goal-form').reset();
-        document.getElementById('goal-form-container').classList.add('hidden');
-        
-        // Clear isEdit flag after successful save/edit
+        document.getElementById('goal-form')?.reset();
         delete goalForm.dataset.isEdit; 
 
     } catch (error) {
         console.error('Error saving goal:', error);
-        // **โค้ดแก้ไข: แสดง error code หรือ message เพื่อช่วย Debug**
         const errorMessage = error.code ? `${error.code}: ${error.message}` : error.message;
         showModal('ข้อผิดพลาด', `ไม่สามารถบันทึกเป้าหมายได้: ${errorMessage}`);
     }
 }
 
+// ฟังก์ชันสำหรับจัดการการออมเงินเพิ่ม (Save Money)
+async function handleSaveMoneySubmit(e) {
+    e.preventDefault();
+    
+    const user = auth.currentUser;
+    if (!user) {
+        showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้ง');
+        return;
+    }
+
+    const saveAmountInput = document.getElementById('save-money-amount');
+    const saveAmount = parseFloat(saveAmountInput.value);
+
+    if (isNaN(saveAmount) || saveAmount <= 0) {
+        showModal('ข้อผิดพลาด', 'กรุณาป้อนจำนวนเงินที่ถูกต้อง');
+        return;
+    }
+    
+    const goalRef = doc(db, 'artifacts', firebaseConfig.appId, 'users', user.uid, 'goal', GOAL_DOC_ID);
+    
+    try {
+        // ดึงข้อมูลเป้าหมายปัจจุบัน
+        const docSnap = await getDoc(goalRef);
+        if (!docSnap.exists()) {
+             showModal('ข้อผิดพลาด', 'ไม่พบเป้าหมายปัจจุบัน กรุณาสร้างเป้าหมายก่อน');
+             return;
+        }
+        
+        const currentGoal = docSnap.data();
+        
+        // คำนวณยอดเงินปัจจุบันใหม่
+        const newCurrentAmount = currentGoal.currentAmount + saveAmount;
+
+        // อัปเดตเอกสารเป้าหมาย
+        await updateDoc(goalRef, {
+            currentAmount: newCurrentAmount,
+            updatedAt: serverTimestamp()
+        });
+
+        // ล้างฟอร์ม
+        saveAmountInput.value = '';
+
+        showModal('สำเร็จ', `บันทึกเงินที่เก็บเพิ่ม ${saveAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท เรียบร้อยแล้ว`);
+
+    } catch (error) {
+        console.error('Error saving money:', error);
+        showModal('ข้อผิดพลาด', 'ไม่สามารถบันทึกเงินที่เก็บเพิ่มได้');
+    }
+}
+
+// ฟังก์ชันช่วยเหลือสำหรับการลบเป้าหมาย
+async function deleteGoal() {
+    const user = auth.currentUser;
+    if (!user) {
+        showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อลบเป้าหมาย');
+        return;
+    }
+
+    try {
+        const goalRef = doc(db, 'artifacts', firebaseConfig.appId, 'users', user.uid, 'goal', GOAL_DOC_ID);
+        await deleteDoc(goalRef); 
+        showModal('สำเร็จ', 'ลบเป้าหมายทางการเงินเรียบร้อยแล้ว');
+    } catch (error) {
+        console.error('Error deleting goal:', error);
+        const errorMessage = error.code ? `${error.code}: ${error.message}` : error.message;
+        showModal('ข้อผิดพลาด', `ไม่สามารถลบเป้าหมายได้: ${errorMessage}`);
+    }
+}
+
+function confirmDeleteGoal() {
+    // ต้องแน่ใจว่าฟังก์ชัน showConfirmationModal ถูกกำหนดไว้แล้วในไฟล์ (จาก snippet ที่คุณมี)
+    showConfirmationModal('ยืนยันการลบเป้าหมาย', 'คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายทางการเงินนี้? การกระทำนี้ไม่สามารถยกเลิกได้', deleteGoal);
+}
+
+// --- END: Goal Management Functions ---
 // ฟังก์ชันสำหรับเปิดฟอร์มพร้อมข้อมูลเดิมเพื่อแก้ไข
 function editGoal(goalData) {
     const formContainer = document.getElementById('goal-form-container');
