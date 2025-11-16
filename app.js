@@ -263,21 +263,27 @@ function renderGoalUI(goal) {
     const displayContainer = document.getElementById('goal-status-container');
     const formContainer = document.getElementById('goal-form-container');
     const goalForm = document.getElementById('goal-form');
+    // *** 1. เพิ่มการอ้างอิงส่วนบันทึกเงินเพิ่ม ***
+    const saveMoneyContainer = document.getElementById('save-money-container');
 
     if (!goal) {
         // ไม่มีเป้าหมาย, แสดงฟอร์มสร้างเป้าหมาย
         displayContainer.classList.add('hidden');
         formContainer.classList.remove('hidden');
+        if (saveMoneyContainer) saveMoneyContainer.classList.add('hidden'); // ซ่อนส่วนบันทึกเงิน
+        
         goalForm.reset();
-        delete goalForm.dataset.docId; // ลบ docId ทิ้งเพื่อให้เป็นการสร้างใหม่
-        delete goalForm.dataset.isEdit; // ลบสถานะการแก้ไข
+        delete goalForm.dataset.docId; 
+        delete goalForm.dataset.isEdit; 
         document.getElementById('goal-submit-btn').textContent = 'สร้างเป้าหมาย';
         return;
     }
 
     // มีเป้าหมาย, แสดงรายละเอียด
-    displayContainer.classList.remove('hidden');
-    formContainer.classList.add('hidden');
+   displayContainer.classList.remove('hidden'); // <--- แสดงสถานะเป้าหมาย
+    formContainer.classList.add('hidden');      // <--- ซ่อนฟอร์มสร้างเป้าหมาย
+    // *** 2. แสดงส่วนบันทึกเงินเพิ่มเมื่อมีเป้าหมาย ***
+    if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden');
     
     document.getElementById('display-goal-name').textContent = goal.name;
     document.getElementById('display-target-amount').textContent = goal.targetAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
@@ -328,9 +334,7 @@ function renderGoalUI(goal) {
     // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
     const editBtn = document.getElementById('edit-goal-btn');
     if (editBtn) {
-        // ล้าง Listener เดิมออกก่อน (ป้องกันการเรียกซ้ำ)
         editBtn.onclick = null; 
-        // ผูกฟังก์ชัน editGoal โดยส่งข้อมูล goal ปัจจุบันเข้าไป
         editBtn.onclick = () => editGoal(goal); 
     }
 }
