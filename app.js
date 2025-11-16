@@ -419,15 +419,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     else if (currentPage === 'about') {
         // ==========================================================
-        // GOALS PAGE LOGIC (about.html)
+        // GOALS PAGE LOGIC (about.html) - CORRECTED
         // ==========================================================
 
-        const openAddGoalModalBtn = document.getElementById('openAddGoalModalBtn');
+        // --- หา ID ที่ถูกต้องตาม about.html ---
+        const addGoalBtn = document.getElementById('addGoalBtn'); // แก้ไข
         const addGoalModal = document.getElementById('addGoalModal');
         const closeAddGoalModalBtn = document.getElementById('closeAddGoalModalBtn');
         const addGoalForm = document.getElementById('addGoalForm');
-        const goalsContainer = document.getElementById('goalsContainer');
-        const noGoalsText = document.getElementById('noGoalsText');
+        const goalsGrid = document.getElementById('goalsGrid'); // แก้ไข
 
         const addSavingModal = document.getElementById('addSavingModal');
         const closeAddSavingModalBtn = document.getElementById('closeAddSavingModalBtn');
@@ -435,13 +435,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const savingModalGoalName = document.getElementById('savingModalGoalName');
         const savingGoalIdInput = document.getElementById('savingGoalId');
         const savingAmountInput = document.getElementById('savingAmount');
+        
+        // --- Modal ยืนยันการลบ (จาก about.html) ---
+        const confirmationModal = document.getElementById('confirmationModal');
+        const cancelBtn = document.getElementById('cancelBtn');
 
         // --- Modal Toggle Functions ---
-        const openModal = (modal) => modal.classList.remove('hidden');
-        const closeModal = (modal) => modal.classList.add('hidden');
+        const openModal = (modal) => {
+            if (modal) modal.classList.remove('hidden');
+        };
+        const closeModal = (modal) => {
+            if (modal) modal.classList.add('hidden');
+        };
 
-        if (openAddGoalModalBtn) {
-            openAddGoalModalBtn.addEventListener('click', () => openModal(addGoalModal));
+        // --- สั่งให้ปุ่มทำงาน ---
+        if (addGoalBtn) { // แก้ไข
+            addGoalBtn.addEventListener('click', () => openModal(addGoalModal));
         }
         if (closeAddGoalModalBtn) {
             closeAddGoalModalBtn.addEventListener('click', () => closeModal(addGoalModal));
@@ -449,6 +458,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (closeAddSavingModalBtn) {
             closeAddSavingModalBtn.addEventListener('click', () => closeModal(addSavingModal));
         }
+        // (เพิ่ม) ปุ่มยกเลิกในหน้าต่างยืนยัน
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => closeModal(confirmationModal));
+        }
+
 
         // --- Save New Goal ---
         if (addGoalForm) {
@@ -456,17 +470,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 if (!auth.currentUser) return;
 
+                // --- หา ID ที่ถูกต้องตาม about.html ---
                 const goalName = document.getElementById('goalName').value;
-                const targetAmount = parseFloat(document.getElementById('goalTarget').value);
-                const initialAmount = parseFloat(document.getElementById('goalInitial').value);
+                const targetAmount = parseFloat(document.getElementById('targetAmount').value); // แก้ไข
+                const initialAmount = parseFloat(document.getElementById('initialAmount').value); // แก้ไข
 
                 if (targetAmount <= initialAmount) {
-                    alert("จำนวนเงินที่ต้องเก็บต้องมากกว่าเงินออมเริ่มต้น");
+                    alert("จำนวนเงินเป้าหมายต้องมากกว่าเงินออมเริ่มต้น");
                     return;
                 }
 
                 try {
-                    const { increment } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                    const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
 
                     await addDoc(collection(db, 'goals'), {
                         userId: auth.currentUser.uid,
@@ -496,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 
-                const { doc, collection, addDoc, updateDoc, increment } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                const { doc, collection, addDoc, updateDoc, increment, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
                 const goalRef = doc(db, 'goals', goalId);
                 const savingsLogRef = collection(goalRef, 'savingsLog');
 
@@ -517,6 +532,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // --- (เพิ่ม) ฟังก์ชันลบเป้าหมาย ---
+        const deleteGoal = async (goalId) => {
+            if (!auth.currentUser || !goalId) return;
+            try {
+               const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+               // หมายเหตุ: การลบเอกสารหลัก จะไม่ลบ subcollection (savingsLog)
+               // แต่ในแอปนี้ เราจะไม่แสดงผล log ถ้า goal หายไปแล้ว ก็ถือว่าเพียงพอ
+               await deleteDoc(doc(db, 'goals', goalId));
+            } catch (error) {
+               console.error("Error deleting goal: ", error);
+               alert("เกิดข้อผิดพลาดในการลบเป้าหมาย");
+            }
+       };
+
         // --- Fetch and Render Goals ---
         const fetchAndRenderGoals = (userId) => {
             (async () => {
@@ -526,13 +555,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 onSnapshot(q, (querySnapshot) => {
                     if (querySnapshot.empty) {
-                        if(goalsContainer) goalsContainer.innerHTML = '';
-                        if(noGoalsText) noGoalsText.classList.remove('hidden');
+                        if(goalsGrid) goalsGrid.innerHTML = '<p class="text-gray-500 text-center col-span-full">ยังไม่มีเป้าหมาย ลองเพิ่มเลย!</p>'; // แก้ไข
                         return;
                     }
                     
-                    if(noGoalsText) noGoalsText.classList.add('hidden');
-                    if(goalsContainer) goalsContainer.innerHTML = '';
+                    if(goalsGrid) goalsGrid.innerHTML = ''; // แก้ไข
 
                     querySnapshot.forEach(async (goalDoc) => {
                         const goal = goalDoc.data();
@@ -545,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const savingsLog = logSnapshot.docs.map(d => d.data());
                         
                         const goalCard = createGoalCard(goal, savingsLog);
-                        if(goalsContainer) goalsContainer.appendChild(goalCard);
+                        if(goalsGrid) goalsGrid.appendChild(goalCard); // แก้ไข
                     });
                 });
             })();
@@ -562,6 +589,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const amountRemaining = Math.max(0, goal.target - goal.current);
 
             card.innerHTML = `
+                <button data-id="${goal.id}" data-name="${goal.name}" class="delete-goal-btn absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">${goal.name}</h3>
                 <div class="mb-3">
                     <div class="flex justify-between text-sm text-gray-600 mb-1">
@@ -587,12 +618,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 </button>
             `;
 
+            // ปุ่ม "บันทึกการออมเพิ่ม"
             card.querySelector('.add-saving-btn').addEventListener('click', (e) => {
                 const button = e.currentTarget;
                 if(savingModalGoalName) savingModalGoalName.textContent = `เป้าหมาย: ${button.dataset.name}`;
                 if(savingGoalIdInput) savingGoalIdInput.value = button.dataset.id;
                 openModal(addSavingModal);
             });
+            
+            // (เพิ่ม) ปุ่ม "ลบเป้าหมาย"
+            card.querySelector('.delete-goal-btn').addEventListener('click', (e) => {
+                 const button = e.currentTarget;
+                 const goalId = button.dataset.id;
+                 const goalName = button.dataset.name;
+                 
+                 const confirmModal = document.getElementById('confirmationModal');
+                 const confirmTitle = document.getElementById('confirmationTitle');
+                 const confirmMsg = document.getElementById('confirmationMessage');
+                 const confirmBtn = document.getElementById('confirmBtn');
+                 
+                 if(confirmTitle) confirmTitle.textContent = "ยืนยันการลบเป้าหมาย";
+                 if(confirmMsg) confirmMsg.textContent = `คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมาย "${goalName}"? ข้อมูลการออมของเป้าหมายนี้จะหายไปทั้งหมด`;
+                 
+                 // เราต้องใช้วิธีนี้เพื่อลบ event listener เก่าที่อาจติดมา
+                 const newConfirmBtn = confirmBtn.cloneNode(true);
+                 confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+                 
+                 newConfirmBtn.addEventListener('click', () => {
+                    deleteGoal(goalId);
+                    closeModal(confirmModal);
+                 }, { once: true }); // ให้ทำงานแค่ครั้งเดียว
+                 
+                 openModal(confirmModal);
+            });
+
             return card;
         };
 
@@ -621,6 +680,4 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAndRenderGoals(auth.currentUser.uid);
         }
 
-    } // End of 'about' page logic
-    
-}); // End of DOMContentLoaded
+    }})
