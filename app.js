@@ -421,12 +421,11 @@ async function handleGoalFormSubmit(e) {
 
         await setDoc(goalRef, goalData, { merge: true }); 
 
-        showModal('สำเร็จ', isCreatingNew ? 'สร้างเป้าหมายทางการเงินเรียบร้อยแล้ว' : 'บันทึกการแก้ไขเป้าหมายเรียบร้อยแล้ว');
-        
-        document.getElementById('goal-form').reset();
-        document.getElementById('goal-form-container').classList.add('hidden');
-        
-        // Clear isEdit flag after successful save/edit
+        showModal("สำเร็จ!", isEdit ? "อัปเดตเป้าหมายเรียบร้อยแล้ว" : "สร้างเป้าหมายใหม่สำเร็จ!");
+
+        e.target.reset(); 
+        e.target.dataset.isEdit = 'false';
+        delete e.target.dataset.docId;
         delete goalForm.dataset.isEdit; 
 
     } catch (error) {
