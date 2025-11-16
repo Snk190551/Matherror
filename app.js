@@ -592,13 +592,7 @@ function initLoginPage() {
 }
 
 function initAboutPage() {
-    // === 1. การตรวจสอบการล็อกอิน (ส่วนที่เพิ่มเข้ามา) ===
-    if (!auth.currentUser) {
-        // หากยังไม่ได้ล็อกอิน ให้เปลี่ยนไปหน้า login
-        window.location.replace('login.html');
-        return;
-    }
-    // ==========================================================
+
 
     const logoutBtn = document.getElementById('logout-btn');
     const goalForm = document.getElementById('goal-form');
@@ -713,25 +707,30 @@ function initInvestPage() {
 }
 
 
-// --- Main Controller & Auth Observer ---
+// ในไฟล์ app.js (ใช้แทนโค้ด onAuthStateChanged เดิมทั้งหมด)
+
 onAuthStateChanged(auth, async (user) => {
-    const protectedPages = ['', 'index.html', 'about.html', 'invest.html'];
-    const loginPage = 'login.html';
-    let currentPage = window.location.pathname.split("/").pop() || 'index.html';
+    // คำนวณหน้าปัจจุบัน (ตัดนามสกุล .html ออก)
+    let currentPage = window.location.pathname.split("/").pop() || 'index';
     if(currentPage.endsWith('.html')) {
         currentPage = currentPage.slice(0, -5);
     }
-     if (currentPage === '') {
+    if (currentPage === '') {
         currentPage = 'index';
     }
-
-
+    
+    // โค้ดนี้ใช้เพื่อกำหนดหน้าที่มีการป้องกัน
+    const protectedPageNames = ['index', 'about', 'invest'];
+    
+    // 1. ถ้าผู้ใช้ล็อกอินแล้ว (user มีค่า)
     if (user) {
+        // A. ถ้าล็อกอินแล้วแต่ยังอยู่หน้า Login ให้เด้งไปหน้าหลัก
         if (currentPage === 'login') {
             window.location.replace('index.html');
             return;
         }
         
+        // B. โหลดข้อมูลผู้ใช้และแสดงคำทักทาย
         const userDoc = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid));
         if (userDoc.exists()) {
             const userData = userDoc.data();
@@ -739,12 +738,30 @@ onAuthStateChanged(auth, async (user) => {
             if (userGreeting) userGreeting.textContent = userData.username || user.email;
         }
 
-    } else {
-        const protectedPageNames = ['index', 'about', 'invest'];
+        // C. *** เพิ่ม: เรียกฟังก์ชันเริ่มต้นหน้าตามหน้าปัจจุบัน ***
+        if (currentPage === 'index') {
+            initHomePage();
+        } else if (currentPage === 'about') {
+            initAboutPage(); // <<-- หน้าเป้าหมายจะเริ่มต้นตรงนี้
+        } else if (currentPage === 'invest') {
+            initInvestPage();
+        }
+    } 
+    // 2. ถ้าผู้ใช้ไม่ได้ล็อกอิน (user เป็น null)
+    else {
+        // ถ้าพยายามเข้าหน้าที่มีการป้องกัน
         if (protectedPageNames.includes(currentPage)) {
+            // หยุด Listener และลบข้อมูล UI ก่อนเปลี่ยนหน้า
             if (unsubscribeFromTransactions) unsubscribeFromTransactions();
-            renderTransactionsUI([]);
+            
+            // Note: ต้องมีฟังก์ชัน renderTransactionsUI() หรือฟังก์ชันจัดการ UI อื่นๆ ที่คุณเขียนไว้
+            // renderTransactionsUI([]); 
+            
+            // เด้งไปหน้า Login ทันที
             window.location.replace('login.html');
+        } else if (currentPage === 'login') {
+            // ถ้าอยู่หน้า Login อยู่แล้ว ก็เรียก initLoginPage()
+            initLoginPage();
         }
     }
 });
