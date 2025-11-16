@@ -184,7 +184,7 @@ function renderTransactionsUI(transactions = []) {
             </div>
             <div class="text-right">
                 <div class="font-bold text-lg">${tx.amount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท</div>
-               <div class="text-xs text-gray-400 mt-1">(มูลค่าเงินใน1ปีข้างหน้า: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
+                <div class="text-xs text-gray-400 mt-1">(มูลค่าเงินใน1ปีข้างหน้า: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
             </div>`;
         listEl.appendChild(itemDiv);
     });
@@ -288,48 +288,6 @@ function initLoginPage() {
     showRegisterBtn?.addEventListener('click', (e) => { e.preventDefault(); registerContainer.classList.remove('hidden'); loginContainer.classList.add('hidden'); });
 }
 
-function initAboutPage() {
-    const logoutBtn = document.getElementById('logout-btn');
-    const editProfileBtn = document.getElementById('edit-profile-btn');
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
-    const editUserForm = document.getElementById('edit-user-form');
-    
-    const userSection = document.getElementById('user-section');
-    const editUserSection = document.getElementById('edit-user-section');
-
-    logoutBtn?.addEventListener('click', () => signOut(auth));
-
-    editProfileBtn?.addEventListener('click', () => {
-        userSection.classList.add('hidden');
-        editUserSection.classList.remove('hidden');
-        const currentUsername = document.getElementById('user-greeting').textContent;
-        document.getElementById('edit-username').value = currentUsername;
-    });
-
-    cancelEditBtn?.addEventListener('click', () => {
-        editUserSection.classList.add('hidden');
-        userSection.classList.remove('hidden');
-    });
-
-    editUserForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const newUsername = document.getElementById('edit-username').value.trim();
-        if (newUsername && auth.currentUser) {
-            const userDocRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid);
-            try {
-                await updateDoc(userDocRef, { username: newUsername });
-                showModal("สำเร็จ", "อัปเดตชื่อผู้ใช้เรียบร้อยแล้ว");
-                document.getElementById('user-greeting').textContent = newUsername;
-                editUserSection.classList.add('hidden');
-                userSection.classList.remove('hidden');
-            } catch (error) {
-                console.error("Error updating username: ", error);
-                showModal("ข้อผิดพลาด", "ไม่สามารถอัปเดตชื่อผู้ใช้ได้");
-            }
-        }
-    });
-}
-
 function initInvestPage() {
     const newsGrid = document.getElementById('news-grid');
     if (!newsGrid) return;
@@ -359,31 +317,58 @@ function initInvestPage() {
 
 // --- Main Controller & Auth Observer ---
 onAuthStateChanged(auth, async (user) => {
-    const protectedPages = ['', 'index.html', 'about.html', 'invest.html'];
-    const loginPage = 'login.html';
     let currentPage = window.location.pathname.split("/").pop() || 'index.html';
     if(currentPage.endsWith('.html')) {
         currentPage = currentPage.slice(0, -5);
     }
-     if (currentPage === '') {
+    if (currentPage === '') {
         currentPage = 'index';
     }
 
+    const userInfoDiv = document.getElementById('userInfo');
+    const userInfoMobileDiv = document.getElementById('userInfoMobile');
 
     if (user) {
+        // --- User is Logged In ---
+        
+        // 1. Handle Page Redirection
         if (currentPage === 'login') {
             window.location.replace('index.html');
             return;
         }
         
+        // 2. Update Navbar UI (This now runs on ALL pages)
         const userDoc = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid));
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            const userGreeting = document.getElementById('user-greeting');
-            if (userGreeting) userGreeting.textContent = userData.username || user.email;
-        }
+        const username = userDoc.exists() ? userDoc.data().username : user.email;
+
+        const commonUserInfoHTML = `
+            <span class="text-gray-700">${username || user.email}</span>
+            <button id="logoutButton" class="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">
+                ออกจากระบบ
+            </button>
+        `;
+        
+        if (userInfoDiv) userInfoDiv.innerHTML = commonUserInfoHTML;
+        if (userInfoMobileDiv) userInfoMobileDiv.innerHTML = commonUserInfoHTML;
+
+        // 3. Add Logout Listeners
+        document.querySelectorAll('#logoutButton').forEach(button => {
+            button.addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    window.location.href = 'login.html';
+                });
+            });
+        });
 
     } else {
+        // --- User is Logged Out ---
+        
+        // 1. Update Navbar UI
+        const loginLink = '<a href="login.html" class="text-blue-600 hover:underline">เข้าสู่ระบบ</a>';
+        if (userInfoDiv) userInfoDiv.innerHTML = loginLink;
+        if (userInfoMobileDiv) userInfoMobileDiv.innerHTML = loginLink;
+
+        // 2. Handle Page Redirection
         const protectedPageNames = ['index', 'about', 'invest'];
         if (protectedPageNames.includes(currentPage)) {
             if (unsubscribeFromTransactions) unsubscribeFromTransactions();
@@ -395,13 +380,20 @@ onAuthStateChanged(auth, async (user) => {
 
 // --- Entry Point ---
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Modal Listeners ---
+    // --- Global Modal Listeners ---
     document.getElementById('confirm-cancel-btn')?.addEventListener('click', hideConfirmationModal);
     document.getElementById('confirm-action-btn')?.addEventListener('click', () => {
         if (typeof confirmCallback === 'function') {
             confirmCallback();
         }
         hideConfirmationModal();
+    });
+
+    // --- Global Mobile Menu Toggle ---
+    const mobileMenuButton = document.getElementById('mobileMenuButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenuButton?.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
     });
 
     // --- Page Identification ---
@@ -413,20 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage = 'index';
     }
     
-    // --- Nav Highlighting ---
-    document.querySelectorAll('nav a').forEach(link => {
-        let linkPage = link.getAttribute('href').split('/').pop() || 'index';
-        if(linkPage.endsWith('.html')) {
-            linkPage = linkPage.slice(0, -5);
-        }
-        if (linkPage === '') {
-            linkPage = 'index';
-        }
-        
-        if (linkPage === currentPage) {
-            link.classList.add('active-nav');
-        }
-    });
+    // (Nav Highlighting ถูกย้ายไปทำในตัว HTML ด้วย aria-current แล้ว)
     
     // --- Page Routing ---
     if (currentPage === 'index') {
@@ -436,19 +415,19 @@ document.addEventListener('DOMContentLoaded', () => {
         initLoginPage();
     } 
     else if (currentPage === 'invest') {
-        initInvestPage(); // (เพิ่มอันนี้ให้สมบูรณ์)
+        initInvestPage();
     }
     else if (currentPage === 'about') {
         // ==========================================================
         // GOALS PAGE LOGIC (about.html) - CORRECTED
         // ==========================================================
 
-        const openAddGoalModalBtn = document.getElementById('openAddGoalModalBtn');
+        // --- หา ID ที่ถูกต้องตาม about.html ---
+        const addGoalBtn = document.getElementById('addGoalBtn'); // แก้ไข
         const addGoalModal = document.getElementById('addGoalModal');
         const closeAddGoalModalBtn = document.getElementById('closeAddGoalModalBtn');
         const addGoalForm = document.getElementById('addGoalForm');
-        const goalsContainer = document.getElementById('goalsContainer');
-        const noGoalsText = document.getElementById('noGoalsText');
+        const goalsGrid = document.getElementById('goalsGrid'); // แก้ไข
 
         const addSavingModal = document.getElementById('addSavingModal');
         const closeAddSavingModalBtn = document.getElementById('closeAddSavingModalBtn');
@@ -456,13 +435,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const savingModalGoalName = document.getElementById('savingModalGoalName');
         const savingGoalIdInput = document.getElementById('savingGoalId');
         const savingAmountInput = document.getElementById('savingAmount');
+        
+        // --- Modal ยืนยันการลบ (จาก about.html) ---
+        const confirmationModal = document.getElementById('confirmationModal');
+        const cancelBtn = document.getElementById('cancelBtn');
 
         // --- Modal Toggle Functions ---
-        const openModal = (modal) => modal.classList.remove('hidden');
-        const closeModal = (modal) => modal.classList.add('hidden');
+        const openModal = (modal) => {
+            if (modal) modal.classList.remove('hidden');
+        };
+        const closeModal = (modal) => {
+            if (modal) modal.classList.add('hidden');
+        };
 
-        if (openAddGoalModalBtn) {
-            openAddGoalModalBtn.addEventListener('click', () => openModal(addGoalModal));
+        // --- สั่งให้ปุ่มทำงาน ---
+        if (addGoalBtn) { // แก้ไข
+            addGoalBtn.addEventListener('click', () => openModal(addGoalModal));
         }
         if (closeAddGoalModalBtn) {
             closeAddGoalModalBtn.addEventListener('click', () => closeModal(addGoalModal));
@@ -470,7 +458,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (closeAddSavingModalBtn) {
             closeAddSavingModalBtn.addEventListener('click', () => closeModal(addSavingModal));
         }
+        // (เพิ่ม) ปุ่มยกเลิกในหน้าต่างยืนยัน
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => closeModal(confirmationModal));
+        }
 
+
+        // --- Save New Goal ---
         // --- Save New Goal ---
         if (addGoalForm) {
             addGoalForm.addEventListener('submit', async (e) => {
@@ -478,28 +472,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!auth.currentUser) return;
 
                 const goalName = document.getElementById('goalName').value;
-                const targetAmount = parseFloat(document.getElementById('goalTarget').value);
-                const initialAmount = parseFloat(document.getElementById('goalInitial').value);
+                const targetAmount = parseFloat(document.getElementById('targetAmount').value);
+                const initialAmount = parseFloat(document.getElementById('initialAmount').value);
 
                 if (targetAmount <= initialAmount) {
-                    alert("จำนวนเงินที่ต้องเก็บต้องมากกว่าเงินออมเริ่มต้น");
+                    alert("จำนวนเงินเป้าหมายต้องมากกว่าเงินออมเริ่มต้น");
                     return;
                 }
 
                 try {
-                    // เราต้องเพิ่ม `increment` จาก firestore
-                    const { increment } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                    //
+                    // V V V V V V V V V V V V V V V V V V
+                    //
+                    //     จุดที่แก้ไข: ลบ import บรรทัดนี้ทิ้งไป
+                    //     เพราะเรา import ไว้ที่ต้นไฟล์แล้ว
+                    //
+                    // ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
+                    //
 
+                    // ใช้ addDoc, collection, serverTimestamp จากที่ import ไว้ด้านบน
                     await addDoc(collection(db, 'goals'), {
                         userId: auth.currentUser.uid,
                         name: goalName,
                         target: targetAmount,
-                        current: initialAmount, // 'current' will track the total saved
-                        createdAt: serverTimestamp()
+                        current: initialAmount,
+                        createdAt: serverTimestamp() // <--- ใช้งานได้เลย
                     });
+                    
                     addGoalForm.reset();
                     closeModal(addGoalModal);
-                    // onSnapshot will handle rendering the new goal
+
                 } catch (error) {
                     console.error("Error adding goal: ", error);
                     alert("เกิดข้อผิดพลาดในการบันทึกเป้าหมาย");
@@ -519,29 +521,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 
-                // เราต้อง import ของที่จำเป็นก่อน
-                const { doc, collection, addDoc, updateDoc, increment } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-
-
+                const { doc, collection, addDoc, updateDoc, increment, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
                 const goalRef = doc(db, 'goals', goalId);
-                // We use a subcollection to log each saving event
                 const savingsLogRef = collection(goalRef, 'savingsLog');
 
                 try {
-                    // 1. Add to the log
                     await addDoc(savingsLogRef, {
                         amount: amount,
                         date: serverTimestamp()
                     });
-
-                    // 2. Update the main goal's current amount using increment
                     await updateDoc(goalRef, {
                         current: increment(amount)
                     });
-
                     addSavingForm.reset();
                     closeModal(addSavingModal);
-                    // onSnapshot will handle re-rendering the updated goal
                 } catch (error) {
                     console.error("Error logging saving: ", error);
                     alert("เกิดข้อผิดพลาดในการบันทึกการออม");
@@ -549,38 +542,64 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // --- (เพิ่ม) ฟังก์ชันลบเป้าหมาย ---
+        const deleteGoal = async (goalId) => {
+            if (!auth.currentUser || !goalId) return;
+            try {
+               const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+               // หมายเหตุ: การลบเอกสารหลัก จะไม่ลบ subcollection (savingsLog)
+               // แต่ในแอปนี้ เราจะไม่แสดงผล log ถ้า goal หายไปแล้ว ก็ถือว่าเพียงพอ
+               await deleteDoc(doc(db, 'goals', goalId));
+            } catch (error) {
+               console.error("Error deleting goal: ", error);
+               alert("เกิดข้อผิดพลาดในการลบเป้าหมาย");
+            }
+       };
 
         // --- Fetch and Render Goals ---
+        // --- Fetch and Render Goals ---
         const fetchAndRenderGoals = (userId) => {
-            // เราต้อง import ของที่จำเป็นก่อน
             (async () => {
-                const { query, collection, where, orderBy, onSnapshot, getDocs } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                // (เราลบบรรทัด "await import(...)" ที่ซ้ำซ้อนออกไปแล้ว)
+                // (ฟังก์ชัน query, collection, where, orderBy, onSnapshot, getDocs)
+                // (จะถูกดึงมาจาก import ด้านบนสุดของไฟล์ app.js แทน)
 
                 const q = query(collection(db, 'goals'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
 
-                onSnapshot(q, (querySnapshot) => {
+                // onSnapshot จะคอย "ฟัง" การเปลี่ยนแปลงใน database
+                // เมื่อมีอะไรใหม่ (เช่น goal ที่เพิ่งเพิ่ม) มันจะทำงานทันที
+                onSnapshot(q, async (querySnapshot) => {
+                    
                     if (querySnapshot.empty) {
-                        if(goalsContainer) goalsContainer.innerHTML = ''; // Clear old goals
-                        if(noGoalsText) noGoalsText.classList.remove('hidden');
+                        if(goalsGrid) goalsGrid.innerHTML = '<p class="text-gray-500 text-center col-span-full">ยังไม่มีเป้าหมาย ลองเพิ่มเลย!</p>'; 
                         return;
                     }
                     
-                    if(noGoalsText) noGoalsText.classList.add('hidden');
-                    if(goalsContainer) goalsContainer.innerHTML = ''; // Clear container for re-render
+                    if(goalsGrid) goalsGrid.innerHTML = ''; // เคลียร์การ์ดเก่าออกก่อน
 
-                    querySnapshot.forEach(async (goalDoc) => {
+                    // สร้างอาร์เรย์สำหรับเก็บ "Promise" ของการสร้างการ์ดแต่ละใบ
+                    const goalPromises = querySnapshot.docs.map(async (goalDoc) => {
                         const goal = goalDoc.data();
                         goal.id = goalDoc.id;
 
-                        // To calculate estimated days, we need the savings log
+                        // เราต้องดึง log การออมของแต่ละการ์ดมาด้วย
                         const savingsLogRef = collection(db, 'goals', goal.id, 'savingsLog');
                         const logQuery = query(savingsLogRef, orderBy('date', 'asc'));
-                        const logSnapshot = await getDocs(logQuery);
-
+                        
+                        // ใช้ getDocs (จาก import ด้านบน) เพื่อดึงข้อมูล log
+                        const logSnapshot = await getDocs(logQuery); 
                         const savingsLog = logSnapshot.docs.map(d => d.data());
                         
-                        const goalCard = createGoalCard(goal, savingsLog);
-                        if(goalsContainer) goalsContainer.appendChild(goalCard);
+                        // ส่งข้อมูล goal และ log ไปสร้างการ์ด
+                        return createGoalCard(goal, savingsLog);
+                    });
+                    
+                    // ใช้ Promise.all เพื่อรอให้การ์ดทุกใบ (ที่ต้องไปดึง log) สร้างเสร็จก่อน
+                    const goalCards = await Promise.all(goalPromises);
+                    
+                    // เมื่อการ์ดทั้งหมดพร้อมแล้ว ค่อยนำไปแสดงผล
+                    goalCards.forEach(card => {
+                        if(goalsGrid) goalsGrid.appendChild(card);
                     });
                 });
             })();
@@ -597,8 +616,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const amountRemaining = Math.max(0, goal.target - goal.current);
 
             card.innerHTML = `
+                <button data-id="${goal.id}" data-name="${goal.name}" class="delete-goal-btn absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">${goal.name}</h3>
-                
                 <div class="mb-3">
                     <div class="flex justify-between text-sm text-gray-600 mb-1">
                         <span>ออมแล้ว ${percentage}%</span>
@@ -609,7 +631,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <p class="text-sm text-gray-500 mt-1">ขาดอีก ${amountRemaining.toLocaleString()} บาท</p>
                 </div>
-
                 <div class="bg-gray-50 p-3 rounded-md mb-4">
                     <h4 class="font-semibold text-center text-blue-800">ประมาณการ</h4>
                     ${dailyRate > 0 ? `
@@ -619,18 +640,43 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-sm text-center text-gray-500">เริ่มบันทึกการออมเพื่อดูประมาณการ</p>
                     `}
                 </div>
-                
-                <button data-id="${goal.id}" data-name="${goal.name}" class="add-saving-btn w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-300">
+                <button data-id="${goal.id}" data-name="${goal.name}" class="add-saving-btn w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-300">
                     <i class="fas fa-piggy-bank mr-2"></i>บันทึกการออมเพิ่ม
                 </button>
             `;
 
-            // Add event listener for the "Add Saving" button on this card
+            // ปุ่ม "บันทึกการออมเพิ่ม"
             card.querySelector('.add-saving-btn').addEventListener('click', (e) => {
                 const button = e.currentTarget;
                 if(savingModalGoalName) savingModalGoalName.textContent = `เป้าหมาย: ${button.dataset.name}`;
                 if(savingGoalIdInput) savingGoalIdInput.value = button.dataset.id;
                 openModal(addSavingModal);
+            });
+            
+            // (เพิ่ม) ปุ่ม "ลบเป้าหมาย"
+            card.querySelector('.delete-goal-btn').addEventListener('click', (e) => {
+                 const button = e.currentTarget;
+                 const goalId = button.dataset.id;
+                 const goalName = button.dataset.name;
+                 
+                 const confirmModal = document.getElementById('confirmationModal');
+                 const confirmTitle = document.getElementById('confirmationTitle');
+                 const confirmMsg = document.getElementById('confirmationMessage');
+                 const confirmBtn = document.getElementById('confirmBtn');
+                 
+                 if(confirmTitle) confirmTitle.textContent = "ยืนยันการลบเป้าหมาย";
+                 if(confirmMsg) confirmMsg.textContent = `คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมาย "${goalName}"? ข้อมูลการออมของเป้าหมายนี้จะหายไปทั้งหมด`;
+                 
+                 // เราต้องใช้วิธีนี้เพื่อลบ event listener เก่าที่อาจติดมา
+                 const newConfirmBtn = confirmBtn.cloneNode(true);
+                 confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+                 
+                 newConfirmBtn.addEventListener('click', () => {
+                    deleteGoal(goalId);
+                    closeModal(confirmModal);
+                 }, { once: true }); // ให้ทำงานแค่ครั้งเดียว
+                 
+                 openModal(confirmModal);
             });
 
             return card;
@@ -639,75 +685,132 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Calculation Logic ---
         const calculateEstimatedDays = (goal, savingsLog) => {
             if (savingsLog.length === 0 || !savingsLog[0].date) {
-                // No log entries yet, or date not loaded, can't calculate
                 return { daysRemaining: "N/A", dailyRate: 0 };
             }
-
             const firstSaveDate = savingsLog[0].date.toDate();
             const today = new Date();
-
-            // Calculate total days passed since the *first* logged save
             const timeDiff = today.getTime() - firstSaveDate.getTime();
-            const daysPassed = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24))); // Ensure at least 1 day
-
-            // Calculate total amount saved *via logs*
+            const daysPassed = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
             const totalLoggedAmount = savingsLog.reduce((sum, log) => sum + log.amount, 0);
-            
             const dailyRate = totalLoggedAmount / daysPassed;
             const amountRemaining = goal.target - goal.current;
-
             if (dailyRate <= 0 || amountRemaining <= 0) {
                 return { daysRemaining: 0, dailyRate: dailyRate.toFixed(2) };
             }
-
             const daysRemaining = Math.ceil(amountRemaining / dailyRate);
-
             return { daysRemaining, dailyRate: dailyRate.toFixed(2) };
         };
 
-
         // --- Auth State Change (for this page) ---
-        onAuthStateChanged(auth, (user) => {
-            const userInfoDiv = document.getElementById('userInfo');
-            const userInfoMobileDiv = document.getElementById('userInfoMobile');
+        // เราต้องเช็ค user ก่อนที่จะ fetch-goal
+        if(auth.currentUser){
+            fetchAndRenderGoals(auth.currentUser.uid);
+        }
 
-            if (user) {
-                // User is signed in, fetch their goals
-                fetchAndRenderGoals(user.uid);
-                
-                // ดึงชื่อ user จาก firestore มาแสดงบน navbar
-                (async () => {
-                    const userDoc = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid));
-                    const username = userDoc.exists() ? userDoc.data().username : user.email;
+    }})
 
-                    const commonUserInfoHTML = `
-                        <span class="text-gray-700">${username || user.email}</span>
-                        <button id="logoutButton" class="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">
-                            ออกจากระบบ
-                        </button>
-                    `;
-                    
-                    if (userInfoDiv) userInfoDiv.innerHTML = commonUserInfoHTML;
-                    if (userInfoMobileDiv) userInfoMobileDiv.innerHTML = commonUserInfoHTML;
+// app.js (เฉพาะส่วนจัดการเป้าหมายใน about.html)
 
-                    // Add logout listener
-                    document.querySelectorAll('#logoutButton').forEach(button => {
-                        button.addEventListener('click', () => {
-                            auth.signOut().then(() => {
-                                window.location.href = 'login.html';
-                            });
-                        });
-                    });
-                })();
+document.addEventListener("DOMContentLoaded", () => {
+  renderGoals();
 
-            } else {
-                // User is signed out
-                if (userInfoDiv) userInfoDiv.innerHTML = '<a href="login.html" class="text-blue-600 hover:underline">เข้าสู่ระบบ</a>';
-                if (userInfoMobileDiv) userInfoMobileDiv.innerHTML = '<a href="login.html" class="block text-blue-600 hover:underline">เข้าสู่ระบบ</a>';
-                // Global auth listener (ข้างบน) จะจัดการ redirect เอง
-            }
-        });
+  // เปิด/ปิด Modal เพิ่มเป้าหมาย
+  const addGoalBtn = document.getElementById("addGoalBtn");
+  const addGoalModal = document.getElementById("addGoalModal");
+  const closeAddGoalModalBtn = document.getElementById("closeAddGoalModalBtn");
 
-    } // นี่คือวงเล็บปิด (}) ที่ถูกต้องสำหรับ else if (currentPage === 'about')
-    
-}); // นี่คือวงเล็บปิด (}) ที่ถูกต้องสำหรับ DOMContentLoaded
+  addGoalBtn?.addEventListener("click", () => addGoalModal.classList.remove("hidden"));
+  closeAddGoalModalBtn?.addEventListener("click", () => addGoalModal.classList.add("hidden"));
+
+  // ฟอร์มเพิ่มเป้าหมาย
+  const addGoalForm = document.getElementById("addGoalForm");
+  addGoalForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("goalName").value.trim();
+    const target = parseFloat(document.getElementById("targetAmount").value);
+    const initial = parseFloat(document.getElementById("initialAmount").value);
+
+    if (!name || target <= 0) return;
+
+    let goals = JSON.parse(localStorage.getItem("goals")) || [];
+    goals.push({ id: Date.now(), name, target, saved: initial });
+    localStorage.setItem("goals", JSON.stringify(goals));
+
+    renderGoals();
+    addGoalModal.classList.add("hidden");
+    addGoalForm.reset();
+  });
+
+  // ฟอร์มเพิ่มเงินออม
+  const addSavingForm = document.getElementById("addSavingForm");
+  const addSavingModal = document.getElementById("addSavingModal");
+  const closeAddSavingModalBtn = document.getElementById("closeAddSavingModalBtn");
+
+  closeAddSavingModalBtn?.addEventListener("click", () => addSavingModal.classList.add("hidden"));
+
+  addSavingForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const goalId = parseInt(document.getElementById("savingGoalId").value);
+    const amount = parseFloat(document.getElementById("savingAmount").value);
+
+    if (amount <= 0) return;
+
+    let goals = JSON.parse(localStorage.getItem("goals")) || [];
+    goals = goals.map(g => g.id === goalId ? { ...g, saved: g.saved + amount } : g);
+    localStorage.setItem("goals", JSON.stringify(goals));
+
+    renderGoals();
+    addSavingModal.classList.add("hidden");
+    addSavingForm.reset();
+  });
+});
+
+// ฟังก์ชันแสดงผลเป้าหมาย
+function renderGoals() {
+  const goalsGrid = document.getElementById("goalsGrid");
+  if (!goalsGrid) return;
+
+  goalsGrid.innerHTML = "";
+  let goals = JSON.parse(localStorage.getItem("goals")) || [];
+
+  goals.forEach(goal => {
+    const percent = Math.min((goal.saved / goal.target) * 100, 100).toFixed(0);
+
+    const card = document.createElement("div");
+    card.className = "bg-gray-100 p-4 rounded-lg shadow-md flex flex-col gap-2";
+
+    card.innerHTML = `
+      <h3 class="text-lg font-bold">${goal.name}</h3>
+      <p>เป้าหมาย: ${goal.target} บาท</p>
+      <p>ออมแล้ว: ${goal.saved} บาท</p>
+      <div class="w-full bg-gray-300 rounded-full h-3">
+        <div class="bg-blue-600 h-3 rounded-full" style="width:${percent}%"></div>
+      </div>
+      <p class="text-sm text-gray-600">ความคืบหน้า: ${percent}%</p>
+      <div class="flex gap-2 mt-2">
+        <button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+          onclick="openSavingModal(${goal.id}, '${goal.name}')">+ ออมเพิ่ม</button>
+        <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+          onclick="deleteGoal(${goal.id})">ลบ</button>
+      </div>
+    `;
+    goalsGrid.appendChild(card);
+  });
+}
+
+// เปิด Modal บันทึกเงินออม
+window.openSavingModal = function(goalId, goalName) {
+  const addSavingModal = document.getElementById("addSavingModal");
+  document.getElementById("savingGoalId").value = goalId;
+  document.getElementById("savingModalGoalName").textContent = goalName;
+  addSavingModal.classList.remove("hidden");
+};
+
+// ลบเป้าหมาย
+window.deleteGoal = function(goalId) {
+  if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้?")) return;
+  let goals = JSON.parse(localStorage.getItem("goals")) || [];
+  goals = goals.filter(g => g.id !== goalId);
+  localStorage.setItem("goals", JSON.stringify(goals));
+  renderGoals();
+};
