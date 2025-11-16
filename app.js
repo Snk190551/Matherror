@@ -390,7 +390,45 @@ async function handleGoalFormSubmit(e) {
     const currentAmount = parseFloat(document.getElementById('current-amount').value);
     const goalForm = document.getElementById('goal-form');
     const docId = goalForm.dataset.docId || GOAL_DOC_ID; 
+    const dataToSave = {
+        name: goalName,
+        targetAmount: targetAmount,
+        currentAmount: currentAmount,
+        updatedAt: serverTimestamp()
+    };
+    // สร้าง docRef ไว้ใช้ซ้ำ
+    const goalRef = doc(db, "users", user.uid, "goal", docId);
+
+    try {
+        if (isEdit) {
+            await updateDoc(goalRef, dataToSave);
+        } else {
+            // (ใช้ setDoc กับ merge: true จะปลอดภัยกว่า)
+            await setDoc(goalRef, dataToSave, { merge: true });
+        }
     
+        // 1. บันทึกเสร็จแล้ว? ไปดึงข้อมูลใหม่เดี๋ยวนี้เลย!
+        const updatedDocSnap = await getDoc(goalRef);
+        
+        // 2. สั่งวาดหน้าจอใหม่ (Re-render) ด้วยข้อมูลที่เพิ่งดึงมา
+        if (updatedDocSnap.exists()) {
+            renderGoalUI({ id: updatedDocSnap.id, ...updatedDocSnap.data() });
+        }
+        // -------------------------
+
+        // 3. ค่อยแสดง Modal
+        showModal("สำเร็จ!", isEdit ? "อัปเดตเป้าหมายเรียบร้อยแล้ว" : "สร้างเป้าหมายใหม่สำเร็จ!");
+
+        // 4. รีเซ็ตฟอร์ม (โค้ดเดิม)
+        e.target.reset(); 
+        delete e.target.dataset.isEdit;
+        delete e.target.dataset.docId;
+
+    } catch (error) {
+        // ... (โค้ด catch block เหมือนเดิม) ...
+    }
+
+
     if (targetAmount <= 0) {
         showModal('ข้อผิดพลาด', 'ยอดเงินเป้าหมายต้องมากกว่า 0');
         return;
