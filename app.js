@@ -265,38 +265,34 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
 // app.js
 // แทนที่ฟังก์ชัน renderGoalUI เก่าทั้งก้อนด้วยอันนี้
 
+// ฟังก์ชันสำหรับจัดการการแสดงผล UI ของเป้าหมาย
 function renderGoalUI(goal) {
-    const displayContainer = document.getElementById('goal-display-container');
+    const displayContainer = document.getElementById('goal-status-container');
     const formContainer = document.getElementById('goal-form-container');
+    const addButtonContainer = document.getElementById('add-goal-button-container'); // <-- (เพิ่มตัวแปรใหม่)
     const goalForm = document.getElementById('goal-form');
 
-    // [การแก้ไข] เราต้องดึงคอนเทนเนอร์หลักทั้งหมดมาควบคุม
-    const goalStatusContainer = document.getElementById('goal-status-container');
-    const saveMoneyContainer = document.getElementById('save-money-container');
-
     if (!goal) {
-        // ไม่มีเป้าหมาย, แสดงฟอร์มสร้างเป้าหมาย
-        
-        // [การแก้ไข] สั่งแสดง/ซ่อนให้ครบทุกส่วน
-        if (goalStatusContainer) goalStatusContainer.classList.remove('hidden'); // แสดงกรอบหลัก
-        if (saveMoneyContainer) saveMoneyContainer.classList.add('hidden'); // ซ่อนส่วนออมเงิน
-        displayContainer.classList.add('hidden'); // ซ่อนส่วนแสดงผล
-        formContainer.classList.remove('hidden'); // แสดงฟอร์ม
-        
+        // --- นี่คือ Logic ใหม่ (ตอนที่ 1) ---
+        // ไม่มีเป้าหมาย: โชว์ปุ่มบวก, ซ่อนอย่างอื่น
+        displayContainer?.classList.add('hidden');
+        formContainer.classList.add('hidden');
+        addButtonContainer?.classList.remove('hidden'); // <-- โชว์ปุ่มบวก
+
         goalForm.reset();
         delete goalForm.dataset.docId; 
-        delete goalForm.dataset.isEdit; 
+        delete goalForm.dataset.isEdit;
         document.getElementById('goal-submit-btn').textContent = 'สร้างเป้าหมาย';
         return;
     }
 
-    // มีเป้าหมาย, แสดงรายละเอียด
-    if (goalStatusContainer) goalStatusContainer.classList.remove('hidden'); // แสดงกรอบหลัก
-    if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden'); // แสดงส่วนออมเงิน
-    displayContainer.classList.remove('hidden'); // แสดงส่วนแสดงผล
-    formContainer.classList.add('hidden'); // ซ่อนฟอร์ม
-    
-    // --- (ส่วนที่เหลือคือโค้ดเดิมของคุณ ทำงานถูกต้องอยู่แล้ว) ---
+    // --- นี่คือ Logic เดิม (ตอนที่ 3) ---
+    // มีเป้าหมาย: โชว์สถานะ, ซ่อนอย่างอื่น (รวมถึงปุ่มบวก)
+    displayContainer?.classList.remove('hidden');
+    formContainer.classList.add('hidden');
+    addButtonContainer?.classList.add('hidden'); // <-- ซ่อนปุ่มบวก
+
+    // (โค้ดที่เหลือสำหรับแสดงผลข้อมูลใน displayContainer... ไม่ต้องแก้ไข)
     document.getElementById('display-goal-name').textContent = goal.name;
     document.getElementById('display-target-amount').textContent = goal.targetAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
     document.getElementById('display-current-amount').textContent = goal.currentAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
@@ -659,6 +655,18 @@ function initAboutPage() {
     const saveMoneyForm = document.getElementById('save-money-form');
     const editGoalBtn = document.getElementById('edit-goal-btn');
     const resetGoalBtn = document.getElementById('reset-goal-btn');
+    
+    // --- (เพิ่มส่วนนี้เข้ามา) ---
+    const showGoalFormBtn = document.getElementById('show-goal-form-btn');
+    
+    // --- นี่คือ Logic (ตอนที่ 2) ---
+    // เมื่อปุ่มบวก ➕ ถูกคลิก
+    showGoalFormBtn?.addEventListener('click', () => {
+        document.getElementById('add-goal-button-container')?.classList.add('hidden'); // ซ่อนปุ่มบวก
+        document.getElementById('goal-form-container')?.classList.remove('hidden'); // โชว์ฟอร์ม
+    });
+    // --- (สิ้นสุดส่วนที่เพิ่ม) ---
+
 
     // Authentication & Logout
     logoutBtn?.addEventListener('click', () => signOut(auth));
@@ -667,25 +675,21 @@ function initAboutPage() {
     goalForm?.addEventListener('submit', handleGoalFormSubmit);
     saveMoneyForm?.addEventListener('submit', handleSaveMoney);
 
-    // Edit Goal Button
+    // Edit Goal Button (อันนี้เราแก้ไข ID ที่ผิดไปแล้วในครั้งก่อน)
     editGoalBtn?.addEventListener('click', () => {
-        document.getElementById('goal-status-container')?.classList.add('hidden');
-        document.getElementById('goal-form-container')?.classList.remove('hidden');
-        document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
-        document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
+        // (เราจะใช้ฟังก์ชัน editGoal() ที่ถูกผูกไว้ใน renderGoalUI แทน)
+        // โค้ดส่วนนี้อาจไม่จำเป็นแล้ว ถ้า editGoal() ทำงานถูกต้อง
+        // แต่การคลิกปุ่ม 'edit-goal-btn' ตอนนี้ถูกจัดการโดย renderGoalUI() ครับ
     });
 
     // Reset/Delete Goal Button
     resetGoalBtn?.addEventListener('click', () => {
         showConfirmationModal('ยืนยันการลบเป้าหมาย', 'คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้? (ข้อมูลจะหายไปทั้งหมด)', async () => {
             if (!auth.currentUser) return;
-            // Delete the goal document
-            // *** FIX: Changed 'goals' to 'goal' collection path ***
             const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goal', GOAL_DOC_ID);
             try {
                 await deleteDoc(goalRef);
                 showModal("สำเร็จ", "ลบเป้าหมายเรียบร้อยแล้ว");
-                // The onSnapshot listener will catch the deletion and call renderGoalUI(null)
             } catch (error) {
                 console.error("Error deleting goal: ", error);
                 showModal("ข้อผิดพลาด", "ไม่สามารถลบเป้าหมายได้");
@@ -696,7 +700,6 @@ function initAboutPage() {
     // Start listening for real-time goal updates
     startGoalListener();
 }
-
 
 function initInvestPage() {
     const newsGrid = document.getElementById('news-grid');
