@@ -375,6 +375,7 @@ function startGoalListener() {
 async function handleGoalFormSubmit(e) {
     e.preventDefault();
     
+    const isEdit = e.target.dataset.isEdit === 'true';
     const user = auth.currentUser;
     if (!user) {
         showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อบันทึกเป้าหมาย (เซสชันการล็อกอินอาจหมดอายุ)');
