@@ -338,8 +338,9 @@ function renderGoalUI(goal) {
 // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
     const editBtn = document.getElementById('edit-goal-btn');
     if (editBtn) {
-        // ล้าง Listener เดิมออกก่อน (ป้องกันการเรียกซ้ำ)
+        // ล้าง Listener เดิมออกก่อน
         editBtn.onclick = null; 
+        
         // ผูกฟังก์ชัน editGoal โดยส่งข้อมูล goal ปัจจุบันเข้าไป
         editBtn.onclick = () => editGoal(goal); 
     }
@@ -435,12 +436,12 @@ function editGoal(goalData) {
     const goalForm = document.getElementById('goal-form');
 
     // 1. นำข้อมูลที่มีอยู่มาใส่ในช่องกรอก
-    document.getElementById('goal-name').value = goalData.name;
-    document.getElementById('target-amount').value = goalData.targetAmount;
-    document.getElementById('current-amount').value = goalData.currentAmount;
+    document.getElementById('goal-name').value = goalData?.name || '';
+    document.getElementById('target-amount').value = goalData?.targetAmount || 0;
+    document.getElementById('current-amount').value = goalData?.currentAmount || 0;
 
     // 2. กำหนด docId และ isEdit flag เพื่อให้ฟังก์ชัน handleGoalFormSubmit ทราบว่าเป็น "การแก้ไข" 
-    goalForm.dataset.docId = goalData.id;
+    goalForm.dataset.docId = goalData?.id || '';
     goalForm.dataset.isEdit = 'true';
 
     // 3. เปลี่ยนข้อความปุ่ม
