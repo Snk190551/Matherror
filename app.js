@@ -260,7 +260,7 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
 
 // ฟังก์ชันสำหรับจัดการการแสดงผล UI ของเป้าหมาย
 function renderGoalUI(goal) {
-    const displayContainer = document.getElementById('goal-display-container');
+    const displayContainer = document.getElementById('goal-status-container');
     const formContainer = document.getElementById('goal-form-container');
     const goalForm = document.getElementById('goal-form');
 
