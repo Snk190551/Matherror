@@ -259,26 +259,41 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
 }
 
 // ฟังก์ชันสำหรับจัดการการแสดงผล UI ของเป้าหมาย
+// app.js
+// แทนที่ฟังก์ชัน renderGoalUI เก่าทั้งก้อนด้วยอันนี้
+
 function renderGoalUI(goal) {
     const displayContainer = document.getElementById('goal-display-container');
     const formContainer = document.getElementById('goal-form-container');
     const goalForm = document.getElementById('goal-form');
 
+    // [การแก้ไข] เราต้องดึงคอนเทนเนอร์หลักทั้งหมดมาควบคุม
+    const goalStatusContainer = document.getElementById('goal-status-container');
+    const saveMoneyContainer = document.getElementById('save-money-container');
+
     if (!goal) {
         // ไม่มีเป้าหมาย, แสดงฟอร์มสร้างเป้าหมาย
-        displayContainer.classList.add('hidden');
-        formContainer.classList.remove('hidden');
+        
+        // [การแก้ไข] สั่งแสดง/ซ่อนให้ครบทุกส่วน
+        if (goalStatusContainer) goalStatusContainer.classList.remove('hidden'); // แสดงกรอบหลัก
+        if (saveMoneyContainer) saveMoneyContainer.classList.add('hidden'); // ซ่อนส่วนออมเงิน
+        displayContainer.classList.add('hidden'); // ซ่อนส่วนแสดงผล
+        formContainer.classList.remove('hidden'); // แสดงฟอร์ม
+        
         goalForm.reset();
-        delete goalForm.dataset.docId; // ลบ docId ทิ้งเพื่อให้เป็นการสร้างใหม่
-        delete goalForm.dataset.isEdit; // ลบสถานะการแก้ไข
+        delete goalForm.dataset.docId; 
+        delete goalForm.dataset.isEdit; 
         document.getElementById('goal-submit-btn').textContent = 'สร้างเป้าหมาย';
         return;
     }
 
     // มีเป้าหมาย, แสดงรายละเอียด
-    displayContainer.classList.remove('hidden');
-    formContainer.classList.add('hidden');
+    if (goalStatusContainer) goalStatusContainer.classList.remove('hidden'); // แสดงกรอบหลัก
+    if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden'); // แสดงส่วนออมเงิน
+    displayContainer.classList.remove('hidden'); // แสดงส่วนแสดงผล
+    formContainer.classList.add('hidden'); // ซ่อนฟอร์ม
     
+    // --- (ส่วนที่เหลือคือโค้ดเดิมของคุณ ทำงานถูกต้องอยู่แล้ว) ---
     document.getElementById('display-goal-name').textContent = goal.name;
     document.getElementById('display-target-amount').textContent = goal.targetAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
     document.getElementById('display-current-amount').textContent = goal.currentAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
@@ -289,11 +304,9 @@ function renderGoalUI(goal) {
     progressBar.textContent = `${Math.min(progress, 100).toFixed(0)}%`;
     progressBar.setAttribute('aria-valuenow', Math.min(progress, 100).toFixed(0));
 
-    // คำนวณยอดเงินคงเหลือ
     const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
     document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { minimumFractionDigits: 2 });
     
-    // --- START: Attainment Calculation and Display Logic ---
     const dateCreated = goal.createdAt ? new Date(goal.createdAt.toDate()) : null;
     const initialAmount = goal.initialAmount || 0;
     const totalSaved = goal.currentAmount - initialAmount;
@@ -303,19 +316,17 @@ function renderGoalUI(goal) {
     if (dateCreated) {
         const daysPassed = (new Date() - dateCreated) / (1000 * 60 * 60 * 24);
         
-        if (daysPassed > 0.01) { // Check if more than a negligible time has passed
+        if (daysPassed > 0.01) { 
             attainment = calculateAttainmentDate(initialAmount, goal.targetAmount, daysPassed, totalSaved);
         } else {
             attainment.arithmetic = "เริ่มการคำนวณในวันถัดไป";
             attainment.geometric = "เริ่มการคำนวณในวันถัดไป";
         }
     } else {
-        // Handle legacy or incomplete goal data
         attainment.arithmetic = "ไม่พบวันที่เริ่มต้น/ยอดเริ่มต้น";
         attainment.geometric = "ไม่พบวันที่เริ่มต้น/ยอดเริ่มต้น";
     }
 
-    // Update UI elements for attainment
     const avgDailyEl = document.getElementById('display-avg-daily');
     const resultArithmeticEl = document.getElementById('result-arithmetic');
     const resultGeometricEl = document.getElementById('result-geometric');
@@ -323,14 +334,10 @@ function renderGoalUI(goal) {
     if (avgDailyEl) avgDailyEl.textContent = attainment.avgDaily.toLocaleString('th-TH', { maximumFractionDigits: 2 });
     if (resultArithmeticEl) resultArithmeticEl.textContent = attainment.arithmetic;
     if (resultGeometricEl) resultGeometricEl.textContent = attainment.geometric;
-    // --- END: Attainment Calculation and Display Logic ---
 
-    // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
     const editBtn = document.getElementById('edit-goal-btn');
     if (editBtn) {
-        // ล้าง Listener เดิมออกก่อน (ป้องกันการเรียกซ้ำ)
         editBtn.onclick = null; 
-        // ผูกฟังก์ชัน editGoal โดยส่งข้อมูล goal ปัจจุบันเข้าไป
         editBtn.onclick = () => editGoal(goal); 
     }
 }
