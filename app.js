@@ -592,6 +592,14 @@ function initLoginPage() {
 }
 
 function initAboutPage() {
+    // === 1. การตรวจสอบการล็อกอิน (ส่วนที่เพิ่มเข้ามา) ===
+    if (!auth.currentUser) {
+        // หากยังไม่ได้ล็อกอิน ให้เปลี่ยนไปหน้า login
+        window.location.replace('login.html');
+        return;
+    }
+    // ==========================================================
+
     const logoutBtn = document.getElementById('logout-btn');
     const goalForm = document.getElementById('goal-form');
     const saveMoneyForm = document.getElementById('save-money-form');
@@ -635,20 +643,6 @@ function initAboutPage() {
     startGoalListener();
 }
 
-async function initAboutPage() {
-    // === 1. การตรวจสอบและโหลดข้อมูลเป้าหมาย (สำคัญที่สุด) ===
-    if (!auth.currentUser) {
-        // หากยังไม่ได้ล็อกอิน ให้เปลี่ยนไปหน้า login
-        window.location.replace('login.html');
-        return;
-    }
-    
-    // โหลดข้อมูลเป้าหมายครั้งแรก (ถ้าคุณมีฟังก์ชันสำหรับโหลดและ render)
-    // *** ถ้าคุณใช้ onSnapshot ใน startGoalListener อยู่แล้ว ส่วนนี้อาจจะไม่จำเป็น ***
-    // *** แต่การเรียก startGoalListener() ด้านล่างก็เพียงพอแล้ว ***
-
-    // ==========================================================
-
     const logoutBtn = document.getElementById('logout-btn');
     const goalForm = document.getElementById('goal-form');
     const saveMoneyForm = document.getElementById('save-money-form');
@@ -659,7 +653,7 @@ async function initAboutPage() {
 
     // Start listening for real-time goal updates
     startGoalListener();
-}
+
 
 // ใน app.js (ให้วางไว้ใกล้ๆ กับ initAboutPage)
 
