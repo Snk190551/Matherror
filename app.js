@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             })();
         };
-        
+
         // --- Create Goal Card HTML ---
         const createGoalCard = (goal, savingsLog) => {
             const card = document.createElement('div');
@@ -708,3 +708,102 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
     }})
+
+    // app.js
+document.addEventListener("DOMContentLoaded", () => {
+  renderGoals();
+
+  // เปิด/ปิด Modal เพิ่มเป้าหมาย
+  const addGoalBtn = document.getElementById("addGoalBtn");
+  const addGoalModal = document.getElementById("addGoalModal");
+  const closeAddGoalModalBtn = document.getElementById("closeAddGoalModalBtn");
+
+  addGoalBtn?.addEventListener("click", () => addGoalModal.classList.remove("hidden"));
+  closeAddGoalModalBtn?.addEventListener("click", () => addGoalModal.classList.add("hidden"));
+
+  // ฟอร์มเพิ่มเป้าหมาย
+  const addGoalForm = document.getElementById("addGoalForm");
+  addGoalForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("goalName").value;
+    const target = parseFloat(document.getElementById("targetAmount").value);
+    const initial = parseFloat(document.getElementById("initialAmount").value);
+
+    let goals = JSON.parse(localStorage.getItem("goals")) || [];
+    goals.push({ id: Date.now(), name, target, saved: initial });
+    localStorage.setItem("goals", JSON.stringify(goals));
+
+    renderGoals();
+    addGoalModal.classList.add("hidden");
+    addGoalForm.reset();
+  });
+
+  // ฟอร์มเพิ่มเงินออม
+  const addSavingForm = document.getElementById("addSavingForm");
+  const addSavingModal = document.getElementById("addSavingModal");
+  const closeAddSavingModalBtn = document.getElementById("closeAddSavingModalBtn");
+
+  closeAddSavingModalBtn?.addEventListener("click", () => addSavingModal.classList.add("hidden"));
+
+  addSavingForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const goalId = parseInt(document.getElementById("savingGoalId").value);
+    const amount = parseFloat(document.getElementById("savingAmount").value);
+
+    let goals = JSON.parse(localStorage.getItem("goals")) || [];
+    goals = goals.map(g => g.id === goalId ? { ...g, saved: g.saved + amount } : g);
+    localStorage.setItem("goals", JSON.stringify(goals));
+
+    renderGoals();
+    addSavingModal.classList.add("hidden");
+    addSavingForm.reset();
+  });
+});
+
+// ฟังก์ชันแสดงผลเป้าหมาย
+function renderGoals() {
+  const goalsGrid = document.getElementById("goalsGrid");
+  if (!goalsGrid) return;
+
+  goalsGrid.innerHTML = "";
+  let goals = JSON.parse(localStorage.getItem("goals")) || [];
+
+  goals.forEach(goal => {
+    const card = document.createElement("div");
+    card.className = "bg-gray-100 p-4 rounded-lg shadow-md flex flex-col gap-2";
+
+    card.innerHTML = `
+      <h3 class="text-lg font-bold">${goal.name}</h3>
+      <p>เป้าหมาย: ${goal.target} บาท</p>
+      <p>ออมแล้ว: ${goal.saved} บาท</p>
+      <div class="flex gap-2 mt-2">
+        <button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700" onclick="openSavingModal(${goal.id}, '${goal.name}')">
+          + ออมเพิ่ม
+        </button>
+        <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" onclick="deleteGoal(${goal.id})">
+          ลบ
+        </button>
+      </div>
+    `;
+    goalsGrid.appendChild(card);
+  });
+}
+
+// เปิด Modal บันทึกเงินออม
+function openSavingModal(goalId, goalName) {
+  const addSavingModal = document.getElementById("addSavingModal");
+  document.getElementById("savingGoalId").value = goalId;
+  document.getElementById("savingModalGoalName").textContent = goalName;
+  addSavingModal.classList.remove("hidden");
+}
+
+// ลบเป้าหมาย
+function deleteGoal(goalId) {
+  if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้?")) return;
+
+  let goals = JSON.parse(localStorage.getItem("goals")) || [];
+  goals = goals.filter(g => g.id !== goalId);
+  localStorage.setItem("goals", JSON.stringify(goals));
+
+  renderGoals();
+}
