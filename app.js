@@ -438,31 +438,34 @@ async function handleGoalFormSubmit(e) {
 }
 
 // ฟังก์ชันสำหรับเปิดฟอร์มพร้อมข้อมูลเดิมเพื่อแก้ไข
+
 function editGoal(goalData) {
     const formContainer = document.getElementById('goal-form-container');
     const goalForm = document.getElementById('goal-form');
     
-    // [แก้ไข] ดึงคอนเทนเนอร์หลักที่ต้องซ่อน
-    const goalStatusContainer = document.getElementById('goal-status-container');
-    const saveMoneyContainer = document.getElementById('save-money-container');
+    // [แก้ไข] ดึง Element ที่ต้องซ่อนให้ถูกต้อง
+    const displayContainer = document.getElementById('goal-display-container'); // << ซ่อนอันนี้
+    const saveMoneyContainer = document.getElementById('save-money-container'); // << และซ่อนอันนี้
 
     // 1. นำข้อมูลที่มีอยู่มาใส่ในช่องกรอก
     document.getElementById('goal-name').value = goalData.name;
     document.getElementById('target-amount').value = goalData.targetAmount;
     document.getElementById('current-amount').value = goalData.currentAmount;
 
-    // 2. กำหนด docId และ isEdit flag เพื่อให้ฟังก์ชัน handleGoalFormSubmit ทราบว่าเป็น "การแก้ไข" 
+    // 2. กำหนด docId และ isEdit flag
     goalForm.dataset.docId = goalData.id;
     goalForm.dataset.isEdit = 'true';
 
     // 3. เปลี่ยนข้อความปุ่ม
     document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
 
-    // 4. [แก้ไข] ซ่อนส่วนแสดงผลทั้งหมด และแสดงฟอร์มแก้ไข
-    if (goalStatusContainer) goalStatusContainer.classList.add('hidden');
+    // 4. [แก้ไข] ซ่อนส่วนแสดงผล (display) และส่วนออมเงิน (save)
+    //    และแสดงฟอร์มแก้ไข (form)
+    if (displayContainer) displayContainer.classList.add('hidden');
     if (saveMoneyContainer) saveMoneyContainer.classList.add('hidden');
     
-    formContainer.classList.remove('hidden');
+    // เราจะไม่ซ่อน goal-status-container เพราะฟอร์มอยู่ในนั้น
+    formContainer.classList.remove('hidden'); // << แสดงฟอร์ม
 }
 
 // New function for handling money saving in about.html
