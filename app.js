@@ -559,8 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Fetch and Render Goals ---
         const fetchAndRenderGoals = (userId) => {
             (async () => {
-                const { query, collection, where, orderBy, onSnapshot, getDocs } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-
+                
                 const q = query(collection(db, 'goals'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
 
                 onSnapshot(q, (querySnapshot) => {
