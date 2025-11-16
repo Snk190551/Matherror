@@ -436,3 +436,248 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+// ... (โค้ดเดิมของคุณทั้งหมด) ...
+
+// ==========================================================
+// GOALS PAGE LOGIC (about.html)
+// ==========================================================
+else if (window.location.pathname.endsWith('about.html')) {
+
+    const openAddGoalModalBtn = document.getElementById('openAddGoalModalBtn');
+    const addGoalModal = document.getElementById('addGoalModal');
+    const closeAddGoalModalBtn = document.getElementById('closeAddGoalModalBtn');
+    const addGoalForm = document.getElementById('addGoalForm');
+    const goalsContainer = document.getElementById('goalsContainer');
+    const noGoalsText = document.getElementById('noGoalsText');
+
+    const addSavingModal = document.getElementById('addSavingModal');
+    const closeAddSavingModalBtn = document.getElementById('closeAddSavingModalBtn');
+    const addSavingForm = document.getElementById('addSavingForm');
+    const savingModalGoalName = document.getElementById('savingModalGoalName');
+    const savingGoalIdInput = document.getElementById('savingGoalId');
+    const savingAmountInput = document.getElementById('savingAmount');
+
+    // --- Modal Toggle Functions ---
+    const openModal = (modal) => modal.classList.remove('hidden');
+    const closeModal = (modal) => modal.classList.add('hidden');
+
+    openAddGoalModalBtn.addEventListener('click', () => openModal(addGoalModal));
+    closeAddGoalModalBtn.addEventListener('click', () => closeModal(addGoalModal));
+    closeAddSavingModalBtn.addEventListener('click', () => closeModal(addSavingModal));
+
+    // --- Save New Goal ---
+    addGoalForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!auth.currentUser) return;
+
+        const goalName = document.getElementById('goalName').value;
+        const targetAmount = parseFloat(document.getElementById('goalTarget').value);
+        const initialAmount = parseFloat(document.getElementById('goalInitial').value);
+
+        if (targetAmount <= initialAmount) {
+            alert("จำนวนเงินที่ต้องเก็บต้องมากกว่าเงินออมเริ่มต้น");
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, 'goals'), {
+                userId: auth.currentUser.uid,
+                name: goalName,
+                target: targetAmount,
+                current: initialAmount, // 'current' will track the total saved
+                createdAt: serverTimestamp()
+            });
+            addGoalForm.reset();
+            closeModal(addGoalModal);
+            // onSnapshot will handle rendering the new goal
+        } catch (error) {
+            console.error("Error adding goal: ", error);
+            alert("เกิดข้อผิดพลาดในการบันทึกเป้าหมาย");
+        }
+    });
+
+    // --- Save Additional Saving (Log) ---
+    addSavingForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const goalId = savingGoalIdInput.value;
+        const amount = parseFloat(savingAmountInput.value);
+
+        if (!goalId || !amount || amount <= 0) {
+            alert("ข้อมูลไม่ถูกต้อง");
+            return;
+        }
+
+        const goalRef = doc(db, 'goals', goalId);
+        // We use a subcollection to log each saving event
+        const savingsLogRef = collection(goalRef, 'savingsLog');
+
+        try {
+            // 1. Add to the log
+            await addDoc(savingsLogRef, {
+                amount: amount,
+                date: serverTimestamp()
+            });
+
+            // 2. Update the main goal's current amount using increment
+            await updateDoc(goalRef, {
+                current: increment(amount)
+            });
+
+            addSavingForm.reset();
+            closeModal(addSavingModal);
+            // onSnapshot will handle re-rendering the updated goal
+        } catch (error) {
+            console.error("Error logging saving: ", error);
+            alert("เกิดข้อผิดพลาดในการบันทึกการออม");
+        }
+    });
+
+
+    // --- Fetch and Render Goals ---
+    const fetchAndRenderGoals = (userId) => {
+        const q = query(collection(db, 'goals'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+
+        onSnapshot(q, (querySnapshot) => {
+            if (querySnapshot.empty) {
+                goalsContainer.innerHTML = ''; // Clear old goals
+                noGoalsText.classList.remove('hidden');
+                return;
+            }
+            
+            noGoalsText.classList.add('hidden');
+            goalsContainer.innerHTML = ''; // Clear container for re-render
+
+            querySnapshot.forEach(async (goalDoc) => {
+                const goal = goalDoc.data();
+                goal.id = goalDoc.id;
+
+                // To calculate estimated days, we need the savings log
+                const savingsLogRef = collection(db, 'goals', goal.id, 'savingsLog');
+                const logQuery = query(savingsLogRef, orderBy('date', 'asc'));
+                const logSnapshot = await getDocs(logQuery);
+
+                const savingsLog = logSnapshot.docs.map(d => d.data());
+                
+                const goalCard = createGoalCard(goal, savingsLog);
+                goalsContainer.appendChild(goalCard);
+            });
+        });
+    };
+
+    // --- Create Goal Card HTML ---
+    const createGoalCard = (goal, savingsLog) => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-lg shadow-md p-6 relative';
+
+        const { daysRemaining, dailyRate } = calculateEstimatedDays(goal, savingsLog);
+
+        const percentage = Math.min((goal.current / goal.target) * 100, 100).toFixed(2);
+        const amountRemaining = Math.max(0, goal.target - goal.current);
+
+        card.innerHTML = `
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">${goal.name}</h3>
+            
+            <div class="mb-3">
+                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>ออมแล้ว ${percentage}%</span>
+                    <span>${goal.current.toLocaleString()} / ${goal.target.toLocaleString()} บาท</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-4 rounded-full" style="width: ${percentage}%"></div>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">ขาดอีก ${amountRemaining.toLocaleString()} บาท</p>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded-md mb-4">
+                <h4 class="font-semibold text-center text-blue-800">ประมาณการ</h4>
+                ${dailyRate > 0 ? `
+                    <p class="text-sm text-center text-gray-700">ออมเฉลี่ยวันละ ${dailyRate.toLocaleString()} บาท</p>
+                    <p class="text-lg font-bold text-center text-blue-600">จะครบใน ${daysRemaining} วัน</p>
+                ` : `
+                    <p class="text-sm text-center text-gray-500">เริ่มบันทึกการออมเพื่อดูประมาณการ</p>
+                `}
+            </div>
+            
+            <button data-id="${goal.id}" data-name="${goal.name}" class="add-saving-btn w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-300">
+                <i class="fas fa-piggy-bank mr-2"></i>บันทึกการออมเพิ่ม
+            </button>
+        `;
+
+        // Add event listener for the "Add Saving" button on this card
+        card.querySelector('.add-saving-btn').addEventListener('click', (e) => {
+            const button = e.currentTarget;
+            savingModalGoalName.textContent = `เป้าหมาย: ${button.dataset.name}`;
+            savingGoalIdInput.value = button.dataset.id;
+            openModal(addSavingModal);
+        });
+
+        return card;
+    };
+
+    // --- Calculation Logic ---
+    const calculateEstimatedDays = (goal, savingsLog) => {
+        if (savingsLog.length === 0) {
+            // No log entries yet, can't calculate
+            return { daysRemaining: "N/A", dailyRate: 0 };
+        }
+
+        const firstSaveDate = savingsLog[0].date.toDate();
+        const today = new Date();
+
+        // Calculate total days passed since the *first* logged save
+        const timeDiff = today.getTime() - firstSaveDate.getTime();
+        const daysPassed = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24))); // Ensure at least 1 day
+
+        // Calculate total amount saved *via logs*
+        const totalLoggedAmount = savingsLog.reduce((sum, log) => sum + log.amount, 0);
+        
+        const dailyRate = totalLoggedAmount / daysPassed;
+        const amountRemaining = goal.target - goal.current;
+
+        if (dailyRate <= 0 || amountRemaining <= 0) {
+            return { daysRemaining: 0, dailyRate: dailyRate.toFixed(2) };
+        }
+
+        const daysRemaining = Math.ceil(amountRemaining / dailyRate);
+
+        return { daysRemaining, dailyRate: dailyRate.toFixed(2) };
+    };
+
+
+    // --- Auth State Change ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // User is signed in, fetch their goals
+            fetchAndRenderGoals(user.uid);
+            
+            // (Keep existing user info display logic from your original file)
+            const userInfoDiv = document.getElementById('userInfo');
+            const userInfoMobileDiv = document.getElementById('userInfoMobile');
+            
+            const commonUserInfoHTML = `
+                <span class="text-gray-700">${user.displayName || user.email}</span>
+                <button id="logoutButton" class="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">
+                    ออกจากระบบ
+                </button>
+            `;
+            
+            userInfoDiv.innerHTML = commonUserInfoHTML;
+            userInfoMobileDiv.innerHTML = commonUserInfoHTML;
+
+            // Add logout listener
+            document.querySelectorAll('#logoutButton').forEach(button => {
+                button.addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        window.location.href = 'login.html';
+                    });
+                });
+            });
+
+        } else {
+            // User is signed out
+            window.location.href = 'login.html';
+        }
+    });
+
+}

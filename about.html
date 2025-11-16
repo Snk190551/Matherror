@@ -1,56 +1,110 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เกี่ยวกับฉัน | แอปรายรับ-รายจ่าย</title>
+    <title>เป้าหมาย - Income-Expense App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100">
 
-    <div id="message-modal" class="modal">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
-            <h3 id="modal-title" class="text-xl font-semibold mb-4 text-gray-800"></h3>
-            <p id="modal-message" class="text-gray-600 mb-6"></p>
-            <button onclick="hideModal()" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors">ตกลง</button>
-        </div>
-    </div>
-
-    
-    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-4xl min-h-[700px] flex flex-col">
-        <nav class="flex justify-between md:justify-around p-2 mb-6 bg-gray-100 rounded-xl shadow-inner">
-            <a href="index.html" id="nav-home" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">หน้าหลัก</a>
-            <a href="invest.html" id="nav-invest" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">แนะนำการลงทุน</a>
-            <a href="about.html" id="nav-about" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">เกี่ยวกับฉัน</a>
-        </nav>
-
-
-
-            <div id="user-section" class="flex flex-col items-center text-center">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">สวัสดี, <span id="user-greeting">ผู้ใช้งาน</span> 👋</h2>
-                <div class="flex space-x-4">
-                    <button id="edit-profile-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors">แก้ไขข้อมูล</button>
-                    <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-red-600 transition-colors">ออกจากระบบ</button>
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-wallet text-2xl text-blue-600 mr-2"></i>
+                    <a href="Index.html" class="text-xl font-bold text-gray-800">แอปรายรับ-รายจ่าย</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="Index.html" class="text-gray-600 hover:text-blue-600">หน้าหลัก</a>
+                    <a href="invest.html" class="text-gray-600 hover:text-blue-600">แนะนำการลงทุน</a>
+                    <a href="about.html" class="text-blue-600 font-semibold border-b-2 border-blue-600" aria-current="page">เป้าหมาย</a>
+                    <div id="userInfo" class="flex items-center space-x-2">
+                        </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobileMenuButton" class="text-gray-600 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
                 </div>
             </div>
+        </div>
+        <div id="mobileMenu" class="md:hidden hidden px-4 pb-4 space-y-2">
+            <a href="Index.html" class="block text-gray-600 hover:text-blue-600">หน้าหลัก</a>
+            <a href="invest.html" class="block text-gray-600 hover:text-blue-600">แนะนำการลงทุน</a>
+            <a href="about.html" class="block text-blue-600 font-semibold" aria-current="page">เป้าหมาย</a>
+            <div id="userInfoMobile" class="space-y-2">
+                </div>
+        </div>
+    </nav>
 
-            <div id="edit-user-section" class="w-full max-w-sm hidden">
-                <form id="edit-user-form">
-                    <h2 class="text-2xl font-semibold text-center mb-6">แก้ไขข้อมูลผู้ใช้</h2>
-                    <div class="mb-4">
-                        <label for="edit-username" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้ใหม่</label>
-                        <input type="text" id="edit-username" class="w-full px-4 py-2 mt-1 border rounded-xl" required>
-                    </div>
-                    <div class="flex space-x-4 mt-6">
-                         <button type="button" id="cancel-edit-btn" class="flex-1 w-full bg-gray-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-gray-600 transition-colors">ยกเลิก</button>
-                        <button type="submit" class="flex-1 w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600 transition-colors">บันทึก</button>
-                    </div>
-                </form>
-            </div>
+    <div class="container mx-auto p-4 max-w-4xl">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">เป้าหมายการออม</h1>
+            <button id="openAddGoalModalBtn" class="bg-blue-600 text-white rounded-full p-2 w-12 h-12 flex items-center justify-center shadow-lg hover:bg-blue-700 transition duration-300">
+                <i class="fas fa-plus text-2xl"></i>
+            </button>
+        </div>
+
+        <div id="goalsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <p id="noGoalsText" class="text-gray-500">ยังไม่มีเป้าหมาย... เริ่มเพิ่มเป้าหมายแรกของคุณเลย!</p>
         </div>
     </div>
+
+    <div id="addGoalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">สร้างเป้าหมายใหม่</h3>
+                <button id="closeAddGoalModalBtn" class="text-gray-500 hover:text-gray-800">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="addGoalForm" class="p-6 space-y-4">
+                <div>
+                    <label for="goalName" class="block text-sm font-medium text-gray-700">เป้าหมายคือ</label>
+                    <input type="text" id="goalName" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="goalTarget" class="block text-sm font-medium text-gray-700">จำนวนเงินที่ต้องเก็บ (บาท)</label>
+                    <input type="number" id="goalTarget" min="1" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="goalInitial" class="block text-sm font-medium text-gray-700">ตอนนี้ออมได้เท่าไร (บาท)</label>
+                    <input type="number" id="goalInitial" min="0" value="0" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
+                    <i class="fas fa-save mr-2"></i>บันทึกเป้าหมาย
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addSavingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">บันทึกการออม</h3>
+                <button id="closeAddSavingModalBtn" class="text-gray-500 hover:text-gray-800">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="addSavingForm" class="p-6 space-y-4">
+                <h4 id="savingModalGoalName" class="text-lg font-medium text-center"></h4>
+                <input type="hidden" id="savingGoalId">
+                <div>
+                    <label for="savingAmount" class="block text-sm font-medium text-gray-700">จำนวนเงินที่ออมเพิ่ม (บาท)</label>
+                    <input type="number" id="savingAmount" min="1" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300">
+                    <i class="fas fa-piggy-bank mr-2"></i>ยืนยันการออม
+                </button>
+            </form>
+        </div>
+    </div>
+
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
-
