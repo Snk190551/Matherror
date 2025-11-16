@@ -263,6 +263,8 @@ function renderGoalUI(goal) {
     const displayContainer = document.getElementById('goal-display-container');
     const formContainer = document.getElementById('goal-form-container');
     const goalForm = document.getElementById('goal-form');
+    const goalStatusContainer = document.getElementById('goal-status-container');
+    const saveMoneyContainer = document.getElementById('save-money-container');
 
     if (!goal) {
         // ไม่มีเป้าหมาย, แสดงฟอร์มสร้างเป้าหมาย
@@ -274,6 +276,9 @@ function renderGoalUI(goal) {
         document.getElementById('goal-submit-btn').textContent = 'สร้างเป้าหมาย';
         return;
     }
+
+    if (goalStatusContainer) goalStatusContainer.classList.remove('hidden');
+    if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden');
 
     // มีเป้าหมาย, แสดงรายละเอียด
     displayContainer.classList.remove('hidden');
@@ -604,14 +609,6 @@ function initAboutPage() {
     // Goal Management
     goalForm?.addEventListener('submit', handleGoalFormSubmit);
     saveMoneyForm?.addEventListener('submit', handleSaveMoney);
-
-    // Edit Goal Button
-    editGoalBtn?.addEventListener('click', () => {
-        document.getElementById('goal-status-container')?.classList.add('hidden');
-        document.getElementById('goal-form-container')?.classList.remove('hidden');
-        document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
-        document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
-    });
 
     // Reset/Delete Goal Button
     resetGoalBtn?.addEventListener('click', () => {
