@@ -557,36 +557,54 @@ document.addEventListener('DOMContentLoaded', () => {
        };
 
         // --- Fetch and Render Goals ---
+        // --- Fetch and Render Goals ---
         const fetchAndRenderGoals = (userId) => {
             (async () => {
-                
+                // (เราลบบรรทัด "await import(...)" ที่ซ้ำซ้อนออกไปแล้ว)
+                // (ฟังก์ชัน query, collection, where, orderBy, onSnapshot, getDocs)
+                // (จะถูกดึงมาจาก import ด้านบนสุดของไฟล์ app.js แทน)
+
                 const q = query(collection(db, 'goals'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
 
-                onSnapshot(q, (querySnapshot) => {
+                // onSnapshot จะคอย "ฟัง" การเปลี่ยนแปลงใน database
+                // เมื่อมีอะไรใหม่ (เช่น goal ที่เพิ่งเพิ่ม) มันจะทำงานทันที
+                onSnapshot(q, async (querySnapshot) => {
+                    
                     if (querySnapshot.empty) {
-                        if(goalsGrid) goalsGrid.innerHTML = '<p class="text-gray-500 text-center col-span-full">ยังไม่มีเป้าหมาย ลองเพิ่มเลย!</p>'; // แก้ไข
+                        if(goalsGrid) goalsGrid.innerHTML = '<p class="text-gray-500 text-center col-span-full">ยังไม่มีเป้าหมาย ลองเพิ่มเลย!</p>'; 
                         return;
                     }
                     
-                    if(goalsGrid) goalsGrid.innerHTML = ''; // แก้ไข
+                    if(goalsGrid) goalsGrid.innerHTML = ''; // เคลียร์การ์ดเก่าออกก่อน
 
-                    querySnapshot.forEach(async (goalDoc) => {
+                    // สร้างอาร์เรย์สำหรับเก็บ "Promise" ของการสร้างการ์ดแต่ละใบ
+                    const goalPromises = querySnapshot.docs.map(async (goalDoc) => {
                         const goal = goalDoc.data();
                         goal.id = goalDoc.id;
 
+                        // เราต้องดึง log การออมของแต่ละการ์ดมาด้วย
                         const savingsLogRef = collection(db, 'goals', goal.id, 'savingsLog');
                         const logQuery = query(savingsLogRef, orderBy('date', 'asc'));
-                        const logSnapshot = await getDocs(logQuery);
-
+                        
+                        // ใช้ getDocs (จาก import ด้านบน) เพื่อดึงข้อมูล log
+                        const logSnapshot = await getDocs(logQuery); 
                         const savingsLog = logSnapshot.docs.map(d => d.data());
                         
-                        const goalCard = createGoalCard(goal, savingsLog);
-                        if(goalsGrid) goalsGrid.appendChild(goalCard); // แก้ไข
+                        // ส่งข้อมูล goal และ log ไปสร้างการ์ด
+                        return createGoalCard(goal, savingsLog);
+                    });
+                    
+                    // ใช้ Promise.all เพื่อรอให้การ์ดทุกใบ (ที่ต้องไปดึง log) สร้างเสร็จก่อน
+                    const goalCards = await Promise.all(goalPromises);
+                    
+                    // เมื่อการ์ดทั้งหมดพร้อมแล้ว ค่อยนำไปแสดงผล
+                    goalCards.forEach(card => {
+                        if(goalsGrid) goalsGrid.appendChild(card);
                     });
                 });
             })();
         };
-
+        
         // --- Create Goal Card HTML ---
         const createGoalCard = (goal, savingsLog) => {
             const card = document.createElement('div');
