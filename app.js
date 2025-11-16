@@ -288,10 +288,11 @@ function renderGoalUI(goal) {
     }
 
     // มีเป้าหมาย, แสดงรายละเอียด
-    if (goalStatusContainer) goalStatusContainer.classList.remove('hidden'); // แสดงกรอบหลัก
-    if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden'); // แสดงส่วนออมเงิน
-    displayContainer.classList.remove('hidden'); // แสดงส่วนแสดงผล
-    formContainer.classList.add('hidden'); // ซ่อนฟอร์ม
+    // [การแก้ไข] สั่งแสดง/ซ่อนให้ครบทุกส่วน
+if (goalStatusContainer) goalStatusContainer.classList.remove('hidden'); // แสดงกรอบหลัก
+if (saveMoneyContainer) saveMoneyContainer.classList.remove('hidden'); // แสดงส่วนออมเงิน
+displayContainer.classList.remove('hidden'); // แสดงส่วนแสดงผล
+formContainer.classList.add('hidden'); // ซ่อนฟอร์ม
     
     // --- (ส่วนที่เหลือคือโค้ดเดิมของคุณ ทำงานถูกต้องอยู่แล้ว) ---
     document.getElementById('display-goal-name').textContent = goal.name;
