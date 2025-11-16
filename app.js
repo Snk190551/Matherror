@@ -351,11 +351,23 @@ async function saveTransaction(event) {
         return;
     }
 
-    const transactionForm = document.getElementById('transaction-form');
-    const description = document.getElementById('description').value;
-    const type = document.getElementById('type').value;
-    const category = document.getElementById('category').value;
-    const amount = parseFloat(document.getElementById('amount').value);
+    // 🔴 [การแก้ไข] ตรวจสอบว่า Element มีอยู่ก่อนดึงค่า .value
+    const descriptionElement = document.getElementById('description');
+    const typeElement = document.getElementById('type');
+    const categoryElement = document.getElementById('category');
+    const amountElement = document.getElementById('amount');
+    
+    // หาก Element ใด Element หนึ่งไม่มีอยู่ (เช่น อยู่ในหน้า about.html) ให้หยุดทำงาน
+    if (!descriptionElement || !typeElement || !categoryElement || !amountElement) {
+        console.error("Transaction form elements not found on this page.");
+        return; 
+    }
+
+    const description = descriptionElement.value;
+    const type = typeElement.value;
+    const category = categoryElement.value;
+    const amount = parseFloat(amountElement.value);
+    // ------------------------------------------------------------
 
     if (amount <= 0 || isNaN(amount)) {
         showModal('ข้อผิดพลาด', 'จำนวนเงินต้องมากกว่า 0', true);
@@ -371,7 +383,9 @@ async function saveTransaction(event) {
         userId: currentUser.uid
     };
 
+    // ... (ส่วนการบันทึก Firebase ที่เหลือ)
     try {
+        const transactionForm = document.getElementById('transaction-form');
         await addDoc(collection(db, 'users', currentUser.uid, 'transactions'), transactionData);
         showModal('สำเร็จ', 'บันทึกรายการเรียบร้อยแล้ว');
         transactionForm.reset();
