@@ -3,18 +3,20 @@
 // Firebase Imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, query, serverTimestamp, updateDoc, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, query, serverTimestamp, updateDoc, orderBy, deleteDoc, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // --- Global Variables & Firebase Setup ---
 let app, db, auth;
 let unsubscribeFromTransactions = null;
+let unsubscribeFromGoal = null;
 let confirmCallback = null;
-let currentUser = null; // เพิ่มตัวแปร global สำหรับเก็บ user
-const GOAL_DOC_ID = 'user_goal'; // Document ID สำหรับเป้าหมายเดียวต่อผู้ใช้
+let currentUser = null; 
+const GOAL_DOC_ID = 'user_goal'; 
+let currentBalance = 0; // เพิ่มตัวแปร global สำหรับยอดคงเหลือ
 
 const firebaseConfig = {
-    // ใช้ค่า config ของคุณ
-  apiKey: "AIzaSyC6d1_FmSvfrnhpqFxdKrg-bleCVC5XkUM",
+  // กรุณาใช้ค่า config ของคุณ
+  apiKey: "AIzaSyC6d1_FmSvfrnhpqfxdKrg-bleCVC5XkUM",
   authDomain: "app-math-465713.firebaseapp.com",
   projectId: "app-math-465713",
   storageBucket: "app-math-465713.firebasestorage.app",
@@ -38,7 +40,6 @@ function showModal(title, message, isError = false) {
     document.getElementById('modal-title').textContent = title;
     document.getElementById('modal-message').textContent = message;
     
-    // ตั้งค่าสีตามประเภทข้อความ (Error/Success)
     const titleElement = document.getElementById('modal-title');
     titleElement.classList.remove('text-red-600', 'text-green-600');
     if (isError) {
@@ -109,10 +110,7 @@ function renderGoalUI(goal) {
     // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข (Edit Button) ---
     const editBtn = document.getElementById('edit-goal-btn');
     if (editBtn) {
-        // ล้าง Listener เดิมออกก่อน
         editBtn.onclick = null; 
-        
-        // ผูกฟังก์ชัน editGoal โดยส่งข้อมูล goal ปัจจุบันเข้าไป พร้อม Log Debug
         editBtn.onclick = () => {
             console.log('✅ EDIT BUTTON CLICKED. Calling editGoal with data:', goal); 
             editGoal(goal);
@@ -128,7 +126,7 @@ function editGoal(goalData) {
     const formContainer = document.getElementById('goal-form-container');
     const goalForm = document.getElementById('goal-form');
 
-    // 1. นำข้อมูลที่มีอยู่มาใส่ในช่องกรอก (ใช้ ?. เพื่อป้องกัน Error เงียบ)
+    // 1. นำข้อมูลที่มีอยู่มาใส่ในช่องกรอก 
     document.getElementById('goal-name').value = goalData?.name || '';
     document.getElementById('target-amount').value = goalData?.targetAmount || 0;
     document.getElementById('current-amount').value = goalData?.currentAmount || 0;
@@ -148,7 +146,6 @@ function editGoal(goalData) {
     console.log('✅ UI Switch Attempted. Display Container Hidden:', displayContainer?.classList.contains('hidden'));
 }
 
-
 async function saveGoal(event) {
     event.preventDefault();
     if (!currentUser) {
@@ -158,7 +155,7 @@ async function saveGoal(event) {
 
     const goalForm = document.getElementById('goal-form');
     const isEdit = goalForm.dataset.isEdit === 'true';
-    const docId = isEdit ? GOAL_DOC_ID : GOAL_DOC_ID; // เป้าหมายใช้ ID เดียวกันเสมอ
+    const docId = GOAL_DOC_ID; 
 
     const goalName = document.getElementById('goal-name').value;
     const targetAmount = parseFloat(document.getElementById('target-amount').value);
@@ -177,7 +174,6 @@ async function saveGoal(event) {
         updatedAt: serverTimestamp()
     };
     
-    // ตั้งค่า initial value สำหรับการสร้างใหม่เท่านั้น
     if (!isEdit) {
          goalData.createdAt = serverTimestamp();
     }
@@ -199,10 +195,11 @@ async function saveGoal(event) {
 
 function startGoalListener() {
     if (!currentUser) return;
-
+    if (unsubscribeFromGoal) unsubscribeFromGoal(); // หยุด listener เดิม
+    
     const goalRef = doc(db, 'users', currentUser.uid, 'goals', GOAL_DOC_ID);
     
-    onSnapshot(goalRef, (doc) => {
+    unsubscribeFromGoal = onSnapshot(goalRef, (doc) => {
         if (doc.exists()) {
             const goalData = {
                 id: doc.id,
@@ -210,68 +207,11 @@ function startGoalListener() {
             };
             renderGoalUI(goalData);
         } else {
-            renderGoalUI(null); // แสดง UI สำหรับสร้างเป้าหมายใหม่
+            renderGoalUI(null); 
         }
     }, (error) => {
         console.error("Error listening to goal changes: ", error);
     });
-}
-
-
-// --- Transaction Management Functions (ย่อส่วน) ---
-
-// ... (ส่วน Transaction Management, initHomePage, saveTransaction, renderTransactionsList, deleteTransaction อยู่ตรงนี้) ...
-
-// --- User Management Functions ---
-
-async function registerUser(event) {
-    event.preventDefault();
-    // ... (logic สำหรับ registerUser) ...
-}
-
-async function loginUser(event) {
-    event.preventDefault();
-    // ... (logic สำหรับ loginUser) ...
-}
-
-async function logoutUser() {
-    // ... (logic สำหรับ logoutUser) ...
-}
-
-function initLoginPage() {
-    // ... (logic สำหรับ initLoginPage) ...
-}
-
-function initHomePage() {
-    // ... (logic สำหรับ initHomePage) ...
-}
-
-function initAboutPage() {
-    // เพิ่ม Listener สำหรับฟอร์มเป้าหมาย
-    const goalForm = document.getElementById('goal-form');
-    if (goalForm) {
-        goalForm.addEventListener('submit', saveGoal);
-    }
-
-    // ลบปุ่มแก้ไขเป้าหมายเดิมออก (ถ้ามี) เพราะเราจะผูกใหม่ใน renderGoalUI
-    // const editGoalBtn = document.getElementById('edit-goal-btn');
-    // if (editGoalBtn) {
-    //     editGoalBtn.onclick = () => editGoal(); 
-    // }
-    
-    // เพิ่ม Listener สำหรับปุ่มลบ
-    const deleteGoalBtn = document.getElementById('delete-goal-btn');
-    if (deleteGoalBtn) {
-        deleteGoalBtn.onclick = () => {
-            showConfirmationModal(
-                'ยืนยันการลบเป้าหมาย',
-                'คุณแน่ใจหรือไม่ที่จะลบเป้าหมายนี้? ข้อมูลเป้าหมายจะถูกลบออกทั้งหมด',
-                () => {
-                    deleteGoal();
-                }
-            );
-        };
-    }
 }
 
 async function deleteGoal() {
@@ -287,25 +227,262 @@ async function deleteGoal() {
 }
 
 
+// --- Transaction Management Functions ---
+
+async function saveTransaction(event) {
+    event.preventDefault();
+    if (!currentUser) {
+        showModal('ข้อผิดพลาด', 'กรุณาเข้าสู่ระบบก่อน', true);
+        return;
+    }
+
+    const transactionForm = document.getElementById('transaction-form');
+    const description = document.getElementById('description').value;
+    const type = document.getElementById('type').value;
+    const category = document.getElementById('category').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+
+    if (amount <= 0 || isNaN(amount)) {
+        showModal('ข้อผิดพลาด', 'จำนวนเงินต้องมากกว่า 0', true);
+        return;
+    }
+
+    const transactionData = {
+        description: description,
+        type: type,
+        category: category,
+        amount: amount,
+        timestamp: serverTimestamp(),
+        userId: currentUser.uid
+    };
+
+    try {
+        await addDoc(collection(db, 'users', currentUser.uid, 'transactions'), transactionData);
+        showModal('สำเร็จ', 'บันทึกรายการเรียบร้อยแล้ว');
+        transactionForm.reset();
+    } catch (error) {
+        console.error("Error adding document: ", error);
+        showModal('ข้อผิดพลาด', 'ไม่สามารถบันทึกรายการได้', true);
+    }
+}
+
+async function deleteTransaction(docId) {
+    if (!currentUser) return;
+    try {
+        await deleteDoc(doc(db, 'users', currentUser.uid, 'transactions', docId));
+        showModal('สำเร็จ', 'ลบรายการเรียบร้อยแล้ว');
+    } catch (error) {
+        console.error("Error deleting document: ", error);
+        showModal('ข้อผิดพลาด', 'ไม่สามารถลบรายการได้', true);
+    }
+}
+
+function renderTransactionsList(transactions) {
+    const listContainer = document.getElementById('transactions-list');
+    const totalIncomeElement = document.getElementById('total-income');
+    const totalExpenseElement = document.getElementById('total-expense');
+    const balanceElement = document.getElementById('current-balance');
+
+    listContainer.innerHTML = ''; // Clear previous list
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    if (transactions.length === 0) {
+        listContainer.innerHTML = '<p class="text-center text-gray-500 py-4">ไม่มีรายการในขณะนี้</p>';
+    }
+
+    transactions.forEach(transaction => {
+        const isIncome = transaction.type === 'income';
+        const sign = isIncome ? '+' : '-';
+        const colorClass = isIncome ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100';
+
+        if (isIncome) {
+            totalIncome += transaction.amount;
+        } else {
+            totalExpense += transaction.amount;
+        }
+
+        const date = transaction.timestamp ? new Date(transaction.timestamp.toDate()).toLocaleDateString('th-TH') : 'N/A';
+
+        const listItem = document.createElement('div');
+        listItem.className = `flex justify-between items-center p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors rounded-xl`;
+        listItem.innerHTML = `
+            <div class="flex-1 min-w-0">
+                <p class="text-gray-800 font-semibold truncate">${transaction.description}</p>
+                <p class="text-sm text-gray-500">${date} - ${transaction.category}</p>
+            </div>
+            <div class="text-right ml-4">
+                <p class="font-bold ${colorClass} py-1 px-3 rounded-full text-sm">
+                    ${sign} ${transaction.amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                </p>
+            </div>
+            <button class="ml-4 text-red-400 hover:text-red-600 transition-colors delete-btn" data-doc-id="${transaction.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        `;
+        listContainer.appendChild(listItem);
+    });
+
+    currentBalance = totalIncome - totalExpense;
+    totalIncomeElement.textContent = totalIncome.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    totalExpenseElement.textContent = totalExpense.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    balanceElement.textContent = currentBalance.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    
+    // ตั้งค่าสีของยอดคงเหลือ
+    balanceElement.classList.remove('text-green-600', 'text-red-600', 'text-gray-800');
+    if (currentBalance > 0) {
+        balanceElement.classList.add('text-green-600');
+    } else if (currentBalance < 0) {
+        balanceElement.classList.add('text-red-600');
+    } else {
+        balanceElement.classList.add('text-gray-800');
+    }
+
+    // ผูก Event Listener สำหรับปุ่มลบ
+    listContainer.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const docId = e.currentTarget.dataset.docId;
+            showConfirmationModal(
+                'ยืนยันการลบรายการ',
+                'คุณแน่ใจหรือไม่ที่จะลบรายการนี้? รายการที่ถูกลบจะไม่สามารถกู้คืนได้',
+                () => {
+                    deleteTransaction(docId);
+                }
+            );
+        });
+    });
+}
+
+function startTransactionListener() {
+    if (!currentUser) return;
+    if (unsubscribeFromTransactions) unsubscribeFromTransactions(); // หยุด listener เดิม
+
+    // Query เพื่อดึงรายการ Transaction ทั้งหมด โดยเรียงลำดับจากล่าสุดไปเก่าสุด
+    const transactionsRef = collection(db, 'users', currentUser.uid, 'transactions');
+    const q = query(transactionsRef, orderBy('timestamp', 'desc'));
+
+    unsubscribeFromTransactions = onSnapshot(q, (snapshot) => {
+        const transactions = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        renderTransactionsList(transactions);
+    }, (error) => {
+        console.error("Error listening to transactions: ", error);
+    });
+}
+
+// --- User Management Functions ---
+
+async function registerUser(event) {
+    event.preventDefault();
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const username = document.getElementById('register-username').value;
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await setDoc(doc(db, "users", user.uid), {
+            username: username,
+            email: email,
+            createdAt: serverTimestamp()
+        });
+        showModal('สำเร็จ', 'ลงทะเบียนสำเร็จ! เข้าสู่ระบบแล้ว');
+    } catch (error) {
+        showModal('ข้อผิดพลาด', 'ลงทะเบียนไม่สำเร็จ: ' + error.message, true);
+    }
+}
+
+async function loginUser(event) {
+    event.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // Auth state listener จะจัดการการเปลี่ยนหน้า
+    } catch (error) {
+        showModal('ข้อผิดพลาด', 'เข้าสู่ระบบไม่สำเร็จ: ' + error.message, true);
+    }
+}
+
+async function logoutUser() {
+    try {
+        if (unsubscribeFromTransactions) unsubscribeFromTransactions();
+        if (unsubscribeFromGoal) unsubscribeFromGoal();
+        await signOut(auth);
+        window.location.replace('login.html');
+    } catch (error) {
+        console.error("Error logging out: ", error);
+        showModal('ข้อผิดพลาด', 'ไม่สามารถออกจากระบบได้', true);
+    }
+}
+
+// --- Initialization Functions ---
+
+function initLoginPage() {
+    document.getElementById('login-form')?.addEventListener('submit', loginUser);
+    document.getElementById('register-form')?.addEventListener('submit', registerUser);
+    document.getElementById('show-register-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('login-container').classList.add('hidden');
+        document.getElementById('register-container').classList.remove('hidden');
+    });
+    document.getElementById('show-login-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('register-container').classList.add('hidden');
+        document.getElementById('login-container').classList.remove('hidden');
+    });
+}
+
+function initHomePage() {
+    document.getElementById('transaction-form')?.addEventListener('submit', saveTransaction);
+    document.getElementById('logout-btn')?.addEventListener('click', logoutUser);
+}
+
+function initAboutPage() {
+    const goalForm = document.getElementById('goal-form');
+    if (goalForm) {
+        goalForm.addEventListener('submit', saveGoal);
+    }
+    
+    const deleteGoalBtn = document.getElementById('delete-goal-btn');
+    if (deleteGoalBtn) {
+        deleteGoalBtn.onclick = () => {
+            showConfirmationModal(
+                'ยืนยันการลบเป้าหมาย',
+                'คุณแน่ใจหรือไม่ที่จะลบเป้าหมายนี้? ข้อมูลเป้าหมายจะถูกลบออกทั้งหมด',
+                () => {
+                    deleteGoal();
+                }
+            );
+        };
+    }
+    document.getElementById('logout-btn-about')?.addEventListener('click', logoutUser); // ถ้ามีปุ่ม logout ในหน้านี้
+}
+
 // --- Auth State Listener ---
 onAuthStateChanged(auth, (user) => {
+    let currentPage = window.location.pathname.split("/").pop();
+    if(currentPage === '') currentPage = 'index.html';
+
     if (user) {
         currentUser = user;
-        // Check if the current page requires a logged-in user
-        let currentPage = window.location.pathname.split("/").pop();
-        if (currentPage === 'login.html' || currentPage === 'register.html') {
+        if (currentPage === 'login.html') {
             window.location.replace('index.html');
         } else if (currentPage === 'about.html') {
             startGoalListener();
-        } else if (currentPage === 'index.html' || currentPage === 'index') {
-            // startTransactionListener(); // ต้องมีฟังก์ชันนี้
+        } else if (currentPage === 'index.html') {
+            startTransactionListener(); 
         }
     } else {
         currentUser = null;
-        // If the user is not logged in and not on the login/register page, redirect to login
-        let currentPage = window.location.pathname.split("/").pop();
         if (currentPage !== 'login.html') {
-            // window.location.replace('login.html');
+            // Unsubscribe listeners when user logs out/is not logged in
+            if (unsubscribeFromTransactions) unsubscribeFromTransactions();
+            if (unsubscribeFromGoal) unsubscribeFromGoal();
+            window.location.replace('login.html');
         }
     }
 });
@@ -321,36 +498,37 @@ document.addEventListener('DOMContentLoaded', () => {
         hideConfirmationModal();
     });
 
-    let currentPage = window.location.pathname.split("/").pop() || 'index';
-    if(currentPage.endsWith('.html')) {
-        currentPage = currentPage.slice(0, -5);
-    }
-     if (currentPage === '') {
-        currentPage = 'index';
-    }
+    // Listener สำหรับ Modal ข้อความ
+    document.getElementById('message-modal')?.addEventListener('click', (e) => {
+        if(e.target.id === 'message-modal') {
+            hideModal();
+        }
+    });
+    
+    document.getElementById('modal-ok-btn')?.addEventListener('click', hideModal);
+
+
+    let currentPage = window.location.pathname.split("/").pop() || 'index.html';
     
     // ตั้งค่า active nav bar
     document.querySelectorAll('nav a').forEach(link => {
-        let linkPage = link.getAttribute('href').split('/').pop() || 'index';
-        if(linkPage.endsWith('.html')) {
-            linkPage = linkPage.slice(0, -5);
-        }
-        if (linkPage === '') {
-            linkPage = 'index';
-        }
-        
-        if (linkPage === currentPage) {
+        const linkHref = link.getAttribute('href');
+        if (linkHref.includes(currentPage)) {
             link.classList.add('active-nav');
+        } else {
+            link.classList.remove('active-nav');
         }
     });
     
     // เรียกฟังก์ชัน init ตามหน้าปัจจุบัน
-    if (currentPage === 'index') {
-        // initHomePage(); // ต้องมีฟังก์ชันนี้
-    } else if (currentPage === 'login') {
-        // initLoginPage(); // ต้องมีฟังก์ชันนี้
-    } else if (currentPage === 'about') {
+    if (currentPage === 'index.html' || currentPage === 'index') {
+        initHomePage(); 
+    } else if (currentPage === 'login.html') {
+        initLoginPage();
+    } else if (currentPage === 'about.html') {
         initAboutPage(); 
+    } else if (currentPage === 'invest.html') {
+        // initInvestPage(); // หากมีฟังก์ชันนี้
+        document.getElementById('logout-btn-invest')?.addEventListener('click', logoutUser);
     }
-    // เพิ่ม else if สำหรับ 'invest' ถ้ามีฟังก์ชัน initInvestPage()
 });
