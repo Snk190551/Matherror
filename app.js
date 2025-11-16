@@ -258,11 +258,14 @@ function calculateAttainmentDate(initialAmount, targetAmount, daysPassed, totalS
     return attainmentDate;
 }
 
-// ฟังก์ชันสำหรับจัดการการแสดงผล UI ของเป้าหมาย
+/// ฟังก์ชันสำหรับจัดการการแสดงผล UI ของเป้าหมาย
 function renderGoalUI(goal) {
-    const displayContainer = document.getElementById('goal-display-container');
+    // *** แก้ไข: ใช้ ID ที่ถูกต้องตามที่เพิ่มใน about.html ***
+    const displayContainer = document.getElementById('goal-display-container'); 
     const formContainer = document.getElementById('goal-form-container');
     const goalForm = document.getElementById('goal-form');
+    // *** เพิ่ม: อ้างอิงถึง progress bar ด้วย ID ที่ถูกต้องใน about.html ***
+    const progressBar = document.getElementById('progress-bar'); 
 
     if (!goal) {
         // ไม่มีเป้าหมาย, แสดงฟอร์มสร้างเป้าหมาย
@@ -271,7 +274,8 @@ function renderGoalUI(goal) {
         goalForm.reset();
         delete goalForm.dataset.docId; // ลบ docId ทิ้งเพื่อให้เป็นการสร้างใหม่
         delete goalForm.dataset.isEdit; // ลบสถานะการแก้ไข
-        document.getElementById('goal-submit-btn').textContent = 'สร้างเป้าหมาย';
+        document.getElementById('goal-form-title').textContent = 'สร้างเป้าหมายใหม่';
+        document.getElementById('goal-submit-btn').textContent = 'บันทึกเป้าหมาย';
         return;
     }
 
@@ -284,15 +288,21 @@ function renderGoalUI(goal) {
     document.getElementById('display-current-amount').textContent = goal.currentAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
 
     const progress = (goal.currentAmount / goal.targetAmount) * 100;
-    const progressBar = document.getElementById('goal-progress-bar');
-    progressBar.style.width = `${Math.min(progress, 100)}%`;
-    progressBar.textContent = `${Math.min(progress, 100).toFixed(0)}%`;
-    progressBar.setAttribute('aria-valuenow', Math.min(progress, 100).toFixed(0));
+    // *** แก้ไข: ใช้ progressBar ที่ถูกต้อง ***
+    if (progressBar) {
+        progressBar.style.width = `${Math.min(progress, 100)}%`;
+        // *** ลบ progressBar.textContent เพราะไม่มีใน about.html แล้ว ***
+        // progressBar.textContent = `${Math.min(progress, 100).toFixed(0)}%`;
+        // progressBar.setAttribute('aria-valuenow', Math.min(progress, 100).toFixed(0));
+    }
+    // *** แก้ไข: อัปเดต % ใน span tag แทน ***
+    document.getElementById('display-progress-percent').textContent = `${Math.min(progress, 100).toFixed(1)}%`;
+
 
     // คำนวณยอดเงินคงเหลือ
     const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
-    document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { minimumFractionDigits: 2 });
-    
+    document.getElementById('display-remaining-amount').textContent = remaining.toLocaleString('th-TH', { minimumFractionDigits: 2 }); 
+
     // --- START: Attainment Calculation and Display Logic ---
     const dateCreated = goal.createdAt ? new Date(goal.createdAt.toDate()) : null;
     const initialAmount = goal.initialAmount || 0;
@@ -325,7 +335,7 @@ function renderGoalUI(goal) {
     if (resultGeometricEl) resultGeometricEl.textContent = attainment.geometric;
     // --- END: Attainment Calculation and Display Logic ---
 
-    // --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
+// --- ส่วนสำคัญ: ผูกปุ่มแก้ไข ---
     const editBtn = document.getElementById('edit-goal-btn');
     if (editBtn) {
         // ล้าง Listener เดิมออกก่อน (ป้องกันการเรียกซ้ำ)
@@ -333,26 +343,6 @@ function renderGoalUI(goal) {
         // ผูกฟังก์ชัน editGoal โดยส่งข้อมูล goal ปัจจุบันเข้าไป
         editBtn.onclick = () => editGoal(goal); 
     }
-}
-
-// ฟังก์ชันสำหรับสลับการแสดงผลจากสถานะเป้าหมายไปเป็นฟอร์มแก้ไข
-function showGoalEditForm(goalData) {
-    const goalStatusContainer = document.getElementById('goal-status-container');
-    const goalFormContainer = document.getElementById('goal-form-container');
-    const saveMoneyContainer = document.getElementById('save-money-container');
-
-    // 1. สลับ UI: ซ่อนสถานะ, แสดงฟอร์ม
-    goalStatusContainer?.classList.add('hidden');
-    saveMoneyContainer?.classList.add('hidden');
-    goalFormContainer?.classList.remove('hidden');
-
-    // 2. ตั้งชื่อฟอร์ม/ปุ่มให้เป็น "แก้ไข"
-    document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
-    document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
-    
-    // (ข้อมูลในฟอร์มถูก Pre-fill แล้วโดย renderGoalUI)
-    // แต่เพื่อความปลอดภัย ให้แน่ใจว่า ID ถูกตั้งค่าใน input field
-    document.getElementById('goal-id').value = goalData.id; 
 }
 
 function startGoalListener() {
@@ -439,8 +429,9 @@ async function handleGoalFormSubmit(e) {
 
 // ฟังก์ชันสำหรับเปิดฟอร์มพร้อมข้อมูลเดิมเพื่อแก้ไข
 function editGoal(goalData) {
+    // *** แก้ไข: ใช้ ID ที่ถูกต้องตามที่เพิ่มใน about.html ***
+    const displayContainer = document.getElementById('goal-display-container'); 
     const formContainer = document.getElementById('goal-form-container');
-    const displayContainer = document.getElementById('goal-display-container');
     const goalForm = document.getElementById('goal-form');
 
     // 1. นำข้อมูลที่มีอยู่มาใส่ในช่องกรอก
@@ -453,11 +444,12 @@ function editGoal(goalData) {
     goalForm.dataset.isEdit = 'true';
 
     // 3. เปลี่ยนข้อความปุ่ม
+    document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
     document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
 
     // 4. แสดงฟอร์มและซ่อนส่วนแสดงผลเป้าหมาย
-    displayContainer.classList.add('hidden');
-    formContainer.classList.remove('hidden');
+    displayContainer?.classList.add('hidden');
+    formContainer?.classList.remove('hidden');
 }
 
 // New function for handling money saving in about.html
@@ -595,7 +587,6 @@ function initAboutPage() {
     const logoutBtn = document.getElementById('logout-btn');
     const goalForm = document.getElementById('goal-form');
     const saveMoneyForm = document.getElementById('save-money-form');
-    const editGoalBtn = document.getElementById('edit-goal-btn');
     const resetGoalBtn = document.getElementById('reset-goal-btn');
 
     // Authentication & Logout
@@ -604,14 +595,6 @@ function initAboutPage() {
     // Goal Management
     goalForm?.addEventListener('submit', handleGoalFormSubmit);
     saveMoneyForm?.addEventListener('submit', handleSaveMoney);
-
-    // Edit Goal Button
-    editGoalBtn?.addEventListener('click', () => {
-        document.getElementById('goal-status-container')?.classList.add('hidden');
-        document.getElementById('goal-form-container')?.classList.remove('hidden');
-        document.getElementById('goal-form-title').textContent = 'แก้ไขเป้าหมาย';
-        document.getElementById('goal-submit-btn').textContent = 'บันทึกการแก้ไข';
-    });
 
     // Reset/Delete Goal Button
     resetGoalBtn?.addEventListener('click', () => {
