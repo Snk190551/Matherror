@@ -80,7 +80,36 @@ const investmentNews = [
         linkUrl: "https://www.bangkokbiznews.com/finance/investment/1131189",
         source: "กรุงเทพธุรกิจ"
     },
-    // ... (rest of the news items) ...
+    {
+        title: "รู้จัก 5 เรื่องต้องระวัง ลงทุน 'หุ้นกู้' อย่างไรไม่ให้พลาด",
+        imageUrl: "https://placehold.co/600x400/9333EA/FFFFFF?text=หุ้นกู้",
+        linkUrl: "https://www.thairath.co.th/money/investment/stocks/2791928",
+        source: "Thairath Money"
+    },
+    {
+        title: "Bitcoin Halving คืออะไร? ทำไมนักลงทุนทั่วโลกจับตา",
+        imageUrl: "https://placehold.co/600x400/F97316/FFFFFF?text=Bitcoin",
+        linkUrl: "https://brandinside.asia/what-is-bitcoin-halving-why-investor-watch/",
+        source: "Brand Inside"
+    },
+    {
+        title: "ทิศทางตลาดอสังหาฯ ครึ่งปีหลัง คอนโดฯ กลางเมืองยังน่าสน",
+        imageUrl: "https://placehold.co/600x400/0891B2/FFFFFF?text=คอนโด",
+        linkUrl: "https://www.bangkokbiznews.com/property/1109968",
+        source: "กรุงเทพธุรกิจ"
+    },
+    {
+        title: "มือใหม่เริ่มลงทุนกองทุนรวมอย่างไร? รวมขั้นตอนง่ายๆ",
+        imageUrl: "https://placehold.co/600x400/65A30D/FFFFFF?text=มือใหม่ลงทุน",
+        linkUrl: "https://www.moneybuffalo.in.th/investment/how-to-start-invest-in-mutual-fund",
+        source: "Money Buffalo"
+    },
+    {
+        title: "ต่างชาติแห่ลงทุน EEC ยอดทะลุเป้าหมาย โอกาสโตต่อเนื่อง",
+        imageUrl: "https://placehold.co/600x400/BE185D/FFFFFF?text=EEC",
+        linkUrl: "https://www.prachachat.net/economy/news-1533036",
+        source: "ประชาชาติธุรกิจ"
+    }
 ];
 
 
@@ -142,7 +171,7 @@ function renderTransactionsUI(transactions = []) {
 
         const typeClass = tx.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
         const sign = tx.type === 'income' ? '+' : '-';
-        const deleteButton = `<button data-id="${tx.id}" class="delete-btn text-red-400 hover:text-red-600 p-1 rounded-full"><svg xmlns="http://www.w.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg></button>`;
+        const deleteButton = `<button data-id="${tx.id}" class="delete-btn text-red-400 hover:text-red-600 p-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg></button>`;
         const itemDiv = document.createElement('div');
         itemDiv.className = `flex justify-between items-center p-4 rounded-xl shadow-sm mb-2 ${typeClass}`;
         itemDiv.innerHTML = `
@@ -155,7 +184,7 @@ function renderTransactionsUI(transactions = []) {
             </div>
             <div class="text-right">
                 <div class="font-bold text-lg">${tx.amount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท</div>
-                <div class="text-xs text-gray-400 mt-1">(มูลค่าเงินใน1ปีข้างหน้า: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
+               <div class="text-xs text-gray-400 mt-1">(มูลค่าเงินใน1ปีข้างหน้า: ${adjustedAmount.toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท)</div>
             </div>`;
         listEl.appendChild(itemDiv);
     });
@@ -259,6 +288,48 @@ function initLoginPage() {
     showRegisterBtn?.addEventListener('click', (e) => { e.preventDefault(); registerContainer.classList.remove('hidden'); loginContainer.classList.add('hidden'); });
 }
 
+function initAboutPage() {
+    const logoutBtn = document.getElementById('logout-btn');
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const editUserForm = document.getElementById('edit-user-form');
+    
+    const userSection = document.getElementById('user-section');
+    const editUserSection = document.getElementById('edit-user-section');
+
+    logoutBtn?.addEventListener('click', () => signOut(auth));
+
+    editProfileBtn?.addEventListener('click', () => {
+        userSection.classList.add('hidden');
+        editUserSection.classList.remove('hidden');
+        const currentUsername = document.getElementById('user-greeting').textContent;
+        document.getElementById('edit-username').value = currentUsername;
+    });
+
+    cancelEditBtn?.addEventListener('click', () => {
+        editUserSection.classList.add('hidden');
+        userSection.classList.remove('hidden');
+    });
+
+    editUserForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newUsername = document.getElementById('edit-username').value.trim();
+        if (newUsername && auth.currentUser) {
+            const userDocRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid);
+            try {
+                await updateDoc(userDocRef, { username: newUsername });
+                showModal("สำเร็จ", "อัปเดตชื่อผู้ใช้เรียบร้อยแล้ว");
+                document.getElementById('user-greeting').textContent = newUsername;
+                editUserSection.classList.add('hidden');
+                userSection.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error updating username: ", error);
+                showModal("ข้อผิดพลาด", "ไม่สามารถอัปเดตชื่อผู้ใช้ได้");
+            }
+        }
+    });
+}
+
 function initInvestPage() {
     const newsGrid = document.getElementById('news-grid');
     if (!newsGrid) return;
@@ -288,58 +359,31 @@ function initInvestPage() {
 
 // --- Main Controller & Auth Observer ---
 onAuthStateChanged(auth, async (user) => {
+    const protectedPages = ['', 'index.html', 'about.html', 'invest.html'];
+    const loginPage = 'login.html';
     let currentPage = window.location.pathname.split("/").pop() || 'index.html';
     if(currentPage.endsWith('.html')) {
         currentPage = currentPage.slice(0, -5);
     }
-    if (currentPage === '') {
+     if (currentPage === '') {
         currentPage = 'index';
     }
 
-    const userInfoDiv = document.getElementById('userInfo');
-    const userInfoMobileDiv = document.getElementById('userInfoMobile');
 
     if (user) {
-        // --- User is Logged In ---
-        
-        // 1. Handle Page Redirection
         if (currentPage === 'login') {
             window.location.replace('index.html');
             return;
         }
         
-        // 2. Update Navbar UI (This now runs on ALL pages)
         const userDoc = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid));
-        const username = userDoc.exists() ? userDoc.data().username : user.email;
-
-        const commonUserInfoHTML = `
-            <span class="text-gray-700">${username || user.email}</span>
-            <button id="logoutButton" class="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">
-                ออกจากระบบ
-            </button>
-        `;
-        
-        if (userInfoDiv) userInfoDiv.innerHTML = commonUserInfoHTML;
-        if (userInfoMobileDiv) userInfoMobileDiv.innerHTML = commonUserInfoHTML;
-
-        // 3. Add Logout Listeners
-        document.querySelectorAll('#logoutButton').forEach(button => {
-            button.addEventListener('click', () => {
-                auth.signOut().then(() => {
-                    window.location.href = 'login.html';
-                });
-            });
-        });
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const userGreeting = document.getElementById('user-greeting');
+            if (userGreeting) userGreeting.textContent = userData.username || user.email;
+        }
 
     } else {
-        // --- User is Logged Out ---
-        
-        // 1. Update Navbar UI
-        const loginLink = '<a href="login.html" class="text-blue-600 hover:underline">เข้าสู่ระบบ</a>';
-        if (userInfoDiv) userInfoDiv.innerHTML = loginLink;
-        if (userInfoMobileDiv) userInfoMobileDiv.innerHTML = loginLink;
-
-        // 2. Handle Page Redirection
         const protectedPageNames = ['index', 'about', 'invest'];
         if (protectedPageNames.includes(currentPage)) {
             if (unsubscribeFromTransactions) unsubscribeFromTransactions();
@@ -351,20 +395,13 @@ onAuthStateChanged(auth, async (user) => {
 
 // --- Entry Point ---
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Global Modal Listeners ---
+    // --- Modal Listeners ---
     document.getElementById('confirm-cancel-btn')?.addEventListener('click', hideConfirmationModal);
     document.getElementById('confirm-action-btn')?.addEventListener('click', () => {
         if (typeof confirmCallback === 'function') {
             confirmCallback();
         }
         hideConfirmationModal();
-    });
-
-    // --- Global Mobile Menu Toggle ---
-    const mobileMenuButton = document.getElementById('mobileMenuButton');
-    const mobileMenu = document.getElementById('mobileMenu');
-    mobileMenuButton?.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
     });
 
     // --- Page Identification ---
@@ -376,7 +413,20 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage = 'index';
     }
     
-    // (Nav Highlighting ถูกย้ายไปทำในตัว HTML ด้วย aria-current แล้ว)
+    // --- Nav Highlighting ---
+    document.querySelectorAll('nav a').forEach(link => {
+        let linkPage = link.getAttribute('href').split('/').pop() || 'index';
+        if(linkPage.endsWith('.html')) {
+            linkPage = linkPage.slice(0, -5);
+        }
+        if (linkPage === '') {
+            linkPage = 'index';
+        }
+        
+        if (linkPage === currentPage) {
+            link.classList.add('active-nav');
+        }
+    });
     
     // --- Page Routing ---
     if (currentPage === 'index') {
@@ -386,11 +436,11 @@ document.addEventListener('DOMContentLoaded', () => {
         initLoginPage();
     } 
     else if (currentPage === 'invest') {
-        initInvestPage();
+        initInvestPage(); // (เพิ่มอันนี้ให้สมบูรณ์)
     }
     else if (currentPage === 'about') {
         // ==========================================================
-        // GOALS PAGE LOGIC (about.html)
+        // GOALS PAGE LOGIC (about.html) - CORRECTED
         // ==========================================================
 
         const openAddGoalModalBtn = document.getElementById('openAddGoalModalBtn');
@@ -437,17 +487,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 try {
+                    // เราต้องเพิ่ม `increment` จาก firestore
                     const { increment } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
 
                     await addDoc(collection(db, 'goals'), {
                         userId: auth.currentUser.uid,
                         name: goalName,
                         target: targetAmount,
-                        current: initialAmount,
+                        current: initialAmount, // 'current' will track the total saved
                         createdAt: serverTimestamp()
                     });
                     addGoalForm.reset();
                     closeModal(addGoalModal);
+                    // onSnapshot will handle rendering the new goal
                 } catch (error) {
                     console.error("Error adding goal: ", error);
                     alert("เกิดข้อผิดพลาดในการบันทึกเป้าหมาย");
@@ -467,20 +519,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 
+                // เราต้อง import ของที่จำเป็นก่อน
                 const { doc, collection, addDoc, updateDoc, increment } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+
+
                 const goalRef = doc(db, 'goals', goalId);
+                // We use a subcollection to log each saving event
                 const savingsLogRef = collection(goalRef, 'savingsLog');
 
                 try {
+                    // 1. Add to the log
                     await addDoc(savingsLogRef, {
                         amount: amount,
                         date: serverTimestamp()
                     });
+
+                    // 2. Update the main goal's current amount using increment
                     await updateDoc(goalRef, {
                         current: increment(amount)
                     });
+
                     addSavingForm.reset();
                     closeModal(addSavingModal);
+                    // onSnapshot will handle re-rendering the updated goal
                 } catch (error) {
                     console.error("Error logging saving: ", error);
                     alert("เกิดข้อผิดพลาดในการบันทึกการออม");
@@ -488,8 +549,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+
         // --- Fetch and Render Goals ---
         const fetchAndRenderGoals = (userId) => {
+            // เราต้อง import ของที่จำเป็นก่อน
             (async () => {
                 const { query, collection, where, orderBy, onSnapshot, getDocs } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
 
@@ -497,18 +560,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 onSnapshot(q, (querySnapshot) => {
                     if (querySnapshot.empty) {
-                        if(goalsContainer) goalsContainer.innerHTML = '';
+                        if(goalsContainer) goalsContainer.innerHTML = ''; // Clear old goals
                         if(noGoalsText) noGoalsText.classList.remove('hidden');
                         return;
                     }
                     
                     if(noGoalsText) noGoalsText.classList.add('hidden');
-                    if(goalsContainer) goalsContainer.innerHTML = '';
+                    if(goalsContainer) goalsContainer.innerHTML = ''; // Clear container for re-render
 
                     querySnapshot.forEach(async (goalDoc) => {
                         const goal = goalDoc.data();
                         goal.id = goalDoc.id;
 
+                        // To calculate estimated days, we need the savings log
                         const savingsLogRef = collection(db, 'goals', goal.id, 'savingsLog');
                         const logQuery = query(savingsLogRef, orderBy('date', 'asc'));
                         const logSnapshot = await getDocs(logQuery);
@@ -534,6 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">${goal.name}</h3>
+                
                 <div class="mb-3">
                     <div class="flex justify-between text-sm text-gray-600 mb-1">
                         <span>ออมแล้ว ${percentage}%</span>
@@ -544,6 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <p class="text-sm text-gray-500 mt-1">ขาดอีก ${amountRemaining.toLocaleString()} บาท</p>
                 </div>
+
                 <div class="bg-gray-50 p-3 rounded-md mb-4">
                     <h4 class="font-semibold text-center text-blue-800">ประมาณการ</h4>
                     ${dailyRate > 0 ? `
@@ -553,45 +619,95 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-sm text-center text-gray-500">เริ่มบันทึกการออมเพื่อดูประมาณการ</p>
                     `}
                 </div>
-                <button data-id="${goal.id}" data-name="${goal.name}" class="add-saving-btn w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-300">
+                
+                <button data-id="${goal.id}" data-name="${goal.name}" class="add-saving-btn w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-300">
                     <i class="fas fa-piggy-bank mr-2"></i>บันทึกการออมเพิ่ม
                 </button>
             `;
 
+            // Add event listener for the "Add Saving" button on this card
             card.querySelector('.add-saving-btn').addEventListener('click', (e) => {
                 const button = e.currentTarget;
                 if(savingModalGoalName) savingModalGoalName.textContent = `เป้าหมาย: ${button.dataset.name}`;
                 if(savingGoalIdInput) savingGoalIdInput.value = button.dataset.id;
                 openModal(addSavingModal);
             });
+
             return card;
         };
 
         // --- Calculation Logic ---
         const calculateEstimatedDays = (goal, savingsLog) => {
             if (savingsLog.length === 0 || !savingsLog[0].date) {
+                // No log entries yet, or date not loaded, can't calculate
                 return { daysRemaining: "N/A", dailyRate: 0 };
             }
+
             const firstSaveDate = savingsLog[0].date.toDate();
             const today = new Date();
+
+            // Calculate total days passed since the *first* logged save
             const timeDiff = today.getTime() - firstSaveDate.getTime();
-            const daysPassed = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+            const daysPassed = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24))); // Ensure at least 1 day
+
+            // Calculate total amount saved *via logs*
             const totalLoggedAmount = savingsLog.reduce((sum, log) => sum + log.amount, 0);
+            
             const dailyRate = totalLoggedAmount / daysPassed;
             const amountRemaining = goal.target - goal.current;
+
             if (dailyRate <= 0 || amountRemaining <= 0) {
                 return { daysRemaining: 0, dailyRate: dailyRate.toFixed(2) };
             }
+
             const daysRemaining = Math.ceil(amountRemaining / dailyRate);
+
             return { daysRemaining, dailyRate: dailyRate.toFixed(2) };
         };
 
-        // --- Auth State Change (for this page) ---
-        // เราต้องเช็ค user ก่อนที่จะ fetch-goal
-        if(auth.currentUser){
-            fetchAndRenderGoals(auth.currentUser.uid);
-        }
 
-    } // End of 'about' page logic
+        // --- Auth State Change (for this page) ---
+        onAuthStateChanged(auth, (user) => {
+            const userInfoDiv = document.getElementById('userInfo');
+            const userInfoMobileDiv = document.getElementById('userInfoMobile');
+
+            if (user) {
+                // User is signed in, fetch their goals
+                fetchAndRenderGoals(user.uid);
+                
+                // ดึงชื่อ user จาก firestore มาแสดงบน navbar
+                (async () => {
+                    const userDoc = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid));
+                    const username = userDoc.exists() ? userDoc.data().username : user.email;
+
+                    const commonUserInfoHTML = `
+                        <span class="text-gray-700">${username || user.email}</span>
+                        <button id="logoutButton" class="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">
+                            ออกจากระบบ
+                        </button>
+                    `;
+                    
+                    if (userInfoDiv) userInfoDiv.innerHTML = commonUserInfoHTML;
+                    if (userInfoMobileDiv) userInfoMobileDiv.innerHTML = commonUserInfoHTML;
+
+                    // Add logout listener
+                    document.querySelectorAll('#logoutButton').forEach(button => {
+                        button.addEventListener('click', () => {
+                            auth.signOut().then(() => {
+                                window.location.href = 'login.html';
+                            });
+                        });
+                    });
+                })();
+
+            } else {
+                // User is signed out
+                if (userInfoDiv) userInfoDiv.innerHTML = '<a href="login.html" class="text-blue-600 hover:underline">เข้าสู่ระบบ</a>';
+                if (userInfoMobileDiv) userInfoMobileDiv.innerHTML = '<a href="login.html" class="block text-blue-600 hover:underline">เข้าสู่ระบบ</a>';
+                // Global auth listener (ข้างบน) จะจัดการ redirect เอง
+            }
+        });
+
+    } // นี่คือวงเล็บปิด (}) ที่ถูกต้องสำหรับ else if (currentPage === 'about')
     
-}); // End of DOMContentLoaded
+}); // นี่คือวงเล็บปิด (}) ที่ถูกต้องสำหรับ DOMContentLoaded
