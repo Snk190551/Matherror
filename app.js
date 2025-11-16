@@ -709,7 +709,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }})
 
-    // app.js
+// app.js (เฉพาะส่วนจัดการเป้าหมายใน about.html)
+
 document.addEventListener("DOMContentLoaded", () => {
   renderGoals();
 
@@ -725,9 +726,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const addGoalForm = document.getElementById("addGoalForm");
   addGoalForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    const name = document.getElementById("goalName").value;
+    const name = document.getElementById("goalName").value.trim();
     const target = parseFloat(document.getElementById("targetAmount").value);
     const initial = parseFloat(document.getElementById("initialAmount").value);
+
+    if (!name || target <= 0) return;
 
     let goals = JSON.parse(localStorage.getItem("goals")) || [];
     goals.push({ id: Date.now(), name, target, saved: initial });
@@ -750,6 +753,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const goalId = parseInt(document.getElementById("savingGoalId").value);
     const amount = parseFloat(document.getElementById("savingAmount").value);
 
+    if (amount <= 0) return;
+
     let goals = JSON.parse(localStorage.getItem("goals")) || [];
     goals = goals.map(g => g.id === goalId ? { ...g, saved: g.saved + amount } : g);
     localStorage.setItem("goals", JSON.stringify(goals));
@@ -769,6 +774,8 @@ function renderGoals() {
   let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
   goals.forEach(goal => {
+    const percent = Math.min((goal.saved / goal.target) * 100, 100).toFixed(0);
+
     const card = document.createElement("div");
     card.className = "bg-gray-100 p-4 rounded-lg shadow-md flex flex-col gap-2";
 
@@ -776,13 +783,15 @@ function renderGoals() {
       <h3 class="text-lg font-bold">${goal.name}</h3>
       <p>เป้าหมาย: ${goal.target} บาท</p>
       <p>ออมแล้ว: ${goal.saved} บาท</p>
+      <div class="w-full bg-gray-300 rounded-full h-3">
+        <div class="bg-blue-600 h-3 rounded-full" style="width:${percent}%"></div>
+      </div>
+      <p class="text-sm text-gray-600">ความคืบหน้า: ${percent}%</p>
       <div class="flex gap-2 mt-2">
-        <button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700" onclick="openSavingModal(${goal.id}, '${goal.name}')">
-          + ออมเพิ่ม
-        </button>
-        <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" onclick="deleteGoal(${goal.id})">
-          ลบ
-        </button>
+        <button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+          onclick="openSavingModal(${goal.id}, '${goal.name}')">+ ออมเพิ่ม</button>
+        <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+          onclick="deleteGoal(${goal.id})">ลบ</button>
       </div>
     `;
     goalsGrid.appendChild(card);
@@ -790,20 +799,18 @@ function renderGoals() {
 }
 
 // เปิด Modal บันทึกเงินออม
-function openSavingModal(goalId, goalName) {
+window.openSavingModal = function(goalId, goalName) {
   const addSavingModal = document.getElementById("addSavingModal");
   document.getElementById("savingGoalId").value = goalId;
   document.getElementById("savingModalGoalName").textContent = goalName;
   addSavingModal.classList.remove("hidden");
-}
+};
 
 // ลบเป้าหมาย
-function deleteGoal(goalId) {
+window.deleteGoal = function(goalId) {
   if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้?")) return;
-
   let goals = JSON.parse(localStorage.getItem("goals")) || [];
   goals = goals.filter(g => g.id !== goalId);
   localStorage.setItem("goals", JSON.stringify(goals));
-
   renderGoals();
-}
+};
