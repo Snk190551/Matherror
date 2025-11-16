@@ -408,7 +408,7 @@ async function handleGoalFormSubmit(e) {
     const targetAmount = parseFloat(document.getElementById('target-amount').value);
     const currentAmount = parseFloat(document.getElementById('current-amount').value);
     const goalForm = document.getElementById('goal-form');
-    const docId = goalForm.dataset.docId || GOAL_DOC_ID; 
+    const docId = GOAL_DOC_ID;
     const dataToSave = {
         name: goalName,
         targetAmount: targetAmount,
