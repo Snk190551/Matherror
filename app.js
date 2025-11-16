@@ -363,20 +363,29 @@ function showGoalEditForm(goalData) {
     document.getElementById('goal-id').value = goalData.id; 
 }
 
-function startGoalListener() {
-    // ต้องมีโค้ดตรวจสอบการล็อกอินก่อนทำงาน
-    if (!auth.currentUser) return; 
 
-    // Path การดึงข้อมูลที่ถูกต้อง (Collection 'goal')
-    const goalRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'goal', GOAL_DOC_ID);
-    
-    onSnapshot(goalRef, (docSnap) => {
+function startGoalListener() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // นี่คือการอ้างอิงไปยัง "ไฟล์" เป้าหมายไฟล์เดียวของเรา
+    const goalRef = doc(db, "users", user.uid, "goal", GOAL_DOC_ID);
+
+    // เราจะใช้ onSnapshot เพื่อ "ดักฟัง" การเปลี่ยนแปลงที่ "ไฟล์" นี้
+    const unsubscribe = onSnapshot(goalRef, (docSnap) => {
         if (docSnap.exists()) {
+            // ถ้าไฟล์มีอยู่, ส่งข้อมูลไปวาดหน้าจอ
             renderGoalUI({ id: docSnap.id, ...docSnap.data() });
         } else {
-            renderGoalUI(null);
+            // ถ้าไฟล์ไม่มี (เช่น ผู้ใช้ใหม่)
+            renderGoalUI(null); 
         }
+    }, (error) => {
+        console.error("Error listening to goal:", error);
+        showModal('ข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลเป้าหมายได้');
     });
+
+    // (เราจะเก็บ unsubscribe ไว้ เผื่อต้องใช้ตอน logout)
 }
 
 // ฟังก์ชันสำหรับบันทึก/แก้ไขเป้าหมาย
