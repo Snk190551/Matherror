@@ -1,83 +1,811 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>หน้าหลัก | แอปรายรับ-รายจ่าย</title>
+    <title>SNK_ZD - จัดการการเงินส่วนบุคคล</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+        }
+
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .shadow-soft {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #115e59;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <div id="message-modal" class="modal">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
-            <h3 id="modal-title" class="text-xl font-semibold mb-4 text-gray-800"></h3>
-            <p id="modal-message" class="text-gray-600 mb-6"></p>
-            <button onclick="hideModal()" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors">ตกลง</button>
-        </div>
-    </div>
-
-    <div id="confirmation-modal" class="modal">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
-            <h3 id="confirmation-title" class="text-xl font-semibold mb-4 text-gray-800">ยืนยันการกระทำ</h3>
-            <p id="confirmation-message" class="text-gray-600 mb-6">คุณแน่ใจหรือไม่?</p>
-            <div class="flex space-x-4">
-                <button id="confirm-cancel-btn" class="flex-1 w-full bg-gray-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-gray-600 transition-colors">ยกเลิก</button>
-                <button id="confirm-action-btn" class="flex-1 w-full bg-red-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-red-600 transition-colors">ยืนยัน</button>
+<body class="bg-gray-50 text-gray-800"><!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg"><i
+                            class="fas fa-chart-line text-white text-xl"></i>
+                    </div><span
+                        class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-700 to-teal-500">SNK_ZD</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8"><a href="#home"
+                        class="text-gray-600 hover:text-teal-600 font-medium transition">หน้าแรก</a> <a
+                        href="#dashboard" class="text-gray-600 hover:text-teal-600 font-medium transition">Dashboard</a>
+                    <a href="#transactions"
+                        class="text-gray-600 hover:text-teal-600 font-medium transition">รายรับรายจ่าย</a> <a
+                        href="#goals" class="text-gray-600 hover:text-teal-600 font-medium transition">เป้าหมาย</a> <a
+                        href="#interests" class="text-gray-600 hover:text-teal-600 font-medium transition">ดอกเบี้ย</a>
+                    <a href="#news" class="text-gray-600 hover:text-teal-600 font-medium transition">ข่าว</a> <a
+                        href="#calculator" class="text-gray-600 hover:text-teal-600 font-medium transition">เงินเฟ้อ</a>
+                </div>
+                <div class="flex items-center space-x-4" id="auth-buttons"><button onclick="showLogin()"
+                        class="text-gray-600 hover:text-teal-600 font-medium transition">เข้าสู่ระบบ</button> <button
+                        onclick="showRegister()"
+                        class="bg-teal-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-teal-700 transition shadow-lg shadow-teal-600/20">
+                        สมัครสมาชิก </button>
+                </div><!-- User Menu (Hidden by default) -->
+                <div id="user-menu" class="hidden flex items-center space-x-4">
+                    <div class="flex items-center space-x-3"><span class="text-gray-700 font-medium"
+                            id="user-name-display">User</span>
+                        <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold"
+                            id="user-avatar"> U </div>
+                    </div><button onclick="handleLogout()" class="text-gray-500 hover:text-red-600 transition"> <i
+                            class="fas fa-sign-out-alt text-xl"></i> </button>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-4xl min-h-[700px] flex flex-col">
-        <nav class="flex justify-between md:justify-around p-2 mb-6 bg-gray-100 rounded-xl shadow-inner">
-            <a href="/index.html" id="nav-home" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">หน้าหลัก</a>
-            <a href="/invest.html" id="nav-invest" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">แนะนำการลงทุน</a>
-            <a href="/about.html" id="nav-about" class="flex-1 text-center py-3 px-4 md:px-6 rounded-lg font-semibold text-sm md:text-base text-gray-700 transition-all duration-300 transform hover:bg-white hover:shadow-md">เกี่ยวกับฉัน</a>
-        </nav>
-
-        <div id="content-container" class="flex-1 flex flex-col">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">แอปรายรับ-รายจ่าย</h1>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-green-100 p-4 rounded-xl shadow-md text-center">
-                    <h2 class="text-lg font-semibold text-green-700">รายรับทั้งหมด</h2>
-                    <p id="total-income" class="text-2xl font-bold text-green-900 mt-2">0.00 บาท</p>
-                </div>
-                <div class="bg-red-100 p-4 rounded-xl shadow-md text-center">
-                    <h2 class="text-lg font-semibold text-red-700">รายจ่ายทั้งหมด</h2>
-                    <p id="total-expense" class="text-2xl font-bold text-red-900 mt-2">0.00 บาท</p>
-                </div>
-                <div class="bg-blue-100 p-4 rounded-xl shadow-md text-center">
-                    <h2 class="text-lg font-semibold text-blue-700">ยอดเงินคงเหลือ</h2>
-                    <p id="total-balance" class="text-2xl font-bold text-blue-900 mt-2">0.00 บาท</p>
+    </nav><!-- Page Container -->
+    <div id="page-content" class="pt-20"><!-- Home / Landing Page -->
+        <section id="home" class="min-h-screen gradient-bg flex items-center py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-white animate-fade-in">
+                        <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight" id="hero-title">
+                            ระบบบันทึกรายรับรายจ่าย + ข่าวการลงทุน + คำนวณเงินเฟ้อแบบอัตโนมัติ</h1>
+                        <p class="text-xl mb-8 text-teal-50" id="hero-subtitle">จัดการการเงินส่วนตัวอย่างมืออาชีพ
+                            ติดตามรายรับรายจ่าย วางแผนเป้าหมายการออม และอัปเดตข่าวการลงทุนแบบเรียลไทม์</p>
+                        <div class="flex flex-wrap gap-4"><button class="btn-primary text-lg" id="hero-cta-btn"
+                                onclick="showRegister()">
+                                <i class="fas fa-rocket mr-2"></i>เริ่มต้นใช้งานฟรี </button> <button
+                                class="btn-secondary text-lg" onclick="navigateTo('dashboard')"> <i
+                                    class="fas fa-play mr-2"></i>ดูตัวอย่าง </button>
+                        </div>
+                    </div>
+                    <div class="relative animate-fade-in">
+                        <div class="glassmorphism rounded-3xl p-8 shadow-soft">
+                            <svg viewbox="0 0 400 300" class="w-full"><!-- Dashboard illustration -->
+                                <rect x="20" y="20" width="360" height="260" rx="12" fill="white" opacity="0.9" />
+                                <!-- Header -->
+                                <rect x="40" y="40" width="80" height="20" rx="4" fill="#0f766e" />
+                                <circle cx="350" cy="50" r="8" fill="#10b981" /> <!-- Stats Cards -->
+                                <rect x="40" y="80" width="100" height="60" rx="8" fill="#dcfce7" />
+                                <rect x="150" y="80" width="100" height="60" rx="8" fill="#dbeafe" />
+                                <rect x="260" y="80" width="100" height="60" rx="8" fill="#fef3c7" /> <!-- Chart -->
+                                <circle cx="120" cy="200" r="50" fill="none" stroke="#10b981" stroke-width="12"
+                                    stroke-dasharray="157 314" />
+                                <circle cx="120" cy="200" r="50" fill="none" stroke="#3b82f6" stroke-width="12"
+                                    stroke-dasharray="94 314" stroke-dashoffset="-157" /> <!-- Bars -->
+                                <rect x="220" y="180" width="30" height="60" rx="4" fill="#10b981" />
+                                <rect x="260" y="160" width="30" height="80" rx="4" fill="#3b82f6" />
+                                <rect x="300" y="190" width="30" height="50" rx="4" fill="#f59e0b" />
+                                <rect x="340" y="170" width="30" height="70" rx="4" fill="#8b5cf6" />
+                            </svg>
+                        </div><!-- Floating elements -->
+                        <div class="absolute -top-4 -right-4 w-20 h-20 bg-yellow-400 rounded-full opacity-80 blur-xl">
+                        </div>
+                        <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-blue-400 rounded-full opacity-80 blur-xl">
+                        </div>
+                    </div>
+                </div><!-- Features Grid -->
+                <div class="grid md:grid-cols-3 gap-8 mt-20">
+                    <div class="glassmorphism rounded-2xl p-8 text-center card-hover">
+                        <div class="icon-circle mx-auto mb-4"
+                            style="background: linear-gradient(135deg, #dcfce7 0%, #10b981 100%);"><i
+                                class="fas fa-wallet text-teal-700"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">บันทึกรายรับรายจ่าย</h3>
+                        <p class="text-teal-100">จัดการธุรกรรมทางการเงินได้ง่าย พร้อมหมวดหมู่ครบถ้วน</p>
+                    </div>
+                    <div class="glassmorphism rounded-2xl p-8 text-center card-hover">
+                        <div class="icon-circle mx-auto mb-4"
+                            style="background: linear-gradient(135deg, #dbeafe 0%, #3b82f6 100%);"><i
+                                class="fas fa-chart-pie text-blue-700"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Dashboard แบบเรียลไทม์</h3>
+                        <p class="text-teal-100">กราฟและสถิติการเงินที่อัปเดตทันที</p>
+                    </div>
+                    <div class="glassmorphism rounded-2xl p-8 text-center card-hover">
+                        <div class="icon-circle mx-auto mb-4"
+                            style="background: linear-gradient(135deg, #fef3c7 0%, #f59e0b 100%);"><i
+                                class="fas fa-newspaper text-yellow-700"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">ข่าวการลงทุน</h3>
+                        <p class="text-teal-100">ติดตามข่าวหุ้น คริปโต และเศรษฐกิจ</p>
+                    </div>
                 </div>
             </div>
-            
-            <div class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
-                <div class="flex justify-between items-center mb-2">
-                    <label for="inflation-rate" class="block text-sm font-medium text-gray-700">อัตราเงินเฟ้อ (%)</label>
-                    <span id="inflation-status" class="text-xs text-gray-500"></span>
+        </section><!-- Dashboard Section -->
+        <section id="dashboard" class="min-h-screen py-20 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-3">Dashboard การเงิน</h2>
+                    <p class="text-gray-600 text-lg">ภาพรวมการเงินของคุณ</p>
+                </div><!-- Stats Cards -->
+                <div class="grid md:grid-cols-3 gap-6 mb-12">
+                    <div class="stat-card card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="icon-circle" style="background: #dcfce7;"><i
+                                    class="fas fa-arrow-trend-up text-green-600"></i>
+                            </div><span
+                                class="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">+12.5%</span>
+                        </div>
+                        <p class="text-gray-500 text-sm mb-1">รายรับรวม</p>
+                        <p class="text-3xl font-bold text-gray-800">฿45,280</p>
+                    </div>
+                    <div class="stat-card card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="icon-circle" style="background: #fee2e2;"><i
+                                    class="fas fa-arrow-trend-down text-red-600"></i>
+                            </div><span
+                                class="text-sm font-semibold text-red-600 bg-red-50 px-3 py-1 rounded-full">-8.2%</span>
+                        </div>
+                        <p class="text-gray-500 text-sm mb-1">รายจ่ายรวม</p>
+                        <p class="text-3xl font-bold text-gray-800">฿28,650</p>
+                    </div>
+                    <div class="stat-card card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="icon-circle" style="background: #dbeafe;"><i
+                                    class="fas fa-piggy-bank text-blue-600"></i>
+                            </div><span
+                                class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">สุขภาพดี</span>
+                        </div>
+                        <p class="text-gray-500 text-sm mb-1">ยอดคงเหลือ</p>
+                        <p class="text-3xl font-bold text-gray-800">฿16,630</p>
+                    </div>
+                </div><!-- Charts Row -->
+                <div class="grid md:grid-cols-2 gap-6"><!-- Pie Chart -->
+                    <div class="bg-white rounded-2xl p-8 shadow-soft">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">สัดส่วนรายจ่าย</h3>
+                        <div class="flex items-center justify-center h-64">
+                            <canvas id="expensePieChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Bar Chart -->
+                    <div class="bg-white rounded-2xl p-8 shadow-soft">
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800">สรุปรายรับรายจ่าย</h3>
+                            <div class="flex bg-gray-100 p-1 rounded-lg mt-4 md:mt-0">
+                                <!-- Removed Daily Button -->
+                                <button onclick="updateChart('weekly')" id="btn-weekly"
+                                    class="px-3 py-1 text-xs rounded-md font-medium transition-all bg-white shadow-sm text-teal-700">รายสัปดาห์</button>
+                                <button onclick="updateChart('monthly')" id="btn-monthly"
+                                    class="px-3 py-1 text-xs rounded-md font-medium transition-all text-gray-500 hover:text-gray-700">รายเดือน</button>
+                            </div>
+                        </div>
+                        <div class="h-64 w-full">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <input type="number" id="inflation-rate" value="3.0" step="0.1" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 bg-gray-200 cursor-not-allowed" readonly>
-                <p class="text-xs text-gray-500 mt-2">ข้อมูลอ้างอิงจากธนาคารแห่งประเทศไทย (อัปเดตอัตโนมัติ)</p>
             </div>
-            
-            <form id="transaction-form" class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label for="date" class="block text-sm font-medium text-gray-700 mb-1">วันที่</label><input type="date" id="date" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required></div>
-                    <div><label for="type" class="block text-sm font-medium text-gray-700 mb-1">ประเภท</label><select id="type" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select></div>
+        </section><!-- Transactions Section -->
+        <section id="transactions" class="min-h-screen py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center mb-12">
+                    <div>
+                        <h2 class="text-4xl font-bold text-gray-800 mb-3">รายรับรายจ่าย</h2>
+                        <p class="text-gray-600 text-lg">บันทึกและจัดการธุรกรรมทางการเงิน</p>
+                    </div><button class="btn-primary" onclick="toggleTransactionForm()"> <i
+                            class="fas fa-plus mr-2"></i>เพิ่มรายการ </button>
+                </div><!-- Add Transaction Form -->
+                <div id="transaction-form" class="bg-white rounded-2xl p-8 shadow-soft mb-8 hidden">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">เพิ่มรายการใหม่</h3>
+                    <form onsubmit="handleAddTransaction(event)" class="grid md:grid-cols-2 gap-6">
+                        <div><label for="trans-type"
+                                class="block text-sm font-semibold text-gray-700 mb-2">ประเภท</label>
+                            <select id="trans-type" required>
+                                <option value="">เลือกประเภท</option>
+                                <option value="income">รายรับ</option>
+                                <option value="expense">รายจ่าย</option>
+                            </select>
+                        </div>
+                        <div><label for="trans-category"
+                                class="block text-sm font-semibold text-gray-700 mb-2">หมวดหมู่</label>
+                            <select id="trans-category" required>
+                                <option value="">เลือกหมวดหมู่</option>
+                                <option value="food">🍜 อาหาร</option>
+                                <option value="transport">🚗 เดินทาง</option>
+                                <option value="bills">📄 ค่าบิล</option>
+                                <option value="salary">💰 เงินเดือน</option>
+                                <option value="business">💼 ธุรกิจ</option>
+                                <option value="shopping">🛍️ ช้อปปิ้ง</option>
+                                <option value="other">📦 อื่นๆ</option>
+                            </select>
+                        </div>
+                        <div><label for="trans-amount" class="block text-sm font-semibold text-gray-700 mb-2">จำนวนเงิน
+                                (บาท)</label> <input type="number" id="trans-amount" placeholder="0.00" step="0.01"
+                                required>
+                        </div>
+                        <div><label for="trans-date"
+                                class="block text-sm font-semibold text-gray-700 mb-2">วันที่</label> <input type="date"
+                                id="trans-date" required>
+                        </div>
+                        <div class="md:col-span-2"><label for="trans-note"
+                                class="block text-sm font-semibold text-gray-700 mb-2">หมายเหตุ</label>
+                            <input type="text" id="trans-note" placeholder="ระบุรายละเอียด (ถ้ามี)">
+                        </div>
+                        <div class="md:col-span-2 flex justify-end space-x-4"><button type="button"
+                                class="btn-secondary" onclick="toggleTransactionForm()">ยกเลิก</button>
+                            <button type="submit" class="btn-primary">บันทึก</button>
+                        </div>
+                    </form>
+                </div><!-- Transactions Table -->
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                                        วันที่</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                                        หมวดหมู่</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                                        รายละเอียด</th>
+                                    <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                                        จำนวนเงิน</th>
+                                    <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                                        การกระทำ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- Transactions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="mt-4"><label for="category" class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label><input type="text" id="category" placeholder="เช่น เงินเดือน, ค่าอาหาร" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required></div>
-                <div class="mt-4"><label for="amount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงิน (บาท)</label><input type="number" id="amount" placeholder="จำนวนเงิน" min="0" step="0.01" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required></div>
-                <button type="submit" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors mt-6">บันทึกรายการ</button>
-            </form>
-            <div class="flex-1 overflow-y-auto pr-2" id="transactions-list-container">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">ประวัติการทำรายการ</h2>
-                <div id="transactions-list"></div>
+            </div>
+        </section><!-- Saving Goals Section -->
+        <section id="goals" class="min-h-screen py-20 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center mb-12">
+                    <div>
+                        <h2 class="text-4xl font-bold text-gray-800 mb-3">เป้าหมายการเงิน</h2>
+                        <p class="text-gray-600 text-lg">ตั้งเป้าหมายและติดตามความคืบหน้า</p>
+                    </div><button class="btn-primary" onclick="toggleGoalForm()"> <i
+                            class="fas fa-plus mr-2"></i>สร้างเป้าหมาย </button>
+                </div><!-- Add Goal Form -->
+                <div id="goal-form" class="bg-white rounded-2xl p-8 shadow-soft mb-8 hidden">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">สร้างเป้าหมายใหม่</h3>
+                    <form onsubmit="handleAddGoal(event)" class="grid md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2"><label for="goal-name"
+                                class="block text-sm font-semibold text-gray-700 mb-2">ชื่อเป้าหมาย</label>
+                            <input type="text" id="goal-name" placeholder="เช่น ซื้อรถยนต์" required>
+                        </div>
+                        <div><label for="goal-target" class="block text-sm font-semibold text-gray-700 mb-2">เป้าหมาย
+                                (บาท)</label> <input type="number" id="goal-target" placeholder="0.00" step="0.01"
+                                required>
+                        </div>
+                        <div><label for="goal-current"
+                                class="block text-sm font-semibold text-gray-700 mb-2">ยอดปัจจุบัน
+                                (บาท)</label> <input type="number" id="goal-current" placeholder="0.00" step="0.01"
+                                required>
+                        </div>
+                        <div><label for="goal-deadline"
+                                class="block text-sm font-semibold text-gray-700 mb-2">กำหนดเวลา</label>
+                            <input type="date" id="goal-deadline" required>
+                        </div>
+                        <div><label for="goal-icon" class="block text-sm font-semibold text-gray-700 mb-2">ไอคอน</label>
+                            <select id="goal-icon" required>
+                                <option value="">เลือกไอคอน</option>
+                                <option value="🚗">🚗 รถยนต์</option>
+                                <option value="🏠">🏠 บ้าน</option>
+                                <option value="✈️">✈️ ท่องเที่ยว</option>
+                                <option value="💍">💍 แต่งงาน</option>
+                                <option value="📚">📚 การศึกษา</option>
+                                <option value="💻">💻 อุปกรณ์</option>
+                                <option value="🎯">🎯 ทั่วไป</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2 flex justify-end space-x-4"><button type="button"
+                                class="btn-secondary" onclick="toggleGoalForm()">ยกเลิก</button> <button type="submit"
+                                class="btn-primary">สร้างเป้าหมาย</button>
+                        </div>
+                    </form>
+                </div><!-- Goals Grid -->
+                <div id="goals-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Goals will be loaded here -->
+                </div>
+            </div>
+        </section><!-- Interest Rates Section -->
+        <section id="interests" class="min-h-screen py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-3">อัตราดอกเบี้ย</h2>
+                    <p class="text-gray-600 text-lg">อัปเดตอัตราดอกเบี้ยเงินฝากจากธนาคารต่างๆ <span
+                            class="text-teal-600 text-sm font-semibold ml-2 bg-teal-50 px-3 py-1 rounded-full"><i
+                                class="fas fa-check-circle mr-1"></i>อัปเดตวันนี้</span></p>
+                </div>
+                <div id="interest-rates-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Interest rates will be loaded here -->
+                </div>
+            </div>
+        </section><!-- Investment News Section -->
+        <section id="news" class="min-h-screen py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center mb-12">
+                    <div>
+                        <h2 class="text-4xl font-bold text-gray-800 mb-3">ข่าวการลงทุน</h2>
+                        <p class="text-gray-600 text-lg">ติดตามข่าวสารตลาดหุ้น คริปโต และเศรษฐกิจ <span
+                                id="news-update-time" class="text-teal-600 font-semibold"></span></p>
+                    </div><button onclick="refreshNews()" class="btn-primary flex items-center space-x-2"
+                        id="refresh-news-btn"> <i class="fas fa-sync-alt"></i> <span>รีเฟรช</span> </button>
+                </div><!-- Live Market Data -->
+                <div class="grid md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+                        <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600">SET
+                                Index</span> <span
+                                class="text-xs bg-green-500 text-white px-2 py-1 rounded-full pulse-dot">LIVE</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="set-index">1,425.50</p>
+                        <p class="text-sm font-semibold" id="set-change"><span class="text-green-600">+8.50
+                                (+0.60%)</span></p>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
+                        <div class="flex items-center justify-between mb-2"><span
+                                class="text-sm text-gray-600">Bitcoin</span> <span
+                                class="text-xs bg-orange-500 text-white px-2 py-1 rounded-full pulse-dot">LIVE</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="btc-price">$68,450</p>
+                        <p class="text-sm font-semibold" id="btc-change"><span class="text-green-600">+2.5%</span></p>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                        <div class="flex items-center justify-between mb-2"><span
+                                class="text-sm text-gray-600">Ethereum</span> <span
+                                class="text-xs bg-blue-500 text-white px-2 py-1 rounded-full pulse-dot">LIVE</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="eth-price">$3,820</p>
+                        <p class="text-sm font-semibold" id="eth-change"><span class="text-green-600">+1.8%</span></p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                        <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600">ทองคำ
+                                (บาท/บาท)</span> <span
+                                class="text-xs bg-purple-500 text-white px-2 py-1 rounded-full pulse-dot">LIVE</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="gold-price">36,250</p>
+                        <p class="text-sm font-semibold" id="gold-change"><span class="text-red-600">-0.3%</span></p>
+                    </div>
+                </div><!-- Category Tabs -->
+                <div class="flex flex-wrap gap-3 mb-8"><button onclick="filterNews('all')"
+                        class="news-category-btn px-6 py-2 bg-teal-600 text-white rounded-full font-semibold"
+                        data-category="all"> ทั้งหมด </button> <button onclick="filterNews('stocks')"
+                        class="news-category-btn px-6 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200"
+                        data-category="stocks"> 📈 หุ้น </button> <button onclick="filterNews('crypto')"
+                        class="news-category-btn px-6 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200"
+                        data-category="crypto"> 💎 คริปโต </button> <button onclick="filterNews('economy')"
+                        class="news-category-btn px-6 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200"
+                        data-category="economy"> 🌍 เศรษฐกิจ </button> <button onclick="filterNews('funds')"
+                        class="news-category-btn px-6 py-2 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200"
+                        data-category="funds"> 💰 กองทุน </button>
+                </div><!-- News Grid -->
+                <div id="news-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- News will be dynamically loaded here -->
+                </div>
+            </div>
+        </section><!-- Inflation Calculator Section -->
+        <section id="calculator" class="min-h-screen py-20 bg-gray-50">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12 text-center">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-3">เครื่องคำนวณเงินเฟ้อ</h2>
+                    <p class="text-gray-600 text-lg">คำนวณมูลค่าเงินในอนาคตจากอัตราเงินเฟ้อ</p>
+                </div>
+                <div class="bg-white rounded-3xl p-8 shadow-soft"><!-- Inflation Rate Display -->
+                    <div class="bg-gradient-to-r from-teal-50 to-blue-50 rounded-2xl p-6 mb-8 border border-teal-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">อัตราเงินเฟ้อปัจจุบัน (CPI)</p>
+                                <div class="flex items-center space-x-3">
+                                    <p class="text-3xl font-bold text-teal-700" id="inflation-rate-display">
+                                        กำลังโหลด...
+                                    </p><span
+                                        class="text-xs bg-green-500 text-white px-3 py-1 rounded-full pulse-dot">LIVE</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" id="inflation-update-date">อัปเดต: -
+                                </p>
+                                <p class="text-xs text-teal-600 mt-2" id="inflation-source">ข้อมูลจาก:
+                                    ธนาคารแห่งประเทศไทย</p>
+                            </div>
+                            <div class="icon-circle"
+                                style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);"><i
+                                    class="fas fa-chart-line text-white"></i>
+                            </div>
+                        </div>
+                    </div><!-- Calculator Form -->
+                    <form id="inflation-form" class="space-y-6">
+                        <div><label for="current-amount" class="block text-sm font-semibold text-gray-700 mb-2">
+                                มูลค่าเงินปัจจุบัน (บาท) </label> <input type="number" id="current-amount"
+                                placeholder="100000" step="0.01" required>
+                        </div>
+                        <div><label for="inflation-rate" class="block text-sm font-semibold text-gray-700 mb-2">
+                                อัตราเงินเฟ้อต่อปี (%) </label> <input type="number" id="inflation-rate"
+                                placeholder="2.41" step="0.01" required>
+                            <p class="text-xs text-gray-500 mt-1">ใช้อัตราเงินเฟ้อปัจจุบัน หรือกรอกค่าเอง
+                            </p>
+                        </div>
+                        <div><label for="years" class="block text-sm font-semibold text-gray-700 mb-2">
+                                จำนวนปี </label>
+                            <input type="number" id="years" placeholder="10" min="1" required>
+                        </div><button type="submit" class="btn-primary w-full text-lg"> <i
+                                class="fas fa-calculator mr-2"></i>คำนวณ </button>
+                    </form><!-- Result Display -->
+                    <div id="inflation-result" class="mt-8 hidden">
+                        <div class="bg-gradient-to-r from-teal-600 to-blue-600 rounded-2xl p-8 text-white">
+                            <p class="text-sm mb-2 opacity-90">มูลค่าเงินในอนาคต</p>
+                            <p class="text-4xl font-bold mb-4" id="future-value">฿0</p>
+                            <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white border-opacity-20">
+                                <div>
+                                    <p class="text-xs opacity-80 mb-1">มูลค่าลดลง</p>
+                                    <p class="text-xl font-bold" id="decrease-amount">฿0</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs opacity-80 mb-1">เปอร์เซ็นต์ลดลง</p>
+                                    <p class="text-xl font-bold" id="decrease-percent">0%</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                            <div class="flex items-start"><i class="fas fa-lightbulb text-yellow-600 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-800 mb-1">คำแนะนำ</p>
+                                    <p class="text-sm text-gray-700" id="advice-text">เงิน 100,000 บาท
+                                        ในวันนี้
+                                        จะมีมูลค่าเทียบเท่า XX,XXX บาท ใน X ปีข้างหน้า</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- Info Cards -->
+                <div class="grid md:grid-cols-3 gap-6 mt-12">
+                    <div class="bg-white rounded-xl p-6 shadow-soft">
+                        <div class="icon-circle mb-4" style="background: #fef3c7;"><i
+                                class="fas fa-info-circle text-yellow-700"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-2">อัตราเงินเฟ้อคืออะไร?</h4>
+                        <p class="text-sm text-gray-600">การเพิ่มขึ้นของระดับราคาสินค้าและบริการโดยทั่วไป
+                            ทำให้กำลังซื้อของเงินลดลง</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-soft">
+                        <div class="icon-circle mb-4" style="background: #dbeafe;"><i
+                                class="fas fa-shield-alt text-blue-700"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-2">ป้องกันผลกระทบ</h4>
+                        <p class="text-sm text-gray-600">ลงทุนในสินทรัพย์ที่ให้ผลตอบแทนสูงกว่าอัตราเงินเฟ้อ
+                            เช่น หุ้น
+                            กองทุน อสังหาฯ</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-soft">
+                        <div class="icon-circle mb-4" style="background: #dcfce7;"><i
+                                class="fas fa-chart-line text-green-700"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-2">วางแผนการเงิน</h4>
+                        <p class="text-sm text-gray-600">คำนวณเป้าหมายการออมให้คำนึงถึงเงินเฟ้อ
+                            เพื่อให้มั่นใจว่าเงินของคุณเพียงพอ</p>
+                    </div>
+                </div>
+            </div>
+        </section><!-- Login Modal -->
+        <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 px-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-8 relative animate-fade-in"><button
+                    onclick="closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <i
+                        class="fas fa-times text-xl"></i> </button>
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">เข้าสู่ระบบ</h3>
+                    <p class="text-gray-600">ยินดีต้อนรับกลับมา!</p>
+                </div>
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div><label for="login-email" class="block text-sm font-semibold text-gray-700 mb-2">อีเมล</label>
+                        <input type="email" id="login-email" placeholder="your@email.com" required>
+                    </div>
+                    <div><label for="login-password"
+                            class="block text-sm font-semibold text-gray-700 mb-2">รหัสผ่าน</label> <input
+                            type="password" id="login-password" placeholder="••••••••" required>
+                    </div>
+                    <div class="flex items-center justify-between text-sm"><label class="flex items-center">
+                            <input type="checkbox" class="mr-2"> <span class="text-gray-600">จดจำฉัน</span>
+                        </label> <a href="#" class="text-teal-600 hover:text-teal-700 font-semibold">ลืมรหัสผ่าน?</a>
+                    </div><button type="submit" class="btn-primary w-full">เข้าสู่ระบบ</button>
+                </form>
+                <p class="text-center text-sm text-gray-600 mt-6">ยังไม่มีบัญชี? <button onclick="showRegister()"
+                        class="text-teal-600 hover:text-teal-700 font-semibold">
+                        สมัครสมาชิก </button></p>
+            </div>
+        </div><!-- Register Modal -->
+        <div id="register-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 px-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-8 relative animate-fade-in"><button
+                    onclick="closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <i
+                        class="fas fa-times text-xl"></i> </button>
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-plus text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">สมัครสมาชิก</h3>
+                    <p class="text-gray-600">สร้างบัญชีใหม่</p>
+                </div>
+                <form onsubmit="handleRegister(event)" class="space-y-4">
+                    <div><label for="register-name"
+                            class="block text-sm font-semibold text-gray-700 mb-2">ชื่อ-นามสกุล</label>
+                        <input type="text" id="register-name" placeholder="ชื่อของคุณ" required>
+                    </div>
+                    <div><label for="register-email"
+                            class="block text-sm font-semibold text-gray-700 mb-2">อีเมล</label> <input type="email"
+                            id="register-email" placeholder="your@email.com" required>
+                    </div>
+                    <div><label for="register-password"
+                            class="block text-sm font-semibold text-gray-700 mb-2">รหัสผ่าน</label> <input
+                            type="password" id="register-password" placeholder="••••••••" required>
+                    </div>
+                    <div><label for="register-confirm"
+                            class="block text-sm font-semibold text-gray-700 mb-2">ยืนยันรหัสผ่าน</label>
+                        <input type="password" id="register-confirm" placeholder="••••••••" required>
+                    </div><label class="flex items-start text-sm"> <input type="checkbox" class="mt-1 mr-2" required>
+                        <span class="text-gray-600"> ฉันยอมรับ <a href="#"
+                                class="text-teal-600 hover:text-teal-700 font-semibold">ข้อกำหนดการใช้งาน</a>
+                            และ <a href="#"
+                                class="text-teal-600 hover:text-teal-700 font-semibold">นโยบายความเป็นส่วนตัว</a>
+                        </span> </label> <button type="submit" class="btn-primary w-full">สมัครสมาชิก</button>
+                </form>
+                <p class="text-center text-sm text-gray-600 mt-6">มีบัญชีอยู่แล้ว? <button onclick="showLogin()"
+                        class="text-teal-600 hover:text-teal-700 font-semibold">
+                        เข้าสู่ระบบ </button></p>
             </div>
         </div>
-    </div>
-    <!-- *** แก้ไขบรรทัดนี้ *** -->
-    <script type="module" src="/app.js"></script>
+        <!-- Goal Analysis Modal -->
+        <div id="analysis-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 px-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative animate-fade-in"><button
+                    onclick="closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <i
+                        class="fas fa-times text-xl"></i>
+                </button>
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+                                <i class="fas fa-chart-line text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800" id="analysis-title">วิเคราะห์เป้าหมาย</h3>
+                        </div>
+                        <button onclick="toggleFormula()" class="text-gray-400 hover:text-indigo-600 transition"
+                            title="ดูสูตรการคำนวณ">
+                            <i class="fas fa-circle-question text-xl"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-600">ประเมินความเป็นไปได้ตามพฤติกรรมการใช้จ่ายของคุณ</p>
+
+                    <!-- Formula Explanation (Hidden) -->
+                    <div id="formula-info"
+                        class="hidden mt-4 bg-gray-50 p-4 rounded-xl border border-gray-200 text-sm animate-fade-in relative">
+                        <button onclick="toggleFormula()"
+                            class="absolute top-2 right-2 text-gray-400 hover:text-gray-600"><i
+                                class="fas fa-times"></i></button>
+                        <h4 class="font-bold text-indigo-700 mb-2">📊 หลักการคำนวณ</h4>
+                        <ul class="space-y-2 text-gray-600">
+                            <li><strong>1. เป้าหมายจริง:</strong> คำนวณตามอัตราเงินเฟ้อ (Target × (1+Inflation)^Years)
+                            </li>
+                            <li><strong>2. ความเป็นไปได้ (Z-Score):</strong>
+                                <br><code
+                                    class="bg-white px-2 py-0.5 rounded border">Probability = (เงินออมเฉลี่ย - เงินที่ต้องเก็บ) / ความผันผวน</code>
+                            </li>
+                            <li><strong>3. การประเมิน:</strong> ถ้าคุณออมได้มากกว่าที่ต้องเก็บ 1.5 เท่า = 95%
+                                (มั่นคงมาก)
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Probability Score -->
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 text-center">
+                        <p class="text-sm text-gray-500 mb-2">โอกาสสำเร็จ</p>
+                        <div class="flex items-center justify-center space-x-2">
+                            <div class="relative w-32 h-32">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="64" cy="64" r="56" stroke="white" stroke-width="12" fill="none"
+                                        class="text-gray-200" />
+                                    <circle id="probability-circle" cx="64" cy="64" r="56" stroke="currentColor"
+                                        stroke-width="12" fill="none" stroke-dasharray="351.86"
+                                        stroke-dashoffset="351.86"
+                                        class="text-indigo-600 transition-all duration-1000 ease-out" />
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                    <span class="text-3xl font-bold text-gray-800" id="analysis-percent">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-sm font-medium mt-2" id="analysis-status">กำลังคำนวณ...</p>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center p-3 bg-red-50 rounded-xl">
+                            <span class="text-gray-600"><i class="fas fa-arrow-trend-up mr-2 text-red-500"></i>เงินเฟ้อ
+                                (เฉลี่ย)</span>
+                            <span class="font-bold text-gray-800" id="analysis-inflation-rate">2.5%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
+                            <span class="text-gray-600"><i
+                                    class="fas fa-bullseye mr-2 text-blue-500"></i>เป้าหมายที่แท้จริง</span>
+                            <span class="font-bold text-blue-700" id="analysis-real-target">฿0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-xl">
+                            <span class="text-gray-600"><i
+                                    class="fas fa-piggy-bank mr-2 text-green-500"></i>เงินเก็บเฉลี่ย/เดือน</span>
+                            <span class="font-bold text-green-700" id="analysis-avg-savings">฿0</span>
+                        </div>
+                    </div>
+
+                    <!-- Suggestions -->
+                    <div id="analysis-suggestions" class="hidden">
+                        <h4 class="font-bold text-gray-800 mb-3"><i
+                                class="fas fa-lightbulb text-yellow-500 mr-2"></i>คำแนะนำ</h4>
+                        <ul class="space-y-2 text-sm text-gray-600 bg-yellow-50 p-4 rounded-xl list-disc pl-8"
+                            id="suggestion-list">
+                            <!-- JS will populate this -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center"><i
+                                class="fas fa-chart-line text-white text-xl"></i>
+                        </div><span class="text-xl font-bold" id="footer-company-name">SNK_ZD</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">แพลตฟอร์มจัดการการเงินส่วนบุคคลที่ทันสมัย
+                        ช่วยให้คุณควบคุมเงินได้ดีขึ้น</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">เมนู</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#home" class="hover:text-teal-400">หน้าแรก</a></li>
+                        <li><a href="#dashboard" class="hover:text-teal-400">Dashboard</a></li>
+                        <li><a href="#transactions" class="hover:text-teal-400">รายรับรายจ่าย</a></li>
+                        <li><a href="#goals" class="hover:text-teal-400">เป้าหมาย</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">ทรัพยากร</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#news" class="hover:text-teal-400">ข่าวการลงทุน</a></li>
+                        <li><a href="#calculator" class="hover:text-teal-400">คำนวณเงินเฟ้อ</a></li>
+                        <li><a href="#" class="hover:text-teal-400">คู่มือการใช้งาน</a></li>
+                        <li><a href="#" class="hover:text-teal-400">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">ติดตาม</h4>
+                    <div class="flex space-x-3"><a href="#"
+                            class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-teal-600 transition">
+                            <i class="fab fa-facebook-f"></i> </a> <a href="#"
+                            class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-teal-600 transition">
+                            <i class="fab fa-twitter"></i> </a> <a href="#"
+                            class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-teal-600 transition">
+                            <i class="fab fa-instagram"></i> </a> <a href="#"
+                            class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-teal-600 transition">
+                            <i class="fab fa-line"></i> </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>© 2024 SNK_ZD. All rights reserved. | <a href="#" class="hover:text-teal-400">Privacy
+                        Policy</a> |
+                    <a href="#" class="hover:text-teal-400">Terms of Service</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
 </body>
-</html>
 
+</html>
