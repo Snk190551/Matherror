@@ -467,7 +467,7 @@ window.addEventListener('scroll', () => {
 // Google Sheets Authentication System
 // ==========================================
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym1yIEk7aDs36ppVx3csI4kus3Un3PyG7wt4TAcyZQRc-rNbHTgFrgd3PdZ3sM9PhP/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz0iZeLie5m180xEntfWyW3yHgPFcNkJjCY2zfZs9MIyJtukjgFLeYlZPv0Kh8dMhpF/exec';
 let currentUser = null;
 
 // JSONP Helper function to bypass CORS
